@@ -35,12 +35,6 @@ export default function Cta() {
               >
                 Piši nam na {site.instagramHandle}
               </a>
-              <a
-                href={site.phoneHref}
-                className="inline-flex items-center justify-center rounded-full border border-cream/30 px-7 py-3.5 text-[15px] font-medium text-cream transition-colors hover:bg-cream hover:text-espresso"
-              >
-                Pozovi
-              </a>
             </div>
           </div>
         </Reveal>

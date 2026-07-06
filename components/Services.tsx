@@ -8,7 +8,7 @@ const services = [
   },
   {
     num: "02",
-    title: "Individualni trening",
+    title: "Personalni trening",
     text: "Trening jedan na jedan, potpuno prilagođen tvom telu, tempu i cilju. Idealno ako želiš maksimalnu pažnju i brži napredak.",
   },
   {
@@ -34,8 +34,8 @@ export default function Services() {
             <span className="script text-[1.35em] text-taupe">svaku</span> ženu
           </h2>
           <p className="mt-4 text-espresso/60">
-            Ne juri se samo kilaža na šipci — radi se na tebi, tvojoj formi i
-            tvom tempu.
+            Grupni treninzi u malim grupama i personalni trening jedan na jedan —
+            radi se na tebi, tvojoj formi i tvom tempu, ne na kilaži na šipci.
           </p>
         </Reveal>
 

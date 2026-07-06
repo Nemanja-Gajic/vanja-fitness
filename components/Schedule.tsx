@@ -29,10 +29,10 @@ export default function Schedule() {
                 </p>
                 <div className="mt-5 space-y-2">
                   <span className="block rounded-full bg-sand-deep px-3 py-1.5 text-sm font-medium text-espresso">
-                    Jutarnji termin
+                    Jutarnji · 8–10h
                   </span>
                   <span className="block rounded-full bg-espresso px-3 py-1.5 text-sm font-medium text-cream">
-                    Večernji termin
+                    Večernji · 18–21h
                   </span>
                 </div>
               </div>

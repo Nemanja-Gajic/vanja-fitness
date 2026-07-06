@@ -15,7 +15,11 @@ const faqs = [
   },
   {
     q: "Da li je studio samo za žene?",
-    a: "Da — fitness studio isključivo za žene, sa atmosferom bez osude.",
+    a: "Da — fitnes studio isključivo za žene, sa atmosferom bez osude.",
+  },
+  {
+    q: "Da li je ovo teretana?",
+    a: "Ne klasična. Vanja Fitness je ženska teretana u formi malog studija: dolaziš samo u zakazan termin, treniraš u grupi od 4–8 žena ili jedan na jedan sa trenerom. Nema gužve, nema čekanja na sprave.",
   },
 ];
 

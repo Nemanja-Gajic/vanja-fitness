@@ -29,20 +29,21 @@ export default function About() {
             </span>
           </h2>
           <p className="mt-6 text-espresso/65">
-            Vanja je sertifikovani trener sa preko četiri godine iskustva i
-            sopstvenim studijem za žene u Sremskoj Mitrovici. Ovde nije bitno
+            Vanja je sertifikovani personalni trener sa preko četiri godine
+            iskustva i sopstvenim fitnes studiom za žene u Sremskoj Mitrovici. Ovde nije bitno
             koliko podigneš — bitno je da svaki pokret radiš pravilno, bezbedno i
             sa osmehom.
           </p>
           <p className="mt-4 text-espresso/65">
-            Male grupe, topla atmosfera bez osude i trener koji te zna po imenu.
-            Zato se žene vraćaju — i ostaju.
+            Nismo klasična teretana — treniraš samo u zakazanim terminima, u maloj
+            grupi ili jedan na jedan, uvek uz trenera. Topla atmosfera bez osude
+            i trener koji te zna po imenu. Zato se žene vraćaju — i ostaju.
           </p>
 
           <ul className="mt-7 space-y-3">
             {[
               "Sertifikovani trener sa fokusom na pravilnu formu",
-              "Fitness studio isključivo za žene",
+              "Fitnes studio isključivo za žene — bez gužve klasične teretane",
               "Male grupe i lična pažnja za svaku polaznicu",
             ].map((t) => (
               <li key={t} className="flex items-start gap-3 text-espresso/75">

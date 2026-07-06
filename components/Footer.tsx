@@ -40,7 +40,8 @@ export default function Footer() {
 
         <div className="mt-10 flex flex-col gap-2 border-t border-cream/10 pt-6 text-sm text-cream/45 sm:flex-row sm:justify-between">
           <p>
-            {site.tagline} · {site.city}, Srbija
+            {site.tagline} · {site.address}, {site.postalCode} {site.city},
+            Srbija
           </p>
           <p>
             © {new Date().getFullYear()} {site.name}. Sva prava zadržana.
