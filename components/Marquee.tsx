@@ -1,9 +1,9 @@
 const items = [
   "Pravilna forma",
   "Male grupe",
-  "Bez osude",
+  "Zakazani termini",
   "Rezultati",
-  "Samopouzdanje",
+  "Trener uz tebe",
   "Studio za žene",
 ];
 

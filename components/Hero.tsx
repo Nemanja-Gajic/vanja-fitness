@@ -34,19 +34,18 @@ export default function Hero() {
             className="hero-in mt-6 text-[clamp(1.7rem,8vw,2.5rem)] leading-[1.05] text-cream sm:text-6xl sm:leading-[1.02] lg:text-7xl"
             style={{ animationDelay: "200ms" }}
           >
-            Zategni telo
+            Prve promene
             <span className="script -mb-2 -mt-2 block text-[clamp(2.6rem,12vw,3.75rem)] text-latte sm:-mb-3 sm:-mt-4 sm:text-8xl">
-              i vrati
+              vidiš za
             </span>
-            Samopouzdanje
+            Mesec dana
           </h1>
 
           <p
             className="hero-in mt-6 max-w-md text-base font-light text-cream/85 sm:text-lg"
             style={{ animationDelay: "360ms" }}
           >
-            Male grupe žena, trener koji prati svaki tvoj pokret i atmosfera u
-            kojoj se vraćaš. Bez osude, bez pritiska.
+            Male grupe žena, trener koji prati svaki tvoj pokret i atmosfera kojoj se vraćaš.
           </p>
 
           <div

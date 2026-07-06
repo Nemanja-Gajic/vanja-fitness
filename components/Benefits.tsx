@@ -14,8 +14,8 @@ const benefits = [
     text: "Redovan trening diže nivo energije, popravlja san i raspoloženje. Osećaš se bolje i van studija.",
   },
   {
-    title: "Samopouzdanje",
-    text: "Kad vidiš da napreduješ i da telo sluša, raste i samopouzdanje. To je ono što žene najviše pamte.",
+    title: "Navika koja ostaje",
+    text: "Zakazan termin i grupa koja te čeka, teže je otkazati nego doći. Tako se gradi rutina koja traje.",
   },
 ];
 

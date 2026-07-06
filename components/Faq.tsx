@@ -15,7 +15,7 @@ const faqs = [
   },
   {
     q: "Da li je studio samo za žene?",
-    a: "Da — fitnes studio isključivo za žene, sa atmosferom bez osude.",
+    a: "Da, fitnes studio isključivo za žene.",
   },
   {
     q: "Da li je ovo teretana?",

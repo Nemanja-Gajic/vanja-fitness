@@ -29,6 +29,9 @@ export default function Footer() {
                 {item.label}
               </a>
             ))}
+            <a href="/blog" className="transition-colors hover:text-cream">
+              Blog
+            </a>
           </nav>
 
           <a

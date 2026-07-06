@@ -22,10 +22,7 @@ export default function Home() {
       <Benefits />
       <Schedule />
       <Pricing />
-      {/* Utisci su privremeno sklonjeni dok ne stignu pravi citati članica.
-          Za vraćanje: odkomentariši liniju ispod i zameni placeholder tekstove
-          u components/Testimonials.tsx pravim utiscima (ime + saglasnost). */}
-      {/* <Testimonials /> */}
+      <Testimonials />
       <Faq />
       <Cta />
       <Footer />

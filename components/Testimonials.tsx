@@ -1,17 +1,10 @@
 import Reveal from "./Reveal";
 
+// Pravi utisci članica (ime + saglasnost). Kad bude 3+, grid se sam vraća na kolone.
 const quotes = [
   {
-    text: "Prvi put da mi je teretana zabavna. Vanja te isprati kroz svaki pokret.",
-    who: "ime članice",
-  },
-  {
-    text: "Za tri meseca sam zategla telo i, što je najvažnije, ostala dosledna.",
-    who: "ime članice",
-  },
-  {
-    text: "Mala grupa, super energija. Konačno mesto gde se ne osećam posmatrano.",
-    who: "ime članice",
+    text: "Sa Vanjom treniram od 2022. godine i mogu iskreno da kažem da je to jedna od najboljih odluka koje sam donela za sebe. Došla sam potpuno neaktivna, nespremna i sa viškom kilograma, a danas sam mnogo zadovoljnija sobom, jača i istrajnija. Ono što Vanju izdvaja nisu samo stručnost i kvalitetni treninzi, već i podrška, motivacija i posvećenost svakom klijentu. Treninzi su prilagodljivi svima, a posle svakog osećam da sam uradila nešto dobro za svoje telo i svoj um. Od srca je preporučujem svima koji žele rezultate, ali i zdrav odnos prema treningu i sebi.",
+    who: "Ivana Vitorović, 38",
   },
 ];
 
@@ -27,10 +20,16 @@ export default function Testimonials() {
           </h2>
         </Reveal>
 
-        <div className="mt-14 grid gap-6 md:grid-cols-3">
+        <div
+          className={
+            quotes.length === 1
+              ? "mx-auto mt-14 max-w-2xl"
+              : "mt-14 grid gap-6 md:grid-cols-3"
+          }
+        >
           {quotes.map((q, i) => (
             <Reveal key={i} delay={i * 130} className="h-full">
-              <figure className="card h-full hover:-translate-y-1.5 hover:shadow-[0_18px_45px_rgba(35,27,21,0.1)]">
+              <figure className="card h-full">
                 <div className="text-taupe">★★★★★</div>
                 <blockquote className="mt-4 text-lg font-light leading-relaxed text-espresso/85">
                   „{q.text}"
@@ -42,11 +41,6 @@ export default function Testimonials() {
             </Reveal>
           ))}
         </div>
-
-        <p className="mt-6 text-center text-xs text-espresso/40">
-          Placeholder — zameni stvarnim utiscima i before/after fotografijama iz
-          septembarske grupe.
-        </p>
       </div>
     </section>
   );

@@ -29,20 +29,25 @@ export default function About() {
             </span>
           </h2>
           <p className="mt-6 text-espresso/65">
-            Vanja je sertifikovani personalni trener sa preko četiri godine
-            iskustva i sopstvenim fitnes studiom za žene u Sremskoj Mitrovici. Ovde nije bitno
-            koliko podigneš — bitno je da svaki pokret radiš pravilno, bezbedno i
-            sa osmehom.
+            Vanja Drljača je personalni trener sa završenom NASM edukacijom
+            (International Certified Personal Trainer) i preko četiri godine
+            iskustva, sa sopstvenim fitnes studiom za žene u Sremskoj
+            Mitrovici. Ovde nije bitno
+            koliko podigneš, bitno je da svaki pokret radiš pravilno i bezbedno.
           </p>
           <p className="mt-4 text-espresso/65">
-            Nismo klasična teretana — treniraš samo u zakazanim terminima, u maloj
-            grupi ili jedan na jedan, uvek uz trenera. Topla atmosfera bez osude
-            i trener koji te zna po imenu. Zato se žene vraćaju — i ostaju.
+            Nismo klasična teretana, treniraš samo u zakazanim terminima, u maloj
+            grupi ili jedan na jedan, uvek uz trenera.
+          </p>
+          <p className="mt-4 text-espresso/65">
+            Fitnes se menja iz godine u godinu, zato Vanja ne prestaje da uči.
+            Slobodno vreme koristi za edukaciju o treningu i ishrani, a u studio
+            donosi samo ono što stvarno radi.
           </p>
 
           <ul className="mt-7 space-y-3">
             {[
-              "Sertifikovani trener sa fokusom na pravilnu formu",
+              "Završena NASM edukacija za personalnog trenera",
               "Fitnes studio isključivo za žene — bez gužve klasične teretane",
               "Male grupe i lična pažnja za svaku polaznicu",
             ].map((t) => (

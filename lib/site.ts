@@ -9,10 +9,10 @@ export const site = {
   address: "Stari Šor 61",
   postalCode: "22000",
   nav: [
-    { label: "O nama", href: "#o-nama" },
-    { label: "Treninzi", href: "#treninzi" },
-    { label: "Članarine", href: "#clanarine" },
-    // { label: "Utisci", href: "#utisci" }, // vrati kad se vrati Testimonials sekcija
-    { label: "Pitanja", href: "#pitanja" },
+    { label: "O nama", href: "/#o-nama" },
+    { label: "Treninzi", href: "/#treninzi" },
+    { label: "Članarine", href: "/#clanarine" },
+    { label: "Utisci", href: "/#utisci" },
+    { label: "Pitanja", href: "/#pitanja" },
   ],
 };

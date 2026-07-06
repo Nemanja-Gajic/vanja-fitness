@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     siteName: "Vanja Fitness",
     title: "Vanja Fitness — Treninzi za žene u Sremskoj Mitrovici",
     description:
-      "Zategni telo i vrati samopouzdanje uz trenera koji te zna po imenu. Prva 3 treninga gratis.",
+      "Prve promene vidiš za mesec dana. Male grupe, trener uz tebe, prva 3 treninga besplatna.",
     url: "/",
     type: "website",
     locale: "sr_RS",
@@ -65,6 +65,19 @@ const businessSchema = {
     },
   ],
   sameAs: [site.instagram],
+  founder: {
+    "@type": "Person",
+    name: "Vanja Drljača",
+    jobTitle: "Personalni trener",
+    hasCredential: {
+      "@type": "EducationalOccupationalCredential",
+      name: "International Certified Personal Trainer",
+      recognizedBy: {
+        "@type": "Organization",
+        name: "National Academy of Sports Medicine (NASM)",
+      },
+    },
+  },
 };
 
 export default function RootLayout({
