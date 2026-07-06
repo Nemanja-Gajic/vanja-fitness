@@ -9,10 +9,11 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "/",
   },
-  title: "Vanja Fitness — Treninzi za žene | Fitnes studio Sremska Mitrovica",
+  title: "Vanja Fitness — Treninzi za žene | Sremska Mitrovica",
   description:
-    "Grupni i personalni treninzi za žene u Sremskoj Mitrovici. Fitnes studio sa zakazanim terminima — male grupe i trener uz tebe na svakom pokretu. Prva 3 treninga su besplatna.",
+    "Grupni i personalni treninzi za žene u Sremskoj Mitrovici. Fitnes studio — male grupe, zakazani termini, trener uz tebe. Prva 3 treninga su besplatna.",
   openGraph: {
+    siteName: "Vanja Fitness",
     title: "Vanja Fitness — Treninzi za žene u Sremskoj Mitrovici",
     description:
       "Zategni telo i vrati samopouzdanje uz trenera koji te zna po imenu. Prva 3 treninga gratis.",
