@@ -12,7 +12,7 @@ export const site = {
     { label: "O nama", href: "#o-nama" },
     { label: "Treninzi", href: "#treninzi" },
     { label: "Članarine", href: "#clanarine" },
-    { label: "Utisci", href: "#utisci" },
+    // { label: "Utisci", href: "#utisci" }, // vrati kad se vrati Testimonials sekcija
     { label: "Pitanja", href: "#pitanja" },
   ],
 };
