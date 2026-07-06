@@ -12,6 +12,9 @@ export default function Hero() {
       <img
         className="hero-zoom absolute inset-0 -z-20 h-full w-full object-cover"
         src="/teretana.jpg"
+        width={1920}
+        height={1072}
+        fetchPriority="high"
         alt="Fitnes studio za žene Vanja Fitness u Sremskoj Mitrovici — sale sa spravama i tegovima"
       />
       {/* Scrim for legibility */}

@@ -19,6 +19,18 @@ export const metadata: Metadata = {
     url: "/",
     type: "website",
     locale: "sr_RS",
+    images: [
+      {
+        url: "/og.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Vanja Fitness — fitnes studio za žene u Sremskoj Mitrovici",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    images: ["/og.jpg"],
   },
 };
 

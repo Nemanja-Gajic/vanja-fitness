@@ -13,6 +13,8 @@ export default function Navbar() {
           <img
             src="/vanja-logo.png"
             alt="Vanja Fitness logo"
+            width={1186}
+            height={1421}
             className="h-12 w-auto"
           />
           <span className="font-display text-sm font-bold uppercase tracking-[0.22em] text-espresso">
