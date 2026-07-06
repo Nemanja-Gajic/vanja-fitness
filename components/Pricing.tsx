@@ -1,4 +1,5 @@
 import { site } from "@/lib/site";
+import Reveal from "./Reveal";
 
 const included = [
   "3 grupna treninga nedeljno",
@@ -9,63 +10,71 @@ const included = [
 
 export default function Pricing() {
   return (
-    <section id="clanarine" className="section bg-mist-deep">
+    <section id="clanarine" className="section bg-sand">
       <div className="wrap">
-        <div className="mx-auto max-w-xl text-center">
+        <Reveal className="mx-auto max-w-xl text-center">
           <span className="kicker">Članarine</span>
-          <h2 className="mt-4 font-serif text-4xl text-ink sm:text-5xl">
-            Treniraj u <span className="italic">maloj grupi žena</span>
+          <h2 className="mt-4 text-3xl text-espresso sm:text-5xl">
+            Treniraj u{" "}
+            <span className="script text-[1.35em] text-taupe">
+              maloj grupi žena
+            </span>
           </h2>
-          <p className="mt-4 text-ink/60">
+          <p className="mt-4 text-espresso/60">
             Male grupe, tri treninga nedeljno i trener koji prati svaki tvoj
             pokret. Počni bez obaveza — prva tri treninga su besplatna.
           </p>
-        </div>
+        </Reveal>
 
         <div className="mx-auto mt-14 grid max-w-4xl items-center gap-6 md:grid-cols-2">
           {/* What's included */}
-          <div className="rounded-5xl border border-ink/[0.08] bg-white p-8">
-            <h3 className="font-serif text-2xl text-ink">Šta uključuje</h3>
-            <ul className="mt-6 space-y-3">
-              {included.map((item) => (
-                <li
-                  key={item}
-                  className="flex items-start gap-3 text-ink/75"
-                >
-                  <span className="mt-0.5 inline-grid h-5 w-5 place-items-center rounded-full bg-lilac text-[11px] text-ink">
-                    ✓
-                  </span>
-                  {item}
-                </li>
-              ))}
-            </ul>
-          </div>
+          <Reveal variant="left">
+            <div className="rounded-5xl border border-espresso/[0.08] bg-white p-8">
+              <h3 className="text-xl text-espresso">Šta uključuje</h3>
+              <ul className="mt-6 space-y-3">
+                {included.map((item) => (
+                  <li
+                    key={item}
+                    className="flex items-start gap-3 text-espresso/75"
+                  >
+                    <span className="mt-0.5 inline-grid h-5 w-5 place-items-center rounded-full bg-espresso text-[11px] text-cream">
+                      ✓
+                    </span>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </Reveal>
 
           {/* Free trial CTA — no prices */}
-          <div className="relative overflow-hidden rounded-5xl bg-lilac p-8">
-            <span className="inline-block rounded-full bg-ink px-4 py-1 text-xs font-medium uppercase tracking-wide text-mist">
-              Počni besplatno
-            </span>
-            <p className="mt-5 font-serif text-3xl leading-tight text-ink">
-              Prva 3 treninga su besplatna
-            </p>
-            <p className="mt-3 text-ink/70">
-              Bez kartice, bez ugovora, bez pritiska. Probaš, pa odlučiš.
-            </p>
-            <p className="mt-6 border-t border-ink/15 pt-5 text-sm text-ink/70">
-              Za aktuelne članarine i slobodne termine — javi se porukom, pa se
-              dogovaramo.
-            </p>
+          <Reveal variant="right" delay={120}>
+            <div className="relative overflow-hidden rounded-5xl bg-espresso p-8 text-cream">
+              <span className="inline-block rounded-full bg-latte px-4 py-1 text-xs font-semibold uppercase tracking-wide text-espresso">
+                Počni besplatno
+              </span>
+              <p className="mt-5 font-display text-2xl font-bold uppercase leading-tight text-cream sm:text-3xl">
+                Prva 3 treninga su{" "}
+                <span className="script text-[1.4em] text-latte">besplatna</span>
+              </p>
+              <p className="mt-3 text-cream/70">
+                Bez kartice, bez ugovora, bez pritiska. Probaš, pa odlučiš.
+              </p>
+              <p className="mt-6 border-t border-cream/15 pt-5 text-sm text-cream/70">
+                Za aktuelne članarine i slobodne termine — javi se porukom, pa
+                se dogovaramo.
+              </p>
 
-            <a
-              href={site.instagram}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn-dark mt-7 w-full"
-            >
-              Javi se za članarine
-            </a>
-          </div>
+              <a
+                href={site.instagram}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-light mt-7 w-full"
+              >
+                Javi se za članarine
+              </a>
+            </div>
+          </Reveal>
         </div>
       </div>
     </section>

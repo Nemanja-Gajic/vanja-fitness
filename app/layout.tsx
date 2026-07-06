@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import Loader from "@/components/Loader";
 
 export const metadata: Metadata = {
   title: "Vanja Fitness — Studio za žene | Sremska Mitrovica",
@@ -29,11 +30,14 @@ export default function RootLayout({
           crossOrigin="anonymous"
         />
         <link
-          href="https://fonts.googleapis.com/css2?family=Arapey:ital@0;1&family=Inter:wght@300;400;500;600&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&family=Allura&family=Inter:wght@300;400;500;600&display=swap"
           rel="stylesheet"
         />
       </head>
-      <body className="font-sans">{children}</body>
+      <body className="font-sans">
+        <Loader />
+        {children}
+      </body>
     </html>
   );
 }

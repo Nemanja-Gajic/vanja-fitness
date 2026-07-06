@@ -7,7 +7,7 @@ export default function Navbar() {
   const [open, setOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-50 border-b border-ink/10 bg-mist/85 backdrop-blur-md">
+    <header className="sticky top-0 z-50 border-b border-espresso/10 bg-cream/85 backdrop-blur-md">
       <nav className="wrap flex h-[72px] items-center justify-between">
         <a href="#top" className="flex items-center gap-3">
           <img
@@ -15,7 +15,9 @@ export default function Navbar() {
             alt="Vanja Fitness logo"
             className="h-12 w-auto"
           />
-          <span className="font-serif text-2xl text-ink">{site.name}</span>
+          <span className="font-display text-sm font-bold uppercase tracking-[0.22em] text-espresso">
+            {site.name}
+          </span>
         </a>
 
         <div className="hidden items-center gap-9 md:flex">
@@ -23,7 +25,7 @@ export default function Navbar() {
             <a
               key={item.href}
               href={item.href}
-              className="text-sm text-ink/70 transition-colors hover:text-ink"
+              className="text-sm text-espresso/70 transition-colors hover:text-espresso"
             >
               {item.label}
             </a>
@@ -41,7 +43,7 @@ export default function Navbar() {
 
         <button
           aria-label="Meni"
-          className="text-2xl text-ink md:hidden"
+          className="text-2xl text-espresso md:hidden"
           onClick={() => setOpen((v) => !v)}
         >
           {open ? "✕" : "☰"}
@@ -49,14 +51,14 @@ export default function Navbar() {
       </nav>
 
       {open && (
-        <div className="border-t border-ink/10 bg-mist md:hidden">
+        <div className="border-t border-espresso/10 bg-cream md:hidden">
           <div className="wrap flex flex-col gap-1 py-4">
             {site.nav.map((item) => (
               <a
                 key={item.href}
                 href={item.href}
                 onClick={() => setOpen(false)}
-                className="py-2 text-ink/80"
+                className="py-2 text-espresso/80"
               >
                 {item.label}
               </a>

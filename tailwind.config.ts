@@ -8,23 +8,20 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        mist: {
-          DEFAULT: "#ECEDE7",
-          deep: "#E3E4DC",
+        cream: "#F3EDE4",
+        sand: {
+          DEFAULT: "#E9DFD2",
+          deep: "#DFD2C0",
         },
-        ink: "#131313",
-        charcoal: "#292D32",
-        lilac: {
-          DEFAULT: "#FBDBFC",
-          deep: "#EFC9F2",
-        },
-        peach: "#FDCD93",
-        mint: "#A1EAE6",
-        blush: "#FFDEDE",
-        cream: "#F4F1EA",
+        latte: "#D7C5AE",
+        taupe: "#A98E74",
+        mocha: "#7C6453",
+        espresso: "#231B15",
+        cocoa: "#372B22",
       },
       fontFamily: {
-        serif: ["Arapey", "Georgia", "serif"],
+        display: ["Montserrat", "system-ui", "sans-serif"],
+        script: ["Allura", "cursive"],
         sans: ["Inter", "system-ui", "sans-serif"],
       },
       borderRadius: {
@@ -39,14 +36,9 @@ const config: Config = {
           "0%": { transform: "translateX(0)" },
           "100%": { transform: "translateX(-50%)" },
         },
-        "fade-up": {
-          "0%": { opacity: "0", transform: "translateY(16px)" },
-          "100%": { opacity: "1", transform: "translateY(0)" },
-        },
       },
       animation: {
         marquee: "marquee 26s linear infinite",
-        "fade-up": "fade-up 0.6s ease both",
       },
     },
   },
