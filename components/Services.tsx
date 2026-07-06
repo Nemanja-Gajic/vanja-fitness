@@ -16,6 +16,11 @@ const services = [
     title: "Praćenje napretka",
     text: "Mesečna merenja — težina, obim i sastav tela. Vidiš crno na belo da napreduješ i ostaješ motivisana.",
   },
+  {
+    num: "04",
+    title: "Besplatan plan ishrane za prvi mesec",
+    text: "Uz prvi mesec treninga dobijaš startni plan ishrane — jednostavan i realan, bez izgladnjivanja. Trening i tanjir rade zajedno.",
+  },
 ];
 
 export default function Services() {
@@ -34,7 +39,7 @@ export default function Services() {
           </p>
         </Reveal>
 
-        <div className="mt-14 grid gap-6 md:grid-cols-3">
+        <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {services.map((s, i) => (
             <Reveal key={s.title} delay={i * 130} className="h-full">
               <div className="card h-full hover:-translate-y-1.5 hover:shadow-[0_18px_45px_rgba(35,27,21,0.1)]">

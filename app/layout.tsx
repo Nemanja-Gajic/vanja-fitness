@@ -5,7 +5,7 @@ import Loader from "@/components/Loader";
 export const metadata: Metadata = {
   title: "Vanja Fitness — Studio za žene | Sremska Mitrovica",
   description:
-    "Boutique studio za žene u Sremskoj Mitrovici. Male grupe, pravilna forma i atmosfera bez osude. Prva 3 treninga su besplatna.",
+    "Fitness studio za žene u Sremskoj Mitrovici. Male grupe, pravilna forma i atmosfera bez osude. Prva 3 treninga su besplatna.",
   openGraph: {
     title: "Vanja Fitness — Studio za žene",
     description:

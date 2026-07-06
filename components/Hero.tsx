@@ -8,15 +8,11 @@ const stats = [
 export default function Hero() {
   return (
     <section id="top" className="relative isolate overflow-hidden">
-      {/* Background video */}
-      <video
+      {/* Background image (studio) */}
+      <img
         className="hero-zoom absolute inset-0 -z-20 h-full w-full object-cover"
-        src="/hero.mp4"
-        poster="/hero-poster.jpg"
-        autoPlay
-        muted
-        loop
-        playsInline
+        src="/teretana.jpg"
+        alt=""
       />
       {/* Scrim for legibility */}
       <div className="absolute inset-0 -z-10 bg-gradient-to-r from-espresso/85 via-espresso/55 to-espresso/25" />
