@@ -10,6 +10,10 @@ const quotes = [
     text: "Mrzela sam vežbanje i trening. Ova žena je učinila da se sve promeni. Od srca sve preporuke za rad sa njom! Pored toga što je posvećena, ona ima predivan pristup koji odmah uliva sigurnost i poverenje. Treninzi sa njom su prijatni, motivišući i uvek prilagođeni osobi, bez osećaja pritiska ili nelagode. Posebno mi znači što pažljivo prati izvođenje svake vežbe, vodi računa o tehnici i ume da ohrabri baš onda kada je potrebno. Uz nju trening ne deluje kao obaveza, već kao vreme u kojem radiš nešto dobro za sebe. Vidi se da svoj posao radi sa puno ljubavi, strpljenja i iskrene želje da pomogne drugima da napreduju.",
     who: "Sara Ivanović, 30",
   },
+  {
+    text: "Na preporuku prijateljice došla sam do Vanjinog kontakta. Od tada, iako sam zbog životnih obaveza nekad pravila pauze, uvek sam se vraćala upravo njoj. Razlog nije samo trening, već sve ono što on nosi sa sobom. Osećaj koji imam čim uđem u salu, Vanjina strpljivost, profesionalnost i iskrena posvećenost svakoj od nas. Tu su i divne žene sa kojima treniram, atmosfera ispunjena smehom, podrškom i pozitivnom energijom. To je mesto gde na sat vremena zaboravim na sve obaveze i posvetim se sebi. A kada se uz sve to vide i rezultati, onda znaš da si na pravom mestu. Od srca preporučujem Vanju svakome ko želi kvalitetan trening, sjajnu atmosferu i trenera koji svoj posao radi sa puno ljubavi i posvećenosti.",
+    who: "Milica Dikić, 39",
+  },
 ];
 
 export default function Testimonials() {
