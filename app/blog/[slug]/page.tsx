@@ -36,10 +36,10 @@ const formatDate = (iso: string) =>
     year: "numeric",
   });
 
-/** Pretvara [tekst](/putanja) u linkove unutar pasusa. */
+/** Pretvara [tekst](/putanja) u linkove i **tekst** u bold unutar pasusa. */
 function renderText(text: string): ReactNode[] {
   const parts: ReactNode[] = [];
-  const regex = /\[([^\]]+)\]\(([^)]+)\)/g;
+  const regex = /\[([^\]]+)\]\(([^)]+)\)|\*\*([^*]+)\*\*/g;
   let lastIndex = 0;
   let match: RegExpExecArray | null;
   let key = 0;
@@ -48,15 +48,23 @@ function renderText(text: string): ReactNode[] {
     if (match.index > lastIndex) {
       parts.push(text.slice(lastIndex, match.index));
     }
-    parts.push(
-      <a
-        key={key++}
-        href={match[2]}
-        className="font-medium text-espresso underline decoration-taupe underline-offset-4 transition-colors hover:text-taupe"
-      >
-        {match[1]}
-      </a>
-    );
+    if (match[3]) {
+      parts.push(
+        <strong key={key++} className="font-semibold text-espresso">
+          {match[3]}
+        </strong>
+      );
+    } else {
+      parts.push(
+        <a
+          key={key++}
+          href={match[2]}
+          className="font-medium text-espresso underline decoration-taupe underline-offset-4 transition-colors hover:text-taupe"
+        >
+          {match[1]}
+        </a>
+      );
+    }
     lastIndex = match.index + match[0].length;
   }
   if (lastIndex < text.length) {

@@ -9,7 +9,7 @@ export default function Navbar() {
   return (
     <header className="sticky top-0 z-50 border-b border-espresso/10 bg-cream/85 backdrop-blur-md">
       <nav className="wrap flex h-[72px] items-center justify-between">
-        <a href="#top" className="flex items-center gap-3">
+        <a href="/" className="flex items-center gap-3">
           <img
             src="/vanja-logo.png"
             alt="Vanja Fitness logo"

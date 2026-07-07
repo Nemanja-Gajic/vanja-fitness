@@ -11,11 +11,11 @@ export default function Hero() {
       {/* Background image (studio) */}
       <img
         className="hero-zoom absolute inset-0 -z-20 h-full w-full object-cover"
-        src="/teretana.jpg"
+        src="/studio-hero.jpg"
         width={1920}
-        height={1072}
+        height={1440}
         fetchPriority="high"
-        alt="Fitnes studio za žene Vanja Fitness u Sremskoj Mitrovici — sale sa spravama i tegovima"
+        alt="Sala za trening u fitnes studiju za žene Vanja Fitness u Sremskoj Mitrovici, sa ogledalima, TRX trakama i neonskim logom"
       />
       {/* Scrim for legibility */}
       <div className="absolute inset-0 -z-10 bg-gradient-to-r from-espresso/85 via-espresso/55 to-espresso/25" />

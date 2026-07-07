@@ -38,7 +38,9 @@ export default function BlogPage() {
           </Reveal>
 
           <div className="mt-12 space-y-5">
-            {posts.map((post, i) => (
+            {[...posts]
+              .sort((a, b) => b.date.localeCompare(a.date))
+              .map((post, i) => (
               <Reveal key={post.slug} delay={i * 100}>
                 <a
                   href={`/blog/${post.slug}`}
