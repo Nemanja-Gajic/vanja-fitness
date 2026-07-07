@@ -6,6 +6,10 @@ const quotes = [
     text: "Sa Vanjom treniram od 2022. godine i mogu iskreno da kažem da je to jedna od najboljih odluka koje sam donela za sebe. Došla sam potpuno neaktivna, nespremna i sa viškom kilograma, a danas sam mnogo zadovoljnija sobom, jača i istrajnija. Ono što Vanju izdvaja nisu samo stručnost i kvalitetni treninzi, već i podrška, motivacija i posvećenost svakom klijentu. Treninzi su prilagodljivi svima, a posle svakog osećam da sam uradila nešto dobro za svoje telo i svoj um. Od srca je preporučujem svima koji žele rezultate, ali i zdrav odnos prema treningu i sebi.",
     who: "Ivana Vitorović, 38",
   },
+  {
+    text: "Mrzela sam vežbanje i trening. Ova žena je učinila da se sve promeni. Od srca sve preporuke za rad sa njom! Pored toga što je posvećena, ona ima predivan pristup koji odmah uliva sigurnost i poverenje. Treninzi sa njom su prijatni, motivišući i uvek prilagođeni osobi, bez osećaja pritiska ili nelagode. Posebno mi znači što pažljivo prati izvođenje svake vežbe, vodi računa o tehnici i ume da ohrabri baš onda kada je potrebno. Uz nju trening ne deluje kao obaveza, već kao vreme u kojem radiš nešto dobro za sebe. Vidi se da svoj posao radi sa puno ljubavi, strpljenja i iskrene želje da pomogne drugima da napreduju.",
+    who: "Sara Ivanović, 30",
+  },
 ];
 
 export default function Testimonials() {
@@ -24,7 +28,9 @@ export default function Testimonials() {
           className={
             quotes.length === 1
               ? "mx-auto mt-14 max-w-2xl"
-              : "mt-14 grid gap-6 md:grid-cols-3"
+              : quotes.length === 2
+                ? "mx-auto mt-14 grid max-w-5xl gap-6 md:grid-cols-2"
+                : "mt-14 grid gap-6 md:grid-cols-3"
           }
         >
           {quotes.map((q, i) => (
