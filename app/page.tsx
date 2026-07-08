@@ -9,6 +9,7 @@ import Pricing from "@/components/Pricing";
 import Testimonials from "@/components/Testimonials";
 import Faq from "@/components/Faq";
 import Cta from "@/components/Cta";
+import Location from "@/components/Location";
 import Footer from "@/components/Footer";
 
 export default function Home() {
@@ -25,6 +26,7 @@ export default function Home() {
       <Testimonials />
       <Faq />
       <Cta />
+      <Location />
       <Footer />
     </main>
   );

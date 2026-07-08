@@ -7,6 +7,7 @@ const csp = [
   "img-src 'self' data: https://www.google-analytics.com https://www.googletagmanager.com",
   "media-src 'self'",
   "connect-src 'self' https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com",
+  "frame-src https://www.google.com",
   "frame-ancestors 'self'",
   "base-uri 'self'",
   "form-action 'self'",
