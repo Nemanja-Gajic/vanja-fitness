@@ -5,17 +5,15 @@ export default function About() {
   return (
     <section id="o-nama" className="section overflow-hidden bg-sand">
       <div className="wrap grid items-center gap-12 md:grid-cols-2">
-        {/* Video preview (placeholder for Vanja photo) */}
         <Reveal variant="left" className="order-2 md:order-1">
           <div className="relative aspect-[4/5] w-full overflow-hidden rounded-5xl bg-latte">
-            <video
+            <img
               className="absolute inset-0 h-full w-full object-cover"
-              src="/hero.mp4"
-              poster="/hero-poster.jpg"
-              autoPlay
-              muted
-              loop
-              playsInline
+              src="/vanja-portret.jpg"
+              alt="Vanja Drljača, personalni trener za žene, u svom studiju Vanja Fitness u Sremskoj Mitrovici"
+              width={1200}
+              height={1600}
+              loading="lazy"
             />
           </div>
         </Reveal>
