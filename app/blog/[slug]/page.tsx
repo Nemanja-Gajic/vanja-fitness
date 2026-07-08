@@ -25,6 +25,18 @@ export function generateMetadata({ params }: Props): Metadata {
       type: "article",
       url: `/blog/${post.slug}`,
       publishedTime: post.date,
+      images: [
+        {
+          url: post.image ? post.image.src : "/og.jpg",
+          width: post.image ? post.image.width : 1200,
+          height: post.image ? post.image.height : 630,
+          alt: post.image ? post.image.alt : post.title,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      images: [post.image ? post.image.src : "/og.jpg"],
     },
   };
 }
