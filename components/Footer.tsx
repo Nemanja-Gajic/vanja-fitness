@@ -9,8 +9,8 @@ export default function Footer() {
             <img
               src="/vanja-logo-white.png"
               alt="Vanja Fitness logo"
-              width={1186}
-              height={1421}
+              width={240}
+              height={288}
               loading="lazy"
               className="h-12 w-auto"
             />
@@ -44,7 +44,7 @@ export default function Footer() {
           </a>
         </div>
 
-        <div className="mt-10 flex flex-col gap-2 border-t border-cream/10 pt-6 text-sm text-cream/45 sm:flex-row sm:justify-between">
+        <div className="mt-10 flex flex-col gap-2 border-t border-cream/10 pt-6 text-sm text-cream/60 sm:flex-row sm:justify-between">
           <p>
             {site.tagline} · {site.address}, {site.postalCode} {site.city},
             Srbija

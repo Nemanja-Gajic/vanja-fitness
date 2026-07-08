@@ -12,6 +12,8 @@ export default function Hero() {
       <img
         className="hero-zoom absolute inset-0 -z-20 h-full w-full object-cover"
         src="/studio-hero.jpg"
+        srcSet="/studio-hero-1280.jpg 1280w, /studio-hero.jpg 1920w"
+        sizes="100vw"
         width={1920}
         height={1440}
         fetchPriority="high"

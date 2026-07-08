@@ -41,7 +41,7 @@ export default function Schedule() {
         </div>
 
         <Reveal delay={200}>
-          <p className="mt-6 text-center text-sm text-espresso/45">
+          <p className="mt-6 text-center text-sm text-espresso/60">
             * Za tačno vreme treninga javi se porukom — dogovaramo termin koji
             ti najviše odgovara.
           </p>
