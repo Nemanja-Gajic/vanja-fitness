@@ -146,6 +146,73 @@ export const posts: Post[] = [
       },
     ],
   },
+  {
+    slug: "da-li-cu-se-ugojiti-od-tegova",
+    title: "Da li ću se ugojiti od tegova?",
+    description:
+      "Najveći mit o ženama i tegovima: da li od tegova možeš da se napucaš? Šta se stvarno desi sa telom u prva tri meseca i kako krećemo sa težinama.",
+    date: "2026-07-13",
+    image: {
+      src: "/tegovi.jpg",
+      alt: "Bučice, kettlebell i tegovi za trening žena u Vanja Fitness studiju u Sremskoj Mitrovici",
+      width: 1600,
+      height: 1067,
+    },
+    sections: [
+      {
+        body: [
+          "„Htela bih da počnem da treniram, ali ne bih da se napucam, samo da se malo zategnem.“ Ovo čujem skoro svaki put kad se javi nova članica. Odmah uz to ide i „neću da dižem velike kilaže, nabaciću puno mišića“. Strah od tegova je razlog zašto žene i tegovi u mnogim glavama ne idu zajedno. Evo šta se stvarno dešava.",
+        ],
+      },
+      {
+        id: "da-je-lako-svi-bi",
+        heading: "Da je tako lako, svi bi se napucali",
+        body: [
+          "Kad mi žena kaže da se plaši da će se napucati, odgovor je uvek isti: da je to tako jednostavno, svi bi to radili.",
+          "Mišići se ne grade ni brzo ni lako. Da bi se žena stvarno „napucala“, potrebne su godine, posebno praćen trening, ishrana i suplementacija. To se nikome ne desi slučajno. Dizanjem tegova na treningu ne možeš da se napucaš do mere koja ti je neprijatna, možeš samo da se zategneš.",
+        ],
+      },
+      {
+        id: "prva-tri-meseca",
+        heading: "Šta se stvarno desi u prva dva-tri meseca",
+        body: [
+          "Prvih dva do tri meseca vidi se najviše napretka, jer je trening najveći šok za organizam. Ako se uz to pazi na ishranu i trenira redovno, obimi se smanjuju, masti je sve manje, a mišićna masa raste.",
+          "Zanimljivo je da kilaža nekad ode i gore dok se obimi smanjuju. To je zato što je mišić mnogo teži od masti. Zato kod nas [mesečno merenje](/#treninzi) ne gleda samo vagu, nego i obime i sastav tela. Vaga ume da prevari, obim struka ne ume.",
+        ],
+      },
+      {
+        id: "kako-krecemo",
+        heading: "Nikad ne krećemo od velikih kilaža",
+        body: [
+          "Težina zavisi od žene do žene. Ako si apsolutni početnik, krećeš sa vrlo lakim težinama, skoro nepostojećim, dok ne naučiš pravilan pokret. Tek kad to savladaš, kilaža polako raste.",
+          "I raste samo u granicama tvojih mogućnosti. Nikad ne idem do tačke gde ne možeš da izdržiš, držim zdravu granicu koja daje efikasan trening bez rizika od povrede. Kako to izgleda uživo, pročitaj u tekstu [Kako izgleda prvi trening](/blog/kako-izgleda-prvi-trening).",
+        ],
+      },
+      {
+        id: "sta-se-menja",
+        heading: "Šta se prvo promeni na telu",
+        body: [
+          "Prvo se obično vidi razlika u nogama i rukama, tu se telo najviše zategne. Onda se promeni i držanje, jer treningom popravljamo celu građu. Na kraju poraste i samopouzdanje. Sve to zajedno izgleda kao ogromna promena, a počelo je od bučice od par kila.",
+        ],
+      },
+      {
+        id: "strah-nestane",
+        heading: "Strah nestane u sali",
+        body: [
+          "Mnoge moje članice su se plašile da krenu. Došle su uz nagovaranje, moje ili neke prijateljice, a danas su uz mene već godinama.",
+          "Trenutno u studiju nemam nijednu ženu koja izbegava tegove. Kad vidiš princip rada, da se svaka vežba radi uz podršku i kako treba, [od malih težina ka većim](/#treninzi), ta blokada nestane.",
+          "Zato uvek kažem isto: bitno je samo početi. Nemaš šta da izgubiš. Gubiš samo ako ne probaš.",
+        ],
+      },
+      {
+        id: "probaj",
+        heading: "Probaj bez rizika",
+        body: [
+          "Prva 3 treninga su besplatna, bez kartice i bez ugovora. Javi se u DM na [@vanjaa.fitness](https://instagram.com/vanjaa.fitness), izaberi [termin](/#termini) i probaj tegove uz nekoga ko prati svaki tvoj pokret.",
+        ],
+      },
+    ],
+  },
 ];
 
 export function getPost(slug: string): Post | undefined {
