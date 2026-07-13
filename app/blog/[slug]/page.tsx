@@ -138,13 +138,19 @@ export default function PostPage({ params }: Props) {
           </header>
 
           {post.image && (
-            <img
-              src={post.image.src}
-              alt={post.image.alt}
-              width={post.image.width}
-              height={post.image.height}
-              className="mt-8 w-full rounded-4xl object-cover"
-            />
+            <picture>
+              <source
+                type="image/webp"
+                srcSet={post.image.src.replace(/\.jpg$/, ".webp")}
+              />
+              <img
+                src={post.image.src}
+                alt={post.image.alt}
+                width={post.image.width}
+                height={post.image.height}
+                className="mt-8 w-full rounded-4xl object-cover"
+              />
+            </picture>
           )}
 
           {toc.length > 1 && (

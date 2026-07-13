@@ -51,6 +51,20 @@ export default function Testimonials() {
             </Reveal>
           ))}
         </div>
+
+        <Reveal delay={150}>
+          <p className="mt-10 text-center text-sm text-espresso/70">
+            <span className="text-taupe">★</span> 5,0 na Google recenzijama ·{" "}
+            <a
+              href="https://maps.app.goo.gl/E1cZ3JQNbQPmEwGW9"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-medium text-espresso underline decoration-taupe underline-offset-4 transition-colors hover:text-taupe"
+            >
+              pogledaj na Google-u
+            </a>
+          </p>
+        </Reveal>
       </div>
     </section>
   );

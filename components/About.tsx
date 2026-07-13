@@ -7,14 +7,17 @@ export default function About() {
       <div className="wrap grid items-center gap-12 md:grid-cols-2">
         <Reveal variant="left" className="order-2 md:order-1">
           <div className="relative aspect-[4/5] w-full overflow-hidden rounded-5xl bg-latte">
-            <img
-              className="absolute inset-0 h-full w-full object-cover"
-              src="/vanja-portret.jpg"
-              alt="Vanja Drljača, personalni trener za žene, u svom studiju Vanja Fitness u Sremskoj Mitrovici"
-              width={1200}
-              height={1600}
-              loading="lazy"
-            />
+            <picture>
+              <source type="image/webp" srcSet="/vanja-portret.webp" />
+              <img
+                className="absolute inset-0 h-full w-full object-cover"
+                src="/vanja-portret.jpg"
+                alt="Vanja Drljača, personalni trener za žene, u svom studiju Vanja Fitness u Sremskoj Mitrovici"
+                width={1200}
+                height={1600}
+                loading="lazy"
+              />
+            </picture>
           </div>
         </Reveal>
 

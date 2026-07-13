@@ -64,7 +64,13 @@ const businessSchema = {
       closes: "21:00",
     },
   ],
-  sameAs: [site.instagram],
+  sameAs: [site.instagram, "https://maps.app.goo.gl/E1cZ3JQNbQPmEwGW9"],
+  hasMap: "https://maps.app.goo.gl/E1cZ3JQNbQPmEwGW9",
+  geo: {
+    "@type": "GeoCoordinates",
+    latitude: 44.9727565,
+    longitude: 19.6024588,
+  },
   founder: {
     "@type": "Person",
     name: "Vanja Drljača",

@@ -9,16 +9,23 @@ export default function Hero() {
   return (
     <section id="top" className="relative isolate overflow-hidden">
       {/* Background image (studio) */}
-      <img
-        className="hero-zoom absolute inset-0 -z-20 h-full w-full object-cover"
-        src="/studio-hero.jpg"
-        srcSet="/studio-hero-1280.jpg 1280w, /studio-hero.jpg 1920w"
-        sizes="100vw"
-        width={1920}
-        height={1440}
-        fetchPriority="high"
-        alt="Sala za trening u fitnes studiju za žene Vanja Fitness u Sremskoj Mitrovici, sa ogledalima, TRX trakama i neonskim logom"
-      />
+      <picture>
+        <source
+          type="image/webp"
+          srcSet="/studio-hero-1280.webp 1280w, /studio-hero.webp 1920w"
+          sizes="100vw"
+        />
+        <img
+          className="hero-zoom absolute inset-0 -z-20 h-full w-full object-cover"
+          src="/studio-hero.jpg"
+          srcSet="/studio-hero-1280.jpg 1280w, /studio-hero.jpg 1920w"
+          sizes="100vw"
+          width={1920}
+          height={1440}
+          fetchPriority="high"
+          alt="Sala za trening u fitnes studiju za žene Vanja Fitness u Sremskoj Mitrovici, sa ogledalima, TRX trakama i neonskim logom"
+        />
+      </picture>
       {/* Scrim for legibility */}
       <div className="absolute inset-0 -z-10 bg-gradient-to-r from-espresso/85 via-espresso/55 to-espresso/25" />
       <div className="absolute inset-0 -z-10 bg-gradient-to-t from-espresso/75 via-transparent to-espresso/25" />
