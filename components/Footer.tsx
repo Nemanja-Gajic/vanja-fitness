@@ -29,13 +29,18 @@ export default function Footer() {
                 {item.label}
               </a>
             ))}
-            <a href="/blog" className="transition-colors hover:text-cream">
+            <a
+              href="/blog"
+              data-cta="futer_blog"
+              className="transition-colors hover:text-cream"
+            >
               Blog
             </a>
           </nav>
 
           <a
             href={site.instagram}
+            data-cta="futer_ig"
             target="_blank"
             rel="noopener noreferrer"
             className="text-sm transition-colors hover:text-cream"

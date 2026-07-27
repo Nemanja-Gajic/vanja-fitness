@@ -36,6 +36,7 @@ export default function Navbar() {
 
         <a
           href={site.instagram}
+          data-cta="navbar_ig"
           target="_blank"
           rel="noopener noreferrer"
           className="btn-primary hidden md:inline-flex"
@@ -67,6 +68,7 @@ export default function Navbar() {
             ))}
             <a
               href={site.instagram}
+              data-cta="meni_mobilni_ig"
               target="_blank"
               rel="noopener noreferrer"
               className="btn-primary mt-2"

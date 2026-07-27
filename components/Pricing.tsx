@@ -67,6 +67,7 @@ export default function Pricing() {
 
               <a
                 href={site.instagram}
+                data-cta="clanarine_ig"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="btn-light mt-7 w-full"

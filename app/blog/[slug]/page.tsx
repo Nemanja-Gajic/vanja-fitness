@@ -211,6 +211,7 @@ export default function PostPage({ params }: Props) {
             </p>
             <a
               href={site.instagram}
+              data-cta="blog_kraj_ig"
               target="_blank"
               rel="noopener noreferrer"
               className="btn-light mt-5"

@@ -29,6 +29,7 @@ export default function Cta() {
             <div className="mt-9 flex flex-wrap justify-center gap-3">
               <a
                 href={site.instagram}
+                data-cta="cta_kartica_ig"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="btn-light"

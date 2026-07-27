@@ -63,6 +63,7 @@ export default function Hero() {
           >
             <a
               href={site.instagram}
+              data-cta="hero_ig"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center justify-center rounded-full bg-cream px-5 py-3 text-sm font-medium text-espresso transition-all duration-300 hover:-translate-y-0.5 hover:bg-latte sm:px-7 sm:py-3.5 sm:text-[15px]"
@@ -72,6 +73,7 @@ export default function Hero() {
             </a>
             <a
               href="#termini"
+              data-cta="hero_termini"
               className="inline-flex items-center justify-center rounded-full border border-cream/40 px-5 py-3 text-sm font-medium text-cream transition-colors hover:bg-cream hover:text-espresso sm:px-7 sm:py-3.5 sm:text-[15px]"
             >
               <span className="sm:hidden">Termini</span>

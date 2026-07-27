@@ -3,6 +3,7 @@ import Script from "next/script";
 import { site } from "@/lib/site";
 import "./globals.css";
 import Loader from "@/components/Loader";
+import Analytics from "@/components/Analytics";
 
 export const metadata: Metadata = {
   metadataBase: new URL(site.url),
@@ -122,6 +123,7 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(businessSchema) }}
         />
+        <Analytics />
         <Loader />
         {children}
       </body>
