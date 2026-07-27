@@ -213,6 +213,85 @@ export const posts: Post[] = [
       },
     ],
   },
+  {
+    slug: "zasto-vaga-stoji-a-obimi-padaju",
+    title: "Zašto vaga stoji, a obimi padaju?",
+    description:
+      "Prošao je mesec dana, a broj na vagi je isti. Šta merimo u studiju, zašto vaga sama ne govori mnogo i šta se na telu promeni pre nego kilaža.",
+    date: "2026-07-27",
+    image: {
+      src: "/merenje-obima.jpg",
+      alt: "Metar za merenje obima struka i butine, merenje obima pokazuje napredak i onda kad vaga stoji",
+      width: 1600,
+      height: 1200,
+    },
+    sections: [
+      {
+        body: [
+          "Prošlo je mesec dana. Staneš na vagu i broj je isti kao prvog dana. U tom trenutku većina žena pomisli da mesec dana nije vredeo ništa.",
+          "Skoro nikad nije tako. Evo šta merimo u studiju i zašto vaga sama ne govori mnogo.",
+        ],
+      },
+      {
+        id: "sta-merimo",
+        heading: "Šta merimo na prvom treningu",
+        body: [
+          "Merenje radimo odmah, pre nego što uopšte kreneš da vežbaš. Merimo težinu, na vagi koja pokazuje i procenat masti i procenat mišića. Uz to merimo obim struka, butine i ruke.",
+          "To je tvoja početna slika. Bez nje kasnije nemaš sa čim da uporediš, pa ostaje samo utisak. Merenje radimo isto i sa članicama [grupnih i individualnih treninga](/#treninzi).",
+        ],
+      },
+      {
+        id: "jednom-mesecno",
+        heading: "Merimo početkom svakog meseca",
+        body: [
+          "Merenje ponavljamo početkom svakog meseca, da vidimo napredak crno na belo.",
+          "Isto savetujem i za kod kuće. Jednom mesečno, i vaga i obimi, nikad samo vaga. Ako se vagaš svaki dan, gledaš vodu, so i to šta si taj dan jela, ne napredak.",
+          "Ako pristaneš, pravimo i fotografije. Na njima se promena vidi jasnije nego na bilo kom broju.",
+        ],
+      },
+      {
+        id: "ista-kilaza",
+        heading: "Kad kilaža stoji, a stara garderoba je odjednom taman",
+        body: [
+          "Kod nekih žena kilaža prvog meseca ostane potpuno ista. Onda probaju neku staru garderobu u koju nisu mogle da uđu i shvate da su izgubile u obimu. Najviše u struku i u nogama.",
+          "Jedna članica mi je rekla: „Kada se izmerim, imam isto kilograma kao kada sam počela, čak sam dobila koji kilogram. Međutim, probala sam stare farmerke i posle dve godine sam ušla u njih.“",
+          "Ne znači to da se kilaža nikad ne pomeri. Jedna devojka je smršala 4 kilograma za mesec i po dana. Ali kilaža je samo jedan podatak od nekoliko koje pratimo.",
+        ],
+      },
+      {
+        id: "prvo-se-promeni",
+        heading: "Prvo se promeni energija, pa tek onda obim",
+        body: [
+          "Ono što se prvo promeni nije ni vaga ni obim, nego energija i snaga. Već na početku mi kažu da imaju više energije tokom dana, da su srećnije i zadovoljnije, pogotovo kad se trening završi.",
+          "Tek posle toga dolaze obimi i odeća. Tim redom, skoro uvek.",
+        ],
+      },
+      {
+        id: "vaga-poraste",
+        heading: "Šta ako vaga poraste",
+        body: [
+          "Bilo je žena kojima vaga u prvim nedeljama poraste. To nije korak unazad.",
+          "Kažem im uvek isto, vaga nije toliko merodavna koliko merenje obima. Mišić je teži od masti, pa se dešava da obimi padaju dok broj na vagi stoji ili raste. O tome kako telo reaguje na tegove pisala sam u tekstu [Da li ću se ugojiti od tegova](/blog/da-li-cu-se-ugojiti-od-tegova).",
+        ],
+      },
+      {
+        id: "ogledalo",
+        heading: "Zašto niko ne odustane zbog vage",
+        body: [
+          "Nije mi se desilo da neka žena odustane zato što joj vaga stoji. Razlog je jednostavan, kad se pogleda u ogledalo, vidi napredak.",
+          "Vaga je jedan broj jednom mesečno. Ogledalo, garderoba, snaga na treningu i energija tokom dana su četiri stvari koje vidiš svaki dan.",
+        ],
+      },
+      {
+        id: "izmeri-se",
+        heading: "Izmeri se na prvom treningu",
+        body: [
+          "Prva 3 treninga su besplatna, a merenje radimo već na prvom. Za mesec dana imaš sa čim da uporediš.",
+          "Javi se u DM na [@vanjaa.fitness](https://instagram.com/vanjaa.fitness) i izaberi [termin koji ti odgovara](/#termini). Kako izgleda sam trening, pročitaj u tekstu [Kako izgleda prvi trening](/blog/kako-izgleda-prvi-trening), a ostalo je verovatno već među [čestim pitanjima](/#pitanja).",
+        ],
+      },
+    ],
+  },
 ];
 
 export function getPost(slug: string): Post | undefined {
