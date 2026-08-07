@@ -3,7 +3,7 @@ import Reveal from "./Reveal";
 
 const included = [
   "3 grupna treninga nedeljno",
-  "Male grupe — 4 do 8 žena",
+  "Male grupe, 4 do 8 žena",
   "Stalni nadzor pravilne forme",
   "Mesečno praćenje napretka",
 ];
@@ -22,7 +22,7 @@ export default function Pricing() {
           </h2>
           <p className="mt-4 text-espresso/60">
             Male grupe, tri treninga nedeljno i trener koji prati svaki tvoj
-            pokret. Počni bez obaveza — prva tri treninga su besplatna.
+            pokret. Počni bez obaveza, prva tri treninga su besplatna.
           </p>
         </Reveal>
 
@@ -47,7 +47,7 @@ export default function Pricing() {
             </div>
           </Reveal>
 
-          {/* Free trial CTA — no prices */}
+          {/* Free trial CTA, no prices */}
           <Reveal variant="right" delay={120}>
             <div className="relative overflow-hidden rounded-5xl bg-espresso p-8 text-cream">
               <span className="inline-block rounded-full bg-latte px-4 py-1 text-xs font-semibold uppercase tracking-wide text-espresso">
@@ -61,7 +61,7 @@ export default function Pricing() {
                 Bez kartice, bez ugovora, bez pritiska. Probaš, pa odlučiš.
               </p>
               <p className="mt-6 border-t border-cream/15 pt-5 text-sm text-cream/70">
-                Za aktuelne članarine i slobodne termine — javi se porukom, pa
+                Za aktuelne članarine i slobodne termine javi se porukom, pa
                 se dogovaramo.
               </p>
 

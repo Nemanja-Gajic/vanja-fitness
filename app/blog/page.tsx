@@ -6,7 +6,7 @@ import { posts } from "@/lib/posts";
 import { site } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: "Blog — saveti za trening | Vanja Fitness",
+  title: "Blog: saveti za trening | Vanja Fitness",
   description:
     "Saveti iz prve ruke o treningu za žene: kako izgleda prvi trening, šta da poneseš i kako se trenira u malom fitnes studiju u Sremskoj Mitrovici.",
   alternates: { canonical: "/blog" },
@@ -32,8 +32,28 @@ export default function BlogPage() {
               <span className="script text-[1.35em] text-taupe">studija</span>
             </h1>
             <p className="mt-4 max-w-xl text-espresso/60">
-              Bez teorije sa interneta — ono što žene stvarno pitaju pre i
-              posle treninga, iz ugla trenera.
+              Ono što žene stvarno pitaju pre i posle treninga, iz ugla
+              trenera. Bez teorije sa interneta i bez recepata za čuda, samo
+              ono što svaki dan vidim u studiju.
+            </p>
+            <p className="mt-4 max-w-xl text-espresso/60">
+              Ja sam Vanja Drljača, trener u Vanja Fitness studiju u Sremskoj
+              Mitrovici. Iza mene su završena NASM edukacija i godine rada sa
+              ženama u malim grupama, od potpunih početnica do onih koje
+              treniraju godinama. Na blogu odgovaram na pitanja koja najčešće
+              čujem na treningu: kako izgleda prvi trening, da li se od tegova
+              dobijaju veliki mišići, šta da radiš kad vaga stoji. Svaki tekst
+              je pisan iz stvarnih situacija sa treninga, ne iz tuđih
+              članaka. Ako imaš pitanje koje ovde ne vidiš, piši mi na{" "}
+              <a
+                href={site.instagram}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-medium text-espresso underline decoration-taupe underline-offset-4"
+              >
+                Instagram
+              </a>
+              .
             </p>
           </Reveal>
 
@@ -67,7 +87,7 @@ export default function BlogPage() {
                 Spremna da probaš?
               </p>
               <p className="mx-auto mt-2 max-w-sm text-sm text-cream/65">
-                Prva 3 treninga su besplatna — javi se i dogovaramo termin.
+                Prva 3 treninga su besplatna, javi se i dogovaramo termin.
               </p>
               <a
                 href={site.instagram}

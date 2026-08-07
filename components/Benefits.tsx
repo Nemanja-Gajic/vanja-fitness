@@ -7,7 +7,7 @@ const benefits = [
   },
   {
     title: "Pravilna forma",
-    text: "Svaki pokret pod nadzorom trenera — rezultat bez povreda i bez loših navika koje te kasnije koče.",
+    text: "Svaki pokret pod nadzorom trenera, rezultat bez povreda i bez loših navika koje te kasnije koče.",
   },
   {
     title: "Više energije",

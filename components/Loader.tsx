@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 
-const MIN_SHOW = 600; // ms — avoid a flash
-const MAX_SHOW = 3500; // ms — never block longer than this
+const MIN_SHOW = 600; // ms, avoid a flash
+const MAX_SHOW = 3500; // ms, never block longer than this
 
 export default function Loader() {
   const [leaving, setLeaving] = useState(false);

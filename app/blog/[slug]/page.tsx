@@ -16,7 +16,7 @@ export function generateMetadata({ params }: Props): Metadata {
   const post = getPost(params.slug);
   if (!post) return {};
   return {
-    title: `${post.title} | Vanja Fitness`,
+    title: post.metaTitle ?? `${post.title} | Vanja Fitness`,
     description: post.description,
     alternates: { canonical: `/blog/${post.slug}` },
     openGraph: {
@@ -207,7 +207,7 @@ export default function PostPage({ params }: Props) {
               Prva 3 treninga su besplatna
             </p>
             <p className="mx-auto mt-2 max-w-sm text-sm text-cream/65">
-              Bez kartice i bez ugovora — javi se porukom i dogovaramo termin.
+              Bez kartice i bez ugovora, javi se porukom i dogovaramo termin.
             </p>
             <a
               href={site.instagram}

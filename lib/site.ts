@@ -1,4 +1,4 @@
-// Central place for site-wide content & links — edit here to update everywhere.
+// Central place for site-wide content & links, edit here to update everywhere.
 export const site = {
   name: "Vanja Fitness",
   url: "https://vanjafitness.rs",

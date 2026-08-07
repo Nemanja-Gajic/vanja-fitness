@@ -49,7 +49,7 @@ export default function About() {
           <ul className="mt-7 space-y-3">
             {[
               "Završena NASM edukacija za personalnog trenera",
-              "Fitnes studio isključivo za žene — bez gužve klasične teretane",
+              "Fitnes studio isključivo za žene, bez gužve klasične teretane",
               "Male grupe i lična pažnja za svaku polaznicu",
             ].map((t) => (
               <li key={t} className="flex items-start gap-3 text-espresso/75">

@@ -22,7 +22,7 @@ export default function Cta() {
               <span className="script text-[1.4em] text-latte">besplatna</span>
             </h2>
             <p className="mx-auto mt-5 max-w-md text-cream/65">
-              Probaš. Svidi ti se — ostaješ. Ako ne — odlaziš. Piši nam na
+              Probaš. Svidi ti se, ostaješ. Ako ne, odlaziš. Piši nam na
               Instagram i dogovaramo termin.
             </p>
 

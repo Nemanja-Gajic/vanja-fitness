@@ -45,7 +45,7 @@ export default function Testimonials() {
                   „{q.text}"
                 </blockquote>
                 <figcaption className="mt-5 text-xs font-semibold uppercase tracking-[0.2em] text-taupe">
-                  — {q.who}
+                  {q.who}
                 </figcaption>
               </figure>
             </Reveal>

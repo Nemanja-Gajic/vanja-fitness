@@ -10,12 +10,12 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "/",
   },
-  title: "Vanja Fitness — Treninzi za žene | Sremska Mitrovica",
+  title: "Vanja Fitness | Treninzi za žene, Sremska Mitrovica",
   description:
-    "Grupni i personalni treninzi za žene u Sremskoj Mitrovici. Fitnes studio — male grupe, zakazani termini, trener uz tebe. Prva 3 treninga su besplatna.",
+    "Grupni i personalni treninzi za žene u Sremskoj Mitrovici. Fitnes studio: male grupe, zakazani termini, trener uz tebe. Prva 3 treninga su besplatna.",
   openGraph: {
     siteName: "Vanja Fitness",
-    title: "Vanja Fitness — Treninzi za žene u Sremskoj Mitrovici",
+    title: "Vanja Fitness | Treninzi za žene u Sremskoj Mitrovici",
     description:
       "Prve promene vidiš za mesec dana. Male grupe, trener uz tebe, prva 3 treninga besplatna.",
     url: "/",
@@ -26,7 +26,7 @@ export const metadata: Metadata = {
         url: "/og.jpg",
         width: 1200,
         height: 630,
-        alt: "Vanja Fitness — fitnes studio za žene u Sremskoj Mitrovici",
+        alt: "Vanja Fitness, fitnes studio za žene u Sremskoj Mitrovici",
       },
     ],
   },
@@ -41,7 +41,7 @@ const businessSchema = {
   "@type": "HealthClub",
   name: site.name,
   description:
-    "Fitnes studio za žene u Sremskoj Mitrovici — grupni i personalni treninzi u zakazanim terminima.",
+    "Fitnes studio za žene u Sremskoj Mitrovici, grupni i personalni treninzi u zakazanim terminima.",
   url: site.url,
   image: `${site.url}/teretana.jpg`,
   address: {

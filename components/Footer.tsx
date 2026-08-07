@@ -49,7 +49,7 @@ export default function Footer() {
           </a>
         </div>
 
-        <div className="mt-10 flex flex-col gap-2 border-t border-cream/10 pt-6 text-sm text-cream/60 sm:flex-row sm:justify-between">
+        <div className="mt-10 flex flex-col gap-4 border-t border-cream/10 pt-6 text-sm text-cream/60 sm:flex-row sm:items-center sm:justify-between">
           <p>
             {site.tagline} · {site.address}, {site.postalCode} {site.city},
             Srbija
@@ -57,6 +57,15 @@ export default function Footer() {
           <p>
             © {new Date().getFullYear()} {site.name}. Sva prava zadržana.
           </p>
+          <a
+            aria-label="2M Web Studio"
+            href="https://www.2m-webstudio.com/"
+            target="_blank"
+            rel="noopener"
+            className="inline-flex w-fit items-center rounded-full border border-cream/15 px-4 py-1.5 text-xs transition-colors hover:border-cream/30 hover:text-cream"
+          >
+            Made by 2M Web Studio
+          </a>
         </div>
       </div>
     </footer>

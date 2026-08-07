@@ -14,12 +14,12 @@ const services = [
   {
     num: "03",
     title: "Praćenje napretka",
-    text: "Mesečna merenja — težina, obim i sastav tela. Vidiš crno na belo da napreduješ i ostaješ motivisana.",
+    text: "Mesečna merenja: težina, obim i sastav tela. Vidiš crno na belo da napreduješ i ostaješ motivisana.",
   },
   {
     num: "04",
     title: "Besplatan plan ishrane za prvi mesec",
-    text: "Uz prvi mesec treninga dobijaš startni plan ishrane — jednostavan i realan, bez izgladnjivanja. Trening i tanjir rade zajedno.",
+    text: "Uz prvi mesec treninga dobijaš startni plan ishrane, jednostavan i realan, bez izgladnjivanja. Trening i tanjir rade zajedno.",
   },
 ];
 
@@ -34,7 +34,7 @@ export default function Services() {
             <span className="script text-[1.35em] text-taupe">svaku</span> ženu
           </h2>
           <p className="mt-4 text-espresso/60">
-            Grupni treninzi u malim grupama i personalni trening jedan na jedan —
+            Grupni treninzi u malim grupama i personalni trening jedan na jedan,
             radi se na tebi, tvojoj formi i tvom tempu, ne na kilaži na šipci.
           </p>
         </Reveal>

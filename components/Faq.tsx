@@ -7,7 +7,7 @@ const faqs = [
   },
   {
     q: "Moram li odmah da platim?",
-    a: "Ne. Prva 3 treninga su potpuno besplatna — bez kartice i bez ugovora. Ostaješ samo ako ti se svidi.",
+    a: "Ne. Prva 3 treninga su potpuno besplatna, bez kartice i bez ugovora. Ostaješ samo ako ti se svidi.",
   },
   {
     q: "Koliko nas je u grupi?",
