@@ -153,7 +153,7 @@ export const posts: Post[] = [
     slug: "da-li-cu-se-ugojiti-od-tegova",
     title: "Da li ću se ugojiti od tegova?",
     description:
-      "Najveći mit o ženama i tegovima: da li od tegova možeš da se napucaš? Šta se stvarno desi sa telom u prva tri meseca i kako krećemo sa težinama.",
+      "Najveći mit o ženama i tegovima: da li od tegova možeš da se nabilduješ? Šta se stvarno desi sa telom u prva tri meseca i kako krećemo sa težinama.",
     date: "2026-07-13",
     image: {
       src: "/tegovi.jpg",
@@ -164,15 +164,15 @@ export const posts: Post[] = [
     sections: [
       {
         body: [
-          "„Htela bih da počnem da treniram, ali ne bih da se napucam, samo da se malo zategnem.“ Ovo čujem skoro svaki put kad se javi nova članica. Odmah uz to ide i „neću da dižem velike kilaže, nabaciću puno mišića“. Strah od tegova je razlog zašto žene i tegovi u mnogim glavama ne idu zajedno. Evo šta se stvarno dešava.",
+          "„Htela bih da počnem da treniram, ali ne bih da se nabildujem, samo da se malo zategnem.“ Ovo čujem skoro svaki put kad se javi nova članica. Odmah uz to ide i „neću da dižem velike kilaže, nabaciću puno mišića“. Strah od tegova je razlog zašto žene i tegovi u mnogim glavama ne idu zajedno. Evo šta se stvarno dešava.",
         ],
       },
       {
         id: "da-je-lako-svi-bi",
-        heading: "Da je tako lako, svi bi se napucali",
+        heading: "Da je tako lako, svi bi se nabildovali",
         body: [
-          "Kad mi žena kaže da se plaši da će se napucati, odgovor je uvek isti: da je to tako jednostavno, svi bi to radili.",
-          "Mišići se ne grade ni brzo ni lako. Da bi se žena stvarno „napucala“, potrebne su godine, posebno praćen trening, ishrana i suplementacija. To se nikome ne desi slučajno. Dizanjem tegova na treningu ne možeš da se napucaš do mere koja ti je neprijatna, možeš samo da se zategneš.",
+          "Kad mi žena kaže da se plaši da će se nabildovati, odgovor je uvek isti: da je to tako jednostavno, svi bi to radili.",
+          "Mišići se ne grade ni brzo ni lako. Da bi se žena stvarno nabildovala, potrebne su godine, posebno praćen trening, ishrana i suplementacija. To se nikome ne desi slučajno. Dizanjem tegova na treningu ne možeš da se nabilduješ do mere koja ti je neprijatna, možeš samo da se zategneš.",
         ],
       },
       {
@@ -362,6 +362,84 @@ export const posts: Post[] = [
           "Dosta žena pokuša samo da odredi sebi plan ishrane, a on u većini slučajeva izgleda kao izgladnjivanje. Izdrže par dana, pa se prepuste starim navikama i često pogoršaju situaciju.",
           "Poenta nije izgladnjivati se, nego korigovati ishranu tako da na taj način možeš da se hraniš uvek, i da polako ali sigurno dođeš do željene kilaže. Normalno je imati i takozvani cheat meal, ali se i to planira i ne treba preterivati.",
           "Zato uz [prvi mesec treninga](/#treninzi) dobijaš startni plan ishrane, da ne moraš sama da pogađaš.",
+        ],
+      },
+    ],
+  },
+  {
+    slug: "vezbe-za-stomak",
+    title: "Vežbe za stomak, šta stvarno skida salo?",
+    metaTitle: "Vežbe za stomak, šta stvarno skida salo? | Vanja Fitness",
+    description:
+      "Trbušnjaci ne skidaju salo sa stomaka. Šta stvarno radi: ishrana, trening snage i jak core. Vežbe koje radimo u studiju i realna očekivanja.",
+    date: "2026-08-10",
+    image: {
+      src: "/vezbe-za-stomak.jpg",
+      alt: "Vanja, trener u Vanja Fitness, radi vežbe za stomak sa podignutim nogama",
+      width: 1600,
+      height: 1067,
+    },
+    sections: [
+      {
+        body: [
+          "Kad me žene pitaju odakle da krenu, najčešći cilj je isti: da skinu stomak. I skoro uvek dodaju da im najteže ide onaj donji deo. Zato hajde da raščistimo šta vežbe za stomak stvarno mogu, a šta ne mogu.",
+        ],
+      },
+      {
+        id: "trbusnjaci-ne-skidaju-salo",
+        heading: "Trbušnjaci ne skidaju salo sa stomaka",
+        body: [
+          "Ovo je najvažnija stvar u celom tekstu. Salo ne možeš da skineš sa stomaka samo trbušnjacima. Telo ne radi tako, masne naslage se gube ravnomerno, sa celog tela.",
+          "Najveći problem koji viđam je što žene očekuju da skinu stomak, a ne paze na ishranu. Rade vežbe, trude se, a rezultata nema, jer je tanjir ostao isti. Rečenica koju stalno ponavljam u studiju glasi: 70% je ishrana, 30% trening. Ne može jedno bez drugog.",
+        ],
+      },
+      {
+        id: "pravi-redosled",
+        heading: "Pravi redosled za skidanje stomaka",
+        body: [
+          "Prvo ide kalorijski deficit i promena ishrane. Pa onda trening snage i kardio. I ništa od toga ne radi kako treba bez regulisanog sna i stresa.",
+          "To ne znači izgladnjivanje, nego ishranu koju možeš da držiš stalno. A šta od treninga, [kardio ili tegovi](/blog/kardio-ili-tegovi-za-mrsavljenje), o tome sam već pisala: za zatezanje tela mora kombinovano.",
+        ],
+      },
+      {
+        id: "donji-stomak",
+        heading: "A šta je sa donjim stomakom?",
+        body: [
+          "Donji stomak je najtvrdoglaviji i tu žene najviše gube strpljenje. Bitno je da znaš i ovo: stomak nije uvek salo. Na njega dosta utiču hormoni, pa je pred menstruaciju, tokom nje i posle nje stomak nekad prosto naduvaniji.",
+          "To znači da izgled stomaka varira iz dana u dan i da jedan pogled u ogledalo nije merilo napretka. Zato kod nas napredak pratimo merenjem, o tome imaš ceo tekst: [Zašto vaga stoji, a obimi padaju](/blog/zasto-vaga-stoji-a-obimi-padaju).",
+        ],
+      },
+      {
+        id: "vezbe-koje-radimo",
+        heading: "Vežbe za stomak koje radimo u studiju",
+        body: [
+          "U studiju se najviše fokusiram na jačanje core mišića, jer je snažan i stabilan core osnova svakog pokreta. Radimo dead bug, plank, side plank, bird dog, hollowman i slične vežbe.",
+          "U zagrevanju uvek bude jedna ili dve vežbe za core, a u toku [treninga](/#treninzi) odradimo još nekoliko vežbi za core ili trbušnjake. Znači, sredina tela se radi na svakom treningu, samo ne satima i ne napamet.",
+          "Zašto baš te vežbe, a ne 100 trbušnjaka na podu? Zbog zdravlja i funkcionalnosti. Jak core nije bitan samo ako želiš vidljive pločice: popravlja držanje tela i ravnotežu, štiti kičmu od opterećenja i pomaže da izbegneš bolove u leđima. Bilo da podižeš nešto teško, trčiš ili ceo dan sediš za stolom, core je osnova svakog pokreta.",
+        ],
+      },
+      {
+        id: "posle-porodjaja-i-posle-30",
+        heading: "Stomak posle porođaja i posle 30. godine",
+        body: [
+          "Kod žena posle trudnoće, i posebno kako godine prolaze, stomak može biti izraženiji i zbog promena u mišićima trupa, držanju, rasporedu masnog tkiva i hormonima, ne samo zbog viška kilograma.",
+          "Zato tu ne jurimo trbušnjake. Cilj je da kroz trening i ishranu smanjimo ukupni procenat masti, ojačamo stomak i celo telo, i da se figura postepeno zategne.",
+        ],
+      },
+      {
+        id: "kad-se-vide-rezultati",
+        heading: "Kad se vide prvi rezultati",
+        body: [
+          "Iskren odgovor: individualno je. Žene sa većim viškom kilograma na početku gube znatno brže od onih koje žele da skinu par milimetara sala sa stomaka. I genetika tu dosta utiče.",
+          "Ali okvirno, posle 2 nedelje redovnog treninga i korigovane ishrane već se vide neki rezultati. Zato merenja radimo jednom mesečno, da napredak vidiš crno na belo, a ne da ga tražiš u ogledalu.",
+        ],
+      },
+      {
+        id: "odakle-da-krenes",
+        heading: "Odakle da kreneš",
+        body: [
+          "Ako ti je cilj stomak, ne treba ti poseban trening za stomak, treba ti sistem: ishrana, trening snage i core na svakom treningu. Uz prvi mesec dobijaš i startni plan ishrane, da onih 70% ne pogađaš sama.",
+          "Prva 3 treninga su besplatna. Javi se u DM na [@vanjaa.fitness](https://instagram.com/vanjaa.fitness), izaberi [termin](/#termini), a ako te još nešto zanima, pogledaj [česta pitanja](/#pitanja).",
         ],
       },
     ],
