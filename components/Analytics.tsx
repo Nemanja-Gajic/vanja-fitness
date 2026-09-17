@@ -9,6 +9,7 @@ import { useEffect } from "react";
 declare global {
   interface Window {
     gtag?: (...args: unknown[]) => void;
+    fbq?: (...args: unknown[]) => void;
   }
 }
 
@@ -44,6 +45,17 @@ export default function Analytics() {
         link_url: href,
         stranica: window.location.pathname,
       });
+
+      // Meta Pixel: svaki CTA klik kao custom event,
+      // klik ka Instagram DM-u i kao standardni "Contact" (za optimizaciju reklama).
+      window.fbq?.("trackCustom", "cta_click", {
+        cta_id: ime,
+        cta_tip: tip,
+        stranica: window.location.pathname,
+      });
+      if (tip === "instagram") {
+        window.fbq?.("track", "Contact", { cta_id: ime });
+      }
     };
 
     document.addEventListener("click", onClick, true);

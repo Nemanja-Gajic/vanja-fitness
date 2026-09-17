@@ -1,12 +1,12 @@
 /** @type {import('next').NextConfig} */
 const csp = [
   "default-src 'self'",
-  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com",
+  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://connect.facebook.net",
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
   "font-src 'self' https://fonts.gstatic.com",
-  "img-src 'self' data: https://www.google-analytics.com https://www.googletagmanager.com",
+  "img-src 'self' data: https://www.google-analytics.com https://www.googletagmanager.com https://www.facebook.com",
   "media-src 'self'",
-  "connect-src 'self' https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com",
+  "connect-src 'self' https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com https://www.facebook.com https://connect.facebook.net",
   "frame-src https://www.google.com",
   "frame-ancestors 'self'",
   "base-uri 'self'",
