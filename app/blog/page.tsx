@@ -37,7 +37,7 @@ export default function BlogPage() {
               ono što svaki dan vidim u studiju.
             </p>
             <p className="mt-4 max-w-xl text-espresso/60">
-              Ja sam Vanja Drljača, trener u Vanja Fitness studiju u Sremskoj
+              Ja sam Vanja Gajić, trener u Vanja Fitness studiju u Sremskoj
               Mitrovici. Iza mene su završena NASM edukacija i godine rada sa
               ženama u malim grupama, od potpunih početnica do onih koje
               treniraju godinama. Na blogu odgovaram na pitanja koja najčešće

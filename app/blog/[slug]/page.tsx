@@ -101,7 +101,7 @@ export default function PostPage({ params }: Props) {
     image: post.image ? `${site.url}${post.image.src}` : `${site.url}/og.jpg`,
     author: {
       "@type": "Person",
-      name: "Vanja Drljača",
+      name: "Vanja Gajić",
       url: site.url,
     },
     publisher: {
@@ -130,7 +130,7 @@ export default function PostPage({ params }: Props) {
 
           <header className="mt-8">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-taupe">
-              {formatDate(post.date)} · Vanja Drljača
+              {formatDate(post.date)} · Vanja Gajić
             </p>
             <h1 className="mt-4 text-3xl leading-tight text-espresso sm:text-4xl">
               {post.title}

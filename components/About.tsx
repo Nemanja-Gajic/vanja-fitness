@@ -12,7 +12,7 @@ export default function About() {
               <img
                 className="absolute inset-0 h-full w-full object-cover"
                 src="/vanja-portret.jpg"
-                alt="Vanja Drljača, personalni trener za žene, u svom studiju Vanja Fitness u Sremskoj Mitrovici"
+                alt="Vanja Gajić, personalni trener za žene, u svom studiju Vanja Fitness u Sremskoj Mitrovici"
                 width={1200}
                 height={1600}
                 loading="lazy"
@@ -30,7 +30,7 @@ export default function About() {
             </span>
           </h2>
           <p className="mt-6 text-espresso/65">
-            Vanja Drljača je personalni trener sa završenom NASM edukacijom
+            Vanja Gajić je personalni trener sa završenom NASM edukacijom
             (International Certified Personal Trainer) i preko četiri godine
             iskustva, sa sopstvenim fitnes studiom za žene u Sremskoj
             Mitrovici. Ovde nije bitno

@@ -74,7 +74,7 @@ const businessSchema = {
   },
   founder: {
     "@type": "Person",
-    name: "Vanja Drljača",
+    name: "Vanja Gajić",
     jobTitle: "Personalni trener",
     hasCredential: {
       "@type": "EducationalOccupationalCredential",
