@@ -457,7 +457,11 @@ function paketLeft(m){ if(!m.paket) return null; const from=m.paketOd||'0000'; c
 function shouldPay(m,mk){ return m.status==='aktivna' && (!m.start || monthKey(m.start)<=mk) && (m.cena||0)>0; }
 function mGroups(m){ if(!m) return []; const a = Array.isArray(m.groups) ? m.groups : (m.group ? [m.group] : []); return a.filter(id=>groups().some(g=>g.id===id)); }
 const inGroup = (m,gid) => mGroups(m).includes(gid);
-function activeGroupsOn(m, date){ const gs=mGroups(m); if(!(m.rotate && gs.length>1)) return gs; const w=Math.round(daysBetween(m.rotAnchor||mondayOf(todayISO()), mondayOf(date))/7); const n=gs.length; return [gs[((w%n)+n)%n]]; }
+// Po danima: plan po nedeljama {ponedeljak: {danUNedelji: idGrupe ili ''}}. Nedelja bez plana nasleđuje poslednji raniji plan.
+function dayPlanFor(m, wk){ const dp=m.dayPlans||{}; if(dp[wk]) return dp[wk]; const k=Object.keys(dp).filter(x=>x<wk).sort().pop(); return k? dp[k] : null; }
+const hasPlan = m => !!m && (m.rotate || m.byDay) && mGroups(m).length>1;
+function activeGroupsOn(m, date){ const gs=mGroups(m); if(m.byDay && gs.length>1){ const pl=dayPlanFor(m, mondayOf(date)); if(!pl) return gs; const g=pl[parse(date).getDay()]; if(g===undefined) return gs; return g && gs.includes(g) ? [g] : []; }
+  if(!(m.rotate && gs.length>1)) return gs; const w=Math.round(daysBetween(m.rotAnchor||mondayOf(todayISO()), mondayOf(date))/7); const n=gs.length; return [gs[((w%n)+n)%n]]; }
 const groupMembers = gid => S.members.filter(m=>inGroup(m,gid) && m.status!=='neaktivna');
 const groupMembersOn = (gid,date) => S.members.filter(m=>m.status!=='neaktivna' && activeGroupsOn(m,date).includes(gid));
 async function syncMemberSessions(m){
@@ -480,7 +484,7 @@ function daysLabel(ds){ const o=[1,2,3,4,5,6,0].filter(d=>(ds||[]).includes(d));
 const GPAL=['#963049','#B8801F','#1F7A70','#2F5FA8','#7A4BB0','#3F8A3A','#C4622D','#C24D8C','#56627A','#7C5A3C'];
 function groupColor(g){ if(!g) return ''; if(g.color) return g.color; const i=groups().findIndex(x=>x.id===g.id); return GPAL[(i<0?0:i)%GPAL.length]; }
 const colorOfId = id => groupColor(groups().find(g=>g.id===id));
-function memberTag(m){ const t=[]; const gs=mGroups(m); if(gs.length) t.push(gs.map(groupName).join(' / ')+(m.rotate&&gs.length>1?' (smene)':'')); if(m.personalni) t.push('Personalni'); return t.join(' · ')||'Bez grupe'; }
+function memberTag(m){ const t=[]; const gs=mGroups(m); if(gs.length) t.push(gs.map(groupName).join(' / ')+(gs.length>1?(m.byDay?' (po danima)':m.rotate?' (smene)':''):'')); if(m.personalni) t.push('Personalni'); return t.join(' · ')||'Bez grupe'; }
 
 /* ---------- render ---------- */
 function render(){
@@ -699,12 +703,15 @@ function vProfil(){
   if(!m) return '<section class="view"><div class="empty">Profil nije pronađen. Javi se Vanji.</div></section>';
   const t=todayISO(), mk=monthKey(t);
   const mine=S.sessions.filter(s=>(s.memberIds||[]).includes(m.id));
-  const past=mine.filter(s=>s.date<=t);
+  const past=mine.filter(s=>s.date<t || (s.date===t && (s.attended||[]).includes(m.id)));
   const came=past.filter(s=>(s.attended||[]).includes(m.id));
   const pct = past.length ? Math.round(came.length/past.length*100) : null;
   const months=[...Array(6)].map((_,i)=>shiftMonth(mk,i-5));
   const perM=months.map(k=>came.filter(s=>s.date.startsWith(k)).length); const mx=Math.max(1,...perM);
-  const next=mine.filter(s=>s.date>t || (s.date===t)).sort((a,b)=>(a.date+(a.time||'')).localeCompare(b.date+(b.time||''))).slice(0,5);
+  const wk=planWeek(), wkEnd=addDays(wk,6);
+  const week=mine.filter(s=>s.date>=wk && s.date<=wkEnd).sort((a,b)=>(a.date+(a.time||'')).localeCompare(b.date+(b.time||'')));
+  const next=mine.filter(s=>s.date>wkEnd).sort((a,b)=>(a.date+(a.time||'')).localeCompare(b.date+(b.time||''))).slice(0,3);
+  const sessRow = s => { const done=s.date<t, ok=(s.attended||[]).includes(m.id); return \`<div class="alert"><span class="dot" style="background:\${s.groupId?colorOfId(s.groupId):'var(--wine)'}"></span><div class="main"><div class="nm">\${esc(DANI[parse(s.date).getDay()])} \${fmtShort(s.date)} u <b class="num">\${esc(s.time||'')}</b></div><div class="sub">\${esc(s.title||'')}\${s.trainerName?' · trener '+esc(s.trainerName):''}</div></div>\${s.date===t?'<span class="pill warn">Danas</span>':done?(ok?'<span class="pill ok">Bila</span>':'<span class="pill mut">Nije bila</span>'):''}</div>\`; };
   const mere=[...(m.mere||[])].sort((a,b)=>a.d.localeCompare(b.d));
   const withKg=mere.filter(x=>x.kg!==null && x.kg!==undefined);
   const fk = n => (Math.round(n*10)/10).toString().replace('.',',');
@@ -723,8 +730,9 @@ function vProfil(){
     <div class="sec-h"><h2>Dolasci po mesecima</h2></div>
     <div class="card"><div class="pbars">\${perM.map((v,i)=>\`<div class="b \${i===5?'cur':''}" style="height:\${Math.round(v/mx*100)}%"><span class="num">\${v||''}</span></div>\`).join('')}</div><div class="bars-x">\${months.map(k=>\`<span>\${MES_K[+k.slice(5)-1]}</span>\`).join('')}</div></div>
     \${m.paket?\`<div class="card" style="padding:12px 14px"><div style="font-weight:500">Personalni paket: ostalo \${Math.max(paketLeft(m),0)} od \${m.paket}</div></div>\`:''}
-    <div class="sec-h"><h2>Sledeći treninzi</h2></div>
-    \${next.length?\`<div class="card list">\${next.map(s=>\`<div class="alert"><span class="dot" style="background:\${s.groupId?colorOfId(s.groupId):'var(--wine)'}"></span><div class="main"><div class="nm">\${esc(fmtDay(s.date))} u \${esc(s.time||'')}</div><div class="sub">\${esc(s.title||'')}\${s.trainerName?' · trener '+esc(s.trainerName):''}</div></div></div>\`).join('')}</div>\`:'<div class="empty">Nema zakazanih treninga.</div>'}
+    <div class="sec-h"><h2>\${wk===mondayOf(t)?'Moji termini ove nedelje':'Moji termini sledeće nedelje'}</h2></div>
+    \${week.length?\`<div class="card list">\${week.map(sessRow).join('')}</div>\`:'<div class="empty">Termini za ovu nedelju još nisu upisani.</div>'}
+    \${next.length?\`<div class="sec-h"><h2 style="font-size:17px">Posle toga</h2></div><div class="card list">\${next.map(sessRow).join('')}</div>\`:''}
     <div class="sec-h"><h2>Kilaža i merenja</h2></div>
     \${kgBox}
     \${mere.length?\`<div class="card list">\${[...mere].reverse().map(x=>\`<div class="alert" style="padding:9px 12px"><div class="main"><div class="nm num">\${fmtShort(x.d)} \${x.d.slice(0,4)}\${x.kg!=null?' · '+fk(x.kg)+' kg':''}</div>\${x.t?\`<div class="sub">\${esc(x.t)}</div>\`:''}</div></div>\`).join('')}</div>\`:'<div class="empty">Još nema merenja.</div>'}
@@ -902,7 +910,12 @@ function memberSheet(id){
     <div class="field"><label for="m-cena">Mesečna članarina (din)</label><input id="m-cena" inputmode="numeric" value="\${m.cena||0}"></div></div>
     <div class="field"><span class="fl">Grupe (može više)</span><div class="gpick" id="m-groups">\${groups().length? groups().map(g=>{ const n=groupMembers(g.id).length, c=capOf(g), mine=inGroup(m,g.id), full=c && n>=c && !mine; return \`<label class="\${full?'dis':''}"><input type="checkbox" value="\${g.id}" \${mine?'checked':''} \${full?'disabled':''}><span class="gdot sm" style="background:\${groupColor(g)}"></span>\${esc(g.name)} <span class="note num">(\${n}\${c?'/'+c:''})\${full?' puna':''}</span></label>\`; }).join('') : '<div class="empty">Još nema grupa. Napravi ih u Grupe.</div>'}</div>
       <div id="m-rotwrap" class="card" style="padding:12px;display:none;flex-direction:column;gap:10px">
-        <div class="seg" id="m-rot"><button type="button" data-k="sve" class="\${m.rotate?'':'on'}">Dolazi u sve grupe</button><button type="button" data-k="smene" class="\${m.rotate?'on':''}">Menja smene</button></div>
+        <div class="seg" id="m-rot"><button type="button" data-k="sve" class="\${m.rotate||m.byDay?'':'on'}">U sve grupe</button><button type="button" data-k="smene" class="\${m.rotate&&!m.byDay?'on':''}">Smene po nedelji</button><button type="button" data-k="dani" class="\${m.byDay?'on':''}">Po danima</button></div>
+        <div id="m-days" style="display:none;flex-direction:column;gap:8px">
+          <div class="weeknav" style="margin:0"><button type="button" class="iconbtn" id="dp-prev" aria-label="Prethodna nedelja"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button><div class="lbl" id="dp-lbl"></div><button type="button" class="iconbtn" id="dp-next" aria-label="Sledeća nedelja"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button></div>
+          <div id="dp-rows" style="display:flex;flex-direction:column;gap:8px"></div>
+          <div class="note" id="dp-note"></div>
+        </div>
         <div id="m-rotcur" style="display:none"><label for="m-rotsel" class="note">\${planWeek()===mondayOf(todayISO())?'Ove nedelje':'Sledeće nedelje (od '+fmtShort(planWeek())+')'} dolazi u:</label><select id="m-rotsel" style="width:100%;border:1px solid var(--line);border-radius:10px;padding:9px;background:var(--surface);margin-top:4px"></select><div class="note" style="margin-top:6px">Sledeće nedelje ide u sledeću grupu, i tako redom. Ovde uvek možeš da zameniš.</div></div>
       </div></div>
     <div class="field"><span class="fl">Status</span><div class="seg" id="m-status">\${[['aktivna','Aktivna'],['proba','Proba'],['neaktivna','Neaktivna']].map(([k,l])=>\`<button type="button" data-k="\${k}" class="\${m.status===k?'on':''}">\${l}</button>\`).join('')}</div></div>
@@ -971,9 +984,28 @@ function memberSheet(id){
     const checkedG=()=>[...gBox.querySelectorAll('input:checked')].map(x=>x.value);
     const curIdx=()=>{ const gs=mGroups(m); if(!(m.rotate && gs.length>1)) return 0; const a=activeGroupsOn(m,planWeek())[0]; return Math.max(0, gs.indexOf(a)); };
     const drawRot=()=>{ const gs=checkedG(); rotWrap.style.display = gs.length>1 ? 'flex' : 'none';
-      const sm=rotSeg.querySelector('.on').dataset.k==='smene'; rotCur.style.display = sm && gs.length>1 ? 'block' : 'none';
+      const k=rotSeg.querySelector('.on').dataset.k, sm=k==='smene'; rotCur.style.display = sm && gs.length>1 ? 'block' : 'none';
+      daysBox.style.display = k==='dani' && gs.length>1 ? 'flex' : 'none'; if(k==='dani' && gs.length>1) drawDays();
       const prev=rotSel.value || (activeGroupsOn(m,planWeek())[0]||'');
       rotSel.innerHTML=gs.map(id=>\`<option value="\${id}" \${id===prev?'selected':''}>\${esc(groupName(id))}</option>\`).join(''); };
+    // plan po danima
+    const dp=JSON.parse(JSON.stringify(m.dayPlans||{})); let dpW=planWeek();
+    const daysBox=root.querySelector('#m-days');
+    const optsFor=(gs,dow)=>gs.map(id=>groups().find(g=>g.id===id)).filter(Boolean).map(g=>({g, ts:schedOf(g).filter(e=>e.d===dow).map(e=>e.t).sort()})).filter(x=>x.ts.length);
+    const planOf=(gs,wk)=>{ const base = dp[wk] || (()=>{ const k=Object.keys(dp).filter(x=>x<wk).sort().pop(); return k?dp[k]:null; })(); const out={};
+      DORD.forEach(d=>{ const o=optsFor(gs,d); if(!o.length) return; out[d] = base && (base[d]==='' || o.some(x=>x.g.id===base[d])) ? base[d] : o[0].g.id; }); return out; };
+    const drawDays=()=>{
+      const gs=checkedG(); const pl=planOf(gs,dpW);
+      const d0=parse(dpW), d1=parse(addDays(dpW,6));
+      root.querySelector('#dp-lbl').textContent = dpW===mondayOf(todayISO()) ? 'Ova nedelja' : dpW===addDays(mondayOf(todayISO()),7) ? 'Sledeća nedelja' : d0.getDate()+'. '+MES_K[d0.getMonth()]+' do '+d1.getDate()+'. '+MES_K[d1.getMonth()];
+      const rows=DORD.filter(d=>optsFor(gs,d).length).map(d=>{ const ds=addDays(dpW,(d+6)%7); const o=optsFor(gs,d);
+        return \`<div style="display:flex;flex-direction:column;gap:4px"><div class="note"><b>\${DANI[d]}</b> \${fmtShort(ds)}</div><div class="seg" data-dow="\${d}">\${o.map(x=>\`<button type="button" data-g="\${x.g.id}" class="\${pl[d]===x.g.id?'on':''}"><span class="gdot sm" style="background:\${groupColor(x.g)}"></span><b class="num">\${esc(x.ts.join(', '))}</b>&nbsp;\${esc(x.g.name.replace(/ grupa$/i,''))}</button>\`).join('')}<button type="button" data-g="" class="\${pl[d]===''?'on':''}">Ne dolazi</button></div></div>\`; });
+      root.querySelector('#dp-rows').innerHTML = rows.length ? rows.join('') : '<div class="note">Izabrane grupe nemaju termine.</div>';
+      root.querySelector('#dp-note').textContent = dp[dpW] ? 'Ove nedelje važi ovaj raspored. Sledeće nedelje ostaje isti dok ga ne promeniš.' : 'Nije posebno podešeno, važi raspored iz prethodne nedelje. Klikni da promeniš.';
+    };
+    root.querySelector('#dp-rows').onclick=e=>{ const b=e.target.closest('button[data-g]'); if(!b) return; const d=+b.closest('[data-dow]').dataset.dow; dp[dpW]={...planOf(checkedG(),dpW), [d]:b.dataset.g}; drawDays(); };
+    root.querySelector('#dp-prev').onclick=()=>{ dpW=addDays(dpW,-7); drawDays(); };
+    root.querySelector('#dp-next').onclick=()=>{ dpW=addDays(dpW,7); drawDays(); };
     gBox.onchange=drawRot;
     rotSeg.onclick=e=>{ const b=e.target.closest('button'); if(!b) return; rotSeg.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b)); drawRot(); };
     drawRot();
@@ -984,7 +1016,13 @@ function memberSheet(id){
       const o={...m, name, phone:root.querySelector('#m-phone').value.trim(), cena:parseInt(String(root.querySelector('#m-cena').value).replace(/\\D/g,''))||0,
         groups:checkedG(), group:checkedG()[0]||'', status:root.querySelector('#m-status .on').dataset.k, start:root.querySelector('#m-start').value,
         paket, paketOd: paket && !m.paketOd ? todayISO() : (m.paketOd||''), personalni:root.querySelector('#m-pers').checked, note:root.querySelector('#m-note').value.trim(), mere};
-      o.rotate = o.groups.length>1 && rotSeg.querySelector('.on').dataset.k==='smene';
+      const rk=rotSeg.querySelector('.on').dataset.k;
+      o.rotate = o.groups.length>1 && rk==='smene';
+      o.byDay = o.groups.length>1 && rk==='dani';
+      if(o.byDay){ if(!Object.keys(dp).length || !dp[planWeek()] && !Object.keys(dp).some(x=>x<planWeek())) dp[planWeek()]=planOf(o.groups,planWeek());
+        const cut=addDays(mondayOf(todayISO()),-56), ks=Object.keys(dp).sort(), keepOld=ks.filter(x=>x<cut).pop();
+        o.dayPlans={}; ks.forEach(x=>{ if(x>=cut || x===keepOld) o.dayPlans[x]=dp[x]; }); }
+      else { delete o.byDay; }
       if(o.rotate){ const idx=Math.max(0,o.groups.indexOf(rotSel.value)); o.rotAnchor=addDays(planWeek(), -7*idx); } else { delete o.rotAnchor; }
       closeSheet(); await put('members',o); await syncMemberSessions(o); toast(isNew?'Članica dodata':'Sačuvano');
     };
@@ -1215,7 +1253,7 @@ function groupSheet(id){
           const target = dayE.length===1 && !S.sessions.some(x=>x.id!==ss.id && x.groupId===g.id && x.date===ss.date && x.time===dayE[0].t) ? dayE[0].t : null;
           if(target && oldE.some(e=>e.t===ss.time)){ newTime=target; } else { await del('sessions',ss.id); continue; }
         }
-        let ids=new Set(ss.memberIds||[]); removed.forEach(x=>ids.delete(x)); added.forEach(x=>{ const mm=memberById(x); if(!mm || !(mm.rotate && mGroups(mm).length>1) || activeGroupsOn(mm, ss.date).includes(g.id)) ids.add(x); });
+        let ids=new Set(ss.memberIds||[]); removed.forEach(x=>ids.delete(x)); added.forEach(x=>{ const mm=memberById(x); if(!mm || !hasPlan(mm) || activeGroupsOn(mm, ss.date).includes(g.id)) ids.add(x); });
         const time = newTime;
         const trainerId = (ss.trainerId||'') === ((orig&&orig.trainerId)||'') ? (ng.trainerId||'') : ss.trainerId;
         await put('sessions',{...ss, title:name, time, trainerId, memberIds:[...ids], attended:(ss.attended||[]).filter(x=>ids.has(x))});
@@ -1321,7 +1359,7 @@ async function fillGroups(fromISO, nDays, part, onlyId, idsOverride, quiet){
       if(e.d!==dow) continue;
       if(part && partOf(e.t)!==part) continue;
       if(S.sessions.some(s=>s.date===ds && s.groupId===g.id && s.time===e.t)) continue;
-      await put('sessions',{id:uid(), date:ds, time:e.t, kind:'grupa', groupId:g.id, trainerId:g.trainerId||'', title:g.name, memberIds: (onlyId && idsOverride) ? idsOverride.filter(id=>{ const mm=memberById(id); return !mm || !(mm.rotate && mGroups(mm).length>1) || activeGroupsOn(mm,ds).includes(g.id); }) : groupMembersOn(g.id, ds).map(m=>m.id), attended:[]});
+      await put('sessions',{id:uid(), date:ds, time:e.t, kind:'grupa', groupId:g.id, trainerId:g.trainerId||'', title:g.name, memberIds: (onlyId && idsOverride) ? idsOverride.filter(id=>{ const mm=memberById(id); return !mm || !hasPlan(mm) || activeGroupsOn(mm,ds).includes(g.id); }) : groupMembersOn(g.id, ds).map(m=>m.id), attended:[]});
       made++;
       }
     }
