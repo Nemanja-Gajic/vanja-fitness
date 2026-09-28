@@ -69,6 +69,7 @@ nav.tabs button{font-size:12px}
 .field .gpick input{width:20px;height:20px;flex:none;padding:0;accent-color:var(--wine);margin-right:2px}
 .field .gpick label{font-size:15px;color:var(--ink);font-weight:400}
 .gpick .note{margin-left:auto}
+a.btn{text-decoration:none;color:var(--ink);display:inline-flex;align-items:center}
 </style>
 
 <script>window.VS_API="/api/studio/data";window.VS_WEB=true;</script>
@@ -299,9 +300,12 @@ function loadLocal(){ try{ return JSON.parse(localStorage.getItem(LKEY))||{}; }c
 const API_URL = window.VS_API || '/api/data';
 const IS_WEB = !!window.VS_WEB;
 const SAVED_LBL = IS_WEB ? 'Sačuvano online' : 'Sačuvano u fajl na računaru';
+let ME={role:'admin', name:'Vanja', id:'admin'};
+const isTrainer = () => ME.role==='trener';
 let fileMode=false, fileHadData=false, pushTimer=null, pushing=false, pushAgain=false;
 const snapshot = () => ({members:S.members,sessions:S.sessions,payments:S.payments,expenses:S.expenses,settings:S.settings,savedAt:S.savedAt||0});
 function saveLocal(){
+  if(isTrainer()) return;
   S.savedAt=Date.now();
   try{ localStorage.setItem(LKEY, JSON.stringify({...snapshot(), serverAt:S.serverAt||0})); }catch(e){}
   if(fileMode){ clearTimeout(pushTimer); pushTimer=setTimeout(pushFile,400); }
@@ -328,6 +332,7 @@ window.addEventListener('pagehide',()=>{ if(fileMode && pushTimer){ clearTimeout
 document.addEventListener('visibilitychange', async ()=>{
   // kad se vratiš na aplikaciju, povuci najnovije (npr. uneto sa telefona)
   if(document.visibilityState!=='visible' || !fileMode || pushTimer || pushing || S.conflict) return;
+  if(isTrainer()){ try{ const r=await fetch(API_URL,{cache:'no-store'}); if(r.status===401){ location.href='/studio/prijava'; return; } const j=await r.json(); if(j&&j.ok&&j.exists){ const f=j.data; S.members=f.members||[]; S.sessions=f.sessions||[]; S.settings=f.settings||S.settings; S.serverAt=f.savedAt||0; if(!document.querySelector('#scrim')) render(); } }catch(e){} return; }
   try{ const r=await fetch(API_URL,{cache:'no-store'}); const j=await r.json();
     if(j && j.ok && j.exists && (j.data.savedAt||0) > (S.serverAt||0)){ const f=j.data;
       S.members=f.members||[]; S.sessions=f.sessions||[]; S.payments=f.payments||[]; S.expenses=f.expenses||[]; S.settings=f.settings||S.settings; S.savedAt=f.savedAt; S.serverAt=f.savedAt;
@@ -339,6 +344,13 @@ async function connectFile(){
   try{ const r=await fetch(API_URL,{cache:'no-store'}); j=await r.json(); }catch(e){ j=null; }
   if(!j || !j.ok){ S.oldServer=true; setSync('Samo u pregledaču','warn'); render(); return; }
   fileMode=true; S.oldServer=false;
+  if(j.me){ ME=j.me; applyRole(); }
+  if(isTrainer()){
+    const f=j.exists?j.data:{};
+    S.members=f.members||[]; S.sessions=f.sessions||[]; S.payments=[]; S.expenses=[]; S.settings=f.settings||S.settings; S.serverAt=f.savedAt||0;
+    setSync('Trener: '+ME.name,'ok'); render(); return;
+  }
+  if(IS_WEB) loadTrainers();
   const f = j.exists ? j.data : null;
   const has = d => !!(d && ((d.members||[]).length || (d.sessions||[]).length || (d.payments||[]).length || (d.expenses||[]).length));
   fileHadData = has(f);
@@ -365,6 +377,7 @@ async function connectFile(){
 const COLS = ['members','sessions','payments'];
 
 async function put(col,obj){
+  if(isTrainer()){ toast('Trener može samo da štiklira dolazak.'); return; }
   if(mode==='db'){
     try{ await DB.collection(col).doc(obj.id).set(obj); }
     catch(e){ toast(e && e.code==='quota_exceeded' ? 'Baza je puna, obriši stare termine.' : 'Nije sačuvano, probaj ponovo.'); }
@@ -465,12 +478,26 @@ function sessionCard(s){
   return \`<div class="card sess" \${gc?\`style="border-left:5px solid \${gc}"\`:''}>
     <div class="sess-h"><div style="display:flex;gap:10px;align-items:baseline;min-width:0"><span class="t num">\${esc(s.time||'')}</span><span class="n">\${esc(s.title)}</span></div>
     <span class="c num">\${att.filter(a=>ids.includes(a)).length}/\${ids.length} došlo</span></div>
+    \${!isTrainer() && s.trainerId && trainerName(s.trainerId)?\`<div class="note" style="margin-top:-4px">Trener: \${esc(trainerName(s.trainerId))}</div>\`:''}
     <div class="chips">\${names.map(m=>\`<button class="chip \${att.includes(m.id)?'on':''}" data-act="att" data-s="\${s.id}" data-m="\${m.id}">\${esc(m.name)}</button>\`).join('')}
-    <button class="chip add" data-act="open-sess" data-s="\${s.id}">Izmeni</button></div>
+    \${isTrainer()?'':\`<button class="chip add" data-act="open-sess" data-s="\${s.id}">Izmeni</button>\`}</div>
   </div>\`;
 }
 
+function vDanasTrener(){
+  const t=todayISO();
+  const todays=S.sessions.filter(s=>s.date===t).sort((a,b)=>(a.time||'').localeCompare(b.time||''));
+  const next=S.sessions.filter(s=>s.date>t).sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time)).slice(0,5);
+  return \`<section class="view">
+    <div class="sec-h"><h2>Zdravo, \${esc((ME.name||'').split(' ')[0])}</h2></div>
+    <div class="sec-h"><h2 style="font-size:17px">Današnji termini</h2></div>
+    \${todays.length? todays.map(sessionCard).join('') : '<div class="empty">Danas nemaš termine.</div>'}
+    \${todays.length?'<p class="note" style="margin:-6px 0 0">Klikni na ime kad članica dođe.</p>':''}
+    \${next.length?\`<div class="sec-h"><h2 style="font-size:17px">Sledeći termini</h2></div><div class="card list">\${next.map(s=>\`<div class="alert"><div class="main"><div class="nm">\${esc(s.title)}</div><div class="sub">\${fmtDay(s.date)} u \${esc(s.time||'')}</div></div><span class="pill mut num">\${(s.memberIds||[]).length}</span></div>\`).join('')}</div>\`:''}
+  </section>\`;
+}
 function vDanas(){
+  if(isTrainer()) return vDanasTrener();
   const t=todayISO(), mk=monthKey(t);
   const todays=S.sessions.filter(s=>s.date===t).sort((a,b)=>(a.time||'').localeCompare(b.time||''));
   const act=S.members.filter(m=>m.status==='aktivna');
@@ -505,6 +532,60 @@ function vDanas(){
     \${alerts.length? \`<div class="card list">\${alerts.join('')}</div>\` : '<div class="empty">Sve je u redu. Sve su platile i redovno dolaze.</div>'}
   </section>\`;
 }
+function onlineBackupsHtml(){
+  if(S.backups===undefined){ S.backups=null; loadBackups(); }
+  const b=S.backups;
+  let list;
+  if(b===null) list='<div class="note">Učitavam…</div>';
+  else if(b.error) list='<div class="note">Online kopije još nisu povezane.</div>';
+  else if(!b.length) list='<div class="note">Još nema online kopija. Prva se pravi noćas, ili klikni „Napravi kopiju sada“.</div>';
+  else list=\`<div class="card list">\${b.slice(0,14).map(x=>{ const d=(x.pathname.match(/(\\d{4}-\\d{2}-\\d{2})/)||[])[1]||''; return \`<div class="alert" style="padding:9px 12px"><div class="main"><div class="nm">\${d?fmtShort(d)+' '+d.slice(0,4):esc(x.pathname)}</div><div class="sub num">\${Math.max(1,Math.round((x.size||0)/1024))} KB</div></div><a class="btn sm" href="/api/studio/backups?p=\${encodeURIComponent(x.pathname)}">Preuzmi</a></div>\`; }).join('')}</div>\`;
+  return \`<div style="border-top:1px solid var(--line);padding-top:12px;display:flex;flex-direction:column;gap:10px"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><div><div style="font-weight:500">Online kopije</div><div class="note">Svaku noć oko 4h sama se pravi kopija. Čuva se 90 dana.</div></div><button class="btn sm" data-act="backup-now">Napravi kopiju sada</button></div>\${list}<div class="note">Da vratiš stanje: preuzmi kopiju, pa klikni „Učitaj kopiju“.</div></div>\`;
+}
+async function loadBackups(){
+  try{ const r=await fetch('/api/studio/backups',{cache:'no-store'}); const j=await r.json(); S.backups = j.ok ? j.backups : {error:true}; }catch(e){ S.backups={error:true}; }
+  if(S.view==='pregled' && !document.querySelector('#scrim')) render();
+}
+function applyRole(){
+  const tr=isTrainer();
+  document.querySelectorAll('#tabs button').forEach(b=>{ b.hidden = tr && !['danas','termini'].includes(b.dataset.v); });
+  document.getElementById('tabs').style.gridTemplateColumns = tr ? 'repeat(2,1fr)' : '';
+  if(tr && !['danas','termini'].includes(S.view)) S.view='danas';
+  const lo=document.getElementById('logout'); if(lo && IS_WEB) lo.hidden=false;
+}
+S.trainers=[];
+async function loadTrainers(){
+  try{ const r=await fetch('/api/studio/users',{cache:'no-store'}); const j=await r.json(); if(j.ok){ S.trainers=j.trainers; if(!document.querySelector('#scrim')) render(); } }catch(e){}
+}
+const trainerName = id => { const t=(S.trainers||[]).find(x=>x.id===id); return t ? t.name : ''; };
+function trainerSelect(idAttr, cur){
+  if(!IS_WEB || isTrainer()) return '';
+  const opts=[['','Vanja (bez trenera)'], ...(S.trainers||[]).filter(t=>t.active||t.id===cur).map(t=>[t.id,t.name+(t.active?'':' (neaktivan)')])];
+  return \`<div class="field"><label for="\${idAttr}">Trener</label><select id="\${idAttr}">\${opts.map(([v,l])=>\`<option value="\${v}" \${v===(cur||'')?'selected':''}>\${esc(l)}</option>\`).join('')}</select>\${(S.trainers||[]).length?'':'<div class="note">Trenere dodaješ u Grupe, na dnu.</div>'}</div>\`;
+}
+async function userAction(body){
+  try{ const r=await fetch('/api/studio/users',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}); const j=await r.json(); if(!j.ok){ toast(j.error||'Nije uspelo.'); return false; } await loadTrainers(); return true; }catch(e){ toast('Nije uspelo, proveri internet.'); return false; }
+}
+function trainerSheet(id){
+  const t = id ? S.trainers.find(x=>x.id===id) : null;
+  openSheet(\`\${sheetHead(t?t.name:'Nov trener')}
+    \${t?\`<div class="note">Korisničko ime: <b>\${esc(t.username)}</b>. \${t.active?'Nalog je aktivan.':'Nalog je isključen, ne može da se prijavi.'}</div>\`:''}
+    \${t?'':\`<div class="field"><label for="tr-name">Ime i prezime</label><input id="tr-name" autocomplete="off"></div>
+    <div class="field"><label for="tr-user">Korisničko ime (za prijavu)</label><input id="tr-user" autocomplete="off" autocapitalize="none" placeholder="npr. marko"></div>\`}
+    <div class="field"><label for="tr-pass">\${t?'Nova lozinka':'Lozinka'} (bar 8 znakova)</label><input id="tr-pass" type="text" autocomplete="new-password"></div>
+    <div class="confirm-slot"></div>
+    <div class="row-btns" style="justify-content:space-between">\${t?\`<div class="row-btns"><button class="btn danger" id="tr-del">Obriši</button><button class="btn" id="tr-act">\${t.active?'Isključi nalog':'Uključi nalog'}</button></div>\`:'<span></span>'}<button class="btn pri" id="tr-save">\${t?'Promeni lozinku':'Napravi trenera'}</button></div>
+    <p class="note" style="margin:0">Trener posle prijave vidi samo termine koje si mu dodelila i štiklira ko je došao. Ne vidi uplate, troškove ni beleške.</p>\`, root=>{
+    wireClose(root);
+    root.querySelector('#tr-save').onclick=async()=>{
+      const pass=root.querySelector('#tr-pass').value;
+      const ok = t ? await userAction({action:'password', id:t.id, password:pass}) : await userAction({action:'create', name:root.querySelector('#tr-name').value, username:root.querySelector('#tr-user').value, password:pass});
+      if(ok){ closeSheet(); render(); toast(t?'Lozinka promenjena':'Trener napravljen'); }
+    };
+    const a=root.querySelector('#tr-act'); if(a) a.onclick=async()=>{ if(await userAction({action:'active', id:t.id, active:!t.active})){ closeSheet(); render(); toast(t.active?'Nalog isključen':'Nalog uključen'); } };
+    const d=root.querySelector('#tr-del'); if(d) d.onclick=()=>confirmBox(root,'Obrisati trenera '+t.name+'? Termini ostaju, samo bez trenera.',async()=>{ if(await userAction({action:'delete', id:t.id})){ closeSheet(); render(); for(const s of S.sessions.filter(s=>s.trainerId===t.id && s.date>=todayISO())) await put('sessions',{...s, trainerId:''}); toast('Trener obrisan'); } });
+  });
+}
 function bannerLocal(){ if(S.conflict) return '<div class="banner" style="background:var(--bad-bg);color:var(--bad)">Podaci su u međuvremenu promenjeni na drugom uređaju, pa ova izmena nije sačuvana. <button class="btn sm" onclick="location.reload()">Učitaj najnovije</button></div>'; if(IS_WEB && S.oldServer) return '<div class="banner">Baza još nije povezana: podaci se za sad čuvaju samo u ovom pregledaču, na ovom uređaju.</div>'; return S.oldServer ? '<div class="banner">Podaci su sačuvani samo u pregledaču. Da bi se čuvali i u fajl: zatvori prozor „Vanja Studio server“ na traci dole, pa ponovo pokreni „Pokreni Vanja Studio“.</div>' : ''; }
 
 const PARTS={jutro:{label:'Jutarnji termini'}, vece:{label:'Večernji termini'}};
@@ -524,14 +605,14 @@ function vTermini(){
   let head='<div class="tg-c tg-h"></div>'+days.map(ds=>{ const d=parse(ds); return \`<div class="tg-c tg-h \${ds===t?'today':''}"><span>\${DANI_K[d.getDay()]}</span><b class="num">\${d.getDate()}.</b></div>\`; }).join('');
   let body='';
   for(const h of hrs){
-    body+=\`<button class="tg-c tg-hr num" data-act="slots" title="Uredi satnice">\${h}</button>\`;
+    body+=\`\${isTrainer()?\`<div class="tg-c tg-hr num">\${h}</div>\`:\`<button class="tg-c tg-hr num" data-act="slots" title="Uredi satnice">\${h}</button>\`}\`;
     for(const ds of days){
       const list=S.sessions.filter(s=>s.date===ds && inPart(s) && rowOf(s)===h).sort((a,b)=>(a.time||'').localeCompare(b.time||''));
       body+=\`<div class="tg-c tg-cell \${ds===t?'today':''}">\${list.map(s=>{ const ids=s.memberIds||[]; const att=(s.attended||[]).filter(a=>ids.includes(a)).length;
         const nm = s.kind==='personalni' && ids.length===1 ? (memberById(ids[0])||{name:''}).name.split(' ')[0] : s.title.replace(/ grupa$/i,'');
         const gc = s.groupId ? colorOfId(s.groupId) : '';
-        return \`<button class="tg-s \${s.kind==='personalni'?'p':''}" \${gc?\`style="--gc:\${gc}"\`:''} data-act="open-sess" data-s="\${s.id}"><span class="tm num">\${esc(s.time||'')}</span><span class="nm">\${esc(nm)}</span><span class="ct num">\${att}/\${ids.length}</span></button>\`; }).join('')}
-        <button class="tg-add" data-act="new-sess" data-d="\${ds}" data-t="\${h}" aria-label="Dodaj termin \${DANI_K[parse(ds).getDay()]} \${h}">+</button></div>\`;
+        return \`<button class="tg-s \${s.kind==='personalni'?'p':''}" \${gc?\`style="--gc:\${gc}"\`:''} data-act="open-sess" data-s="\${s.id}"><span class="tm num">\${esc(s.time||'')}</span><span class="nm">\${esc(nm)}</span><span class="ct num">\${att}/\${ids.length}\${!isTrainer() && s.trainerId && trainerName(s.trainerId)?' · '+esc(trainerName(s.trainerId).split(' ')[0]):''}</span></button>\`; }).join('')}
+        \${isTrainer()?'':\`<button class="tg-add" data-act="new-sess" data-d="\${ds}" data-t="\${h}" aria-label="Dodaj termin \${DANI_K[parse(ds).getDay()]} \${h}">+</button>\`}</div>\`;
     }
   }
   const partGroups=groups().filter(g=>schedOf(g).some(e=>partOf(e.t)===S.part));
@@ -539,10 +620,10 @@ function vTermini(){
   return \`<section class="view">
     <div class="seg big" role="tablist">\${Object.entries(PARTS).map(([k,v])=>\`<button role="tab" data-act="part" data-p="\${k}" class="\${S.part===k?'on':''}">\${v.label.replace(' termini','')}</button>\`).join('')}</div>
     <div class="weeknav"><button class="iconbtn" data-act="wk" data-n="-1" aria-label="Prethodna nedelja"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button><div class="lbl">\${lbl}</div><button class="iconbtn" data-act="wk" data-n="1" aria-label="Sledeća nedelja"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button></div>
-    <div class="sec-h"><h2>\${P.label} <span class="note num">(\${cnt})</span></h2><div class="row-btns">\${partGroups.length?\`<button class="btn pri sm" data-act="fill-part">Popuni \${S.part==='jutro'?'jutarnje':'večernje'} grupe</button>\`:''}\${w!==planWeek()?'<button class="btn ghost sm" data-act="wk0">Nazad na ovu</button>':''}</div></div>
+    <div class="sec-h"><h2>\${P.label} <span class="note num">(\${cnt})</span></h2><div class="row-btns">\${partGroups.length && !isTrainer()?\`<button class="btn pri sm" data-act="fill-part">Popuni \${S.part==='jutro'?'jutarnje':'večernje'} grupe</button>\`:''}\${w!==planWeek()?'<button class="btn ghost sm" data-act="wk0">Nazad na ovu</button>':''}</div></div>
     \${hrs.length? \`<div class="tg-wrap"><div class="tg">\${head}\${body}</div></div>\` : '<div class="card emptybox"><p>Nema satnica. Dodaj prvu.</p></div>'}
-    <button class="btn" data-act="slots" style="align-self:flex-start">Uredi satnice</button>
-    <p class="note" style="margin:0">Klikni na + u polju da dodaš termin za taj dan i sat. Klikni na termin da ga izmeniš ili obrišeš.</p>
+    \${isTrainer()?'<p class="note" style="margin:0">Ovde su samo tvoji termini. Klikni na termin da štikliraš ko je došao.</p>':\`<button class="btn" data-act="slots" style="align-self:flex-start">Uredi satnice</button>
+    <p class="note" style="margin:0">Klikni na + u polju da dodaš termin za taj dan i sat. Klikni na termin da ga izmeniš ili obrišeš.</p>\`}
   </section>\`;
 }
 function countFor(k){
@@ -638,7 +719,8 @@ function vPregled(){
     \${tpls.length?\`<div class="sec-h"><h2 style="font-size:17px">Stalni troškovi</h2></div><div class="card list">\${tpls.map(t=>\`<div class="alert"><div class="main"><div class="nm">\${esc(t.cat)}</div>\${t.note?\`<div class="sub">\${esc(t.note)}</div>\`:''}</div><span class="num">\${money(t.amount)}</span><button class="btn ghost sm" data-act="rm-tpl" data-t="\${t.id}" style="color:var(--bad)">Ukloni</button></div>\`).join('')}</div>\`:''}
     <div class="sec-h"><h2>Rezervna kopija</h2></div>
     <div class="card" style="padding:14px;display:flex;flex-direction:column;gap:10px"><p class="note" style="margin:0">\${fileMode&&IS_WEB?'Sve se automatski čuva online, pa isto vidiš na telefonu i na računaru. Svaki dan se sama pravi i dnevna kopija u bazi (čuva se 60 dana). Dugme ispod pravi dodatnu kopiju u fajl.':fileMode?'Sve se automatski čuva u fajl: Documents, Vanja Studio, podaci. Svaki dan se sama pravi i dnevna kopija u podaci, rezervne-kopije. Dugme ispod pravi dodatnu kopiju, npr. za USB.':'Podaci su trenutno samo u pregledaču. Jednom nedeljno sačuvaj kopiju.'}</p>
-    <div class="row-btns"><button class="btn pri" data-act="backup">Sačuvaj kopiju</button><button class="btn" data-act="restore">Učitaj kopiju</button></div></div>
+    <div class="row-btns"><button class="btn pri" data-act="backup">Sačuvaj kopiju</button><button class="btn" data-act="restore">Učitaj kopiju</button></div>
+    \${IS_WEB?onlineBackupsHtml():''}</div>
   </section>\`;
 }
 
@@ -756,6 +838,7 @@ function sessionSheet(id, date, time){
     <div class="field"><span class="fl">Vrsta</span><div class="seg" id="s-kind">\${kinds.map(([k,l])=>\`<button type="button" data-k="\${k}" class="\${curKind===k?'on':''}">\${esc(l)}</button>\`).join('')}</div></div>
     <div class="field" id="s-gwrap" \${curKind==='grupa'?'':'hidden'}><label for="s-group">Koja grupa</label><select id="s-group"><option value="">Izaberi grupu</option>\${groups().map(g=>\`<option value="\${g.id}" \${s.groupId===g.id?'selected':''}>\${esc(g.name)} (\${groupMembers(g.id).length}\${capOf(g)?'/'+capOf(g):''})</option>\`).join('')}</select></div>
     <div class="grid2"><div class="field"><label for="s-date">Datum</label><input id="s-date" type="date" value="\${s.date}"></div><div class="field"><label for="s-time">Vreme</label><input id="s-time" type="time" value="\${esc(s.time)}"></div></div>
+    \${trainerSelect('s-trainer', s.trainerId || (isNew ? (groups().find(g=>g.id===s.groupId)||{}).trainerId : ''))}
     <div class="field"><label for="s-title">Naziv</label><input id="s-title" value="\${esc(s.title)}" placeholder="npr. Personalni sa Anom"></div>
     <div class="field"><span class="fl" id="s-cnt"></span><input class="search" id="s-q" placeholder="Traži članicu" autocomplete="off"><div class="pick" id="s-pick"></div></div>
     \${isNew?\`<div class="field"><label for="s-rep">Ponovi</label><select id="s-rep"><option value="1">Samo ovaj put</option><option value="4">Svake nedelje, 4 nedelje</option><option value="8">Svake nedelje, 8 nedelja</option><option value="12">Svake nedelje, 12 nedelja</option></select></div>\`:''}
@@ -787,7 +870,8 @@ function sessionSheet(id, date, time){
     root.querySelector('#s-save').onclick=async()=>{
       const k=seg.querySelector('.on').dataset.k;
       if(k==='grupa' && !gsel.value && groups().length){ toast('Izaberi grupu.'); return; }
-      const base={...s, date:root.querySelector('#s-date').value||s.date, time:root.querySelector('#s-time').value, kind:k==='personalni'?'personalni':'grupa', groupId:k==='grupa'?gsel.value:'', memberIds:[...sel], attended:[...att].filter(a=>sel.has(a))};
+      const trSel=root.querySelector('#s-trainer');
+      const base={...s, trainerId: trSel ? trSel.value : (s.trainerId||''), date:root.querySelector('#s-date').value||s.date, time:root.querySelector('#s-time').value, kind:k==='personalni'?'personalni':'grupa', groupId:k==='grupa'?gsel.value:'', memberIds:[...sel], attended:[...att].filter(a=>sel.has(a))};
       let title=root.querySelector('#s-title').value.trim();
       if(base.kind==='personalni' && (title==='Personalni'||!title) && sel.size===1) title='Personalni · '+memberById([...sel][0]).name.split(' ')[0];
       base.title=title||(base.kind==='personalni'?'Personalni':'Trening');
@@ -798,6 +882,26 @@ function sessionSheet(id, date, time){
     };
     const db=root.querySelector('#s-del'); if(db) db.onclick=()=>confirmBox(root,'Obrisati ovaj termin?',async()=>{ closeSheet(); await del('sessions',s.id); toast('Termin obrisan'); });
   });
+}
+function attendanceSheet(id){
+  const s=S.sessions.find(x=>x.id===id); if(!s) return;
+  openSheet(\`\${sheetHead(s.title)}<div class="note">\${fmtDay(s.date)} u \${esc(s.time||'')}</div><div id="att-box"></div>\`, root=>{
+    wireClose(root);
+    const draw=()=>{ const cur=S.sessions.find(x=>x.id===id)||s; const att=cur.attended||[]; const ms=(cur.memberIds||[]).map(memberById).filter(Boolean).sort((a,b)=>a.name.localeCompare(b.name,'sr'));
+      root.querySelector('#att-box').innerHTML=\`<div class="chips">\${ms.map(m=>\`<button class="chip \${att.includes(m.id)?'on':''}" data-m="\${m.id}">\${esc(m.name)}</button>\`).join('')}</div><div class="note" style="margin-top:10px">Došlo \${att.filter(x=>(cur.memberIds||[]).includes(x)).length} od \${(cur.memberIds||[]).length}.</div>\`; };
+    draw();
+    root.querySelector('#att-box').onclick=async e=>{ const c=e.target.closest('[data-m]'); if(!c) return; c.classList.toggle('on'); await toggleAttendance(id, c.dataset.m); draw(); };
+  });
+}
+async function toggleAttendance(sid, mid){
+  const s=S.sessions.find(x=>x.id===sid); if(!s) return;
+  const present=!(s.attended||[]).includes(mid);
+  if(!isTrainer() || !IS_WEB){ const att=new Set(s.attended||[]); present?att.add(mid):att.delete(mid); await put('sessions',{...s, attended:[...att]}); return; }
+  const i=S.sessions.indexOf(s); const opt={...s, attended: present ? [...(s.attended||[]), mid] : (s.attended||[]).filter(x=>x!==mid)}; S.sessions[i]=opt;
+  try{ const r=await fetch('/api/studio/attendance',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionId:sid, memberId:mid, present})}); const j=await r.json();
+    if(!j.ok) throw 0; S.sessions[i]={...opt, attended:j.attended}; S.serverAt=j.savedAt; }
+  catch(e){ S.sessions[i]=s; toast('Nije sačuvano, proveri internet.'); }
+  if(!document.querySelector('#scrim')) render();
 }
 function memberSessionCopy(id){ const s=S.sessions.find(x=>x.id===id); return {...s, memberIds:[...(s.memberIds||[])], attended:[...(s.attended||[])]}; }
 
@@ -835,7 +939,7 @@ function vGrupe(){
       const ms=sorted(groupMembers(g.id)); const cap=capOf(g);
       const full = cap && ms.length>=cap;
       const pill = cap ? \`<span class="pill \${ms.length>cap?'bad':full?'warn':'ok'} num">\${ms.length}/\${cap} \${full?'puna':'žena'}</span>\` : \`<span class="pill mut num">\${ms.length} žena</span>\`;
-      const when = schedLabel(g) || 'Nije stavljena u termine';
+      const when = (schedLabel(g) || 'Nije stavljena u termine') + (g.trainerId && trainerName(g.trainerId) ? ' · Trener: '+trainerName(g.trainerId) : '');
       const gc=groupColor(g);
       return \`<div class="card grp" style="border-top:5px solid \${gc}">
         <button class="grp-h" data-act="open-grp" data-g="\${g.id}"><div class="main"><div class="grp-n"><span class="gdot" style="background:\${gc}"></span>\${esc(g.name)}</div><div class="sub">\${esc(when)}\${cap&&!full?\` · ima mesta još \${cap-ms.length}\`:''}</div></div>\${pill}</button>
@@ -844,6 +948,8 @@ function vGrupe(){
         <div class="row-btns"><button class="btn sm" data-act="open-grp" data-g="\${g.id}">Uredi grupu</button>\${schedOf(g).length?\`<button class="btn sm ghost" data-act="fill-grp" data-g="\${g.id}">Napravi termine ove nedelje</button>\`:''}</div>
       </div>\`; }).join('') : \`<div class="card emptybox"><p>Još nema grupa. Napravi prvu, na primer „Pon Sre 18h“ ili „Početnice“.</p><button class="btn pri" data-act="new-grp">+ Nova grupa</button></div>\`}
     \${noGroup?\`<p class="note" style="margin:0">\${noGroup} \${noGroup===1?'članica nije':'članica nisu'} ni u jednoj grupi.</p>\`:''}
+    \${IS_WEB?\`<div class="sec-h"><h2>Treneri <span class="note num">(\${(S.trainers||[]).length})</span></h2><button class="btn ghost" data-act="new-trainer">+ Nov trener</button></div>
+    \${(S.trainers||[]).length?\`<div class="card list">\${S.trainers.map(t=>{ const n=S.sessions.filter(s=>s.trainerId===t.id && s.date>=todayISO()).length; return \`<button class="item" data-act="open-trainer" data-t="\${t.id}"><span class="av">\${esc(initials(t.name))}</span><div class="main"><div class="nm">\${esc(t.name)}</div><div class="sub">@\${esc(t.username)} · \${n} \${n===1?'budući termin':'budućih termina'}</div></div>\${t.active?'<span class="pill ok">Aktivan</span>':'<span class="pill mut">Isključen</span>'}</button>\`; }).join('')}</div>\`:'<div class="empty">Još nema trenera. Napravi nalog, pa mu u grupi ili terminu izaberi trenera.</div>'}\`:''}
     <button class="btn ghost" data-act="settings" style="align-self:flex-start">Podešavanja (probe, upozorenja)</button>
   </section>\`;
 }
@@ -859,6 +965,7 @@ function groupSheet(id){
   let gcol = orig ? groupColor(orig) : GPAL[groups().length % GPAL.length];
   const times=allSlotTimes();
   openSheet(\`\${sheetHead(isNew?'Nova grupa':'Uredi grupu')}
+    \${trainerSelect('g-trainer', g.trainerId)}
     <div class="field"><label for="g-name">Naziv grupe</label><input id="g-name" value="\${esc(g.name)}" placeholder="npr. Početnice, Pon Sre 18h, Mame" autocomplete="off"></div>
     <div class="field"><span class="fl">Boja grupe</span><div class="swatches" id="g-col">\${GPAL.map(c=>\`<button type="button" class="sw \${c===gcol?'on':''}" data-c="\${c}" style="background:\${c}" aria-label="Boja \${c}"></button>\`).join('')}<label class="sw custom \${GPAL.includes(gcol)?'':'on'}" title="Svoja boja" style="background:\${GPAL.includes(gcol)?'var(--surface)':gcol}"><input type="color" id="g-colc" value="\${gcol}" aria-label="Izaberi svoju boju"><span>+</span></label></div></div>
     <div class="grid2"><div class="field"><label for="g-cap">Najviše žena</label><input id="g-cap" inputmode="numeric" value="\${capOf(g)||''}" placeholder="bez ograničenja"></div>
@@ -913,7 +1020,8 @@ function groupSheet(id){
       const name=root.querySelector('#g-name').value.trim(); if(!name){ root.querySelector('#g-name').focus(); toast('Upiši naziv grupe.'); return; }
       if(groups().some(x=>x.id!==g.id && x.name.toLowerCase()===name.toLowerCase())){ toast('Grupa sa tim imenom već postoji.'); return; }
       const pend=[...root.querySelectorAll('#g-days input:checked')].length; if(pend){ toast('Štiklirala si dane, klikni „+ Dodaj“ pre čuvanja.'); return; }
-      const ng=withSched({...g, name, cap:cap(), color:gcol}, sched);
+      const gtr=root.querySelector('#g-trainer');
+      const ng=withSched({...g, name, cap:cap(), color:gcol, trainerId: gtr ? gtr.value : (g.trainerId||'')}, sched);
       if(ng.cap && sel.size>ng.cap){ toast('U grupi je '+sel.size+', a najviše je '+ng.cap+'.'); return; }
       closeSheet();
       const st=JSON.parse(JSON.stringify(settings())); st.groups=st.groups||[];
@@ -936,7 +1044,8 @@ function groupSheet(id){
         }
         let ids=new Set(ss.memberIds||[]); removed.forEach(x=>ids.delete(x)); added.forEach(x=>{ const mm=memberById(x); if(!mm || !(mm.rotate && mGroups(mm).length>1) || activeGroupsOn(mm, ss.date).includes(g.id)) ids.add(x); });
         const time = newTime;
-        await put('sessions',{...ss, title:name, time, memberIds:[...ids], attended:(ss.attended||[]).filter(x=>ids.has(x))});
+        const trainerId = (ss.trainerId||'') === ((orig&&orig.trainerId)||'') ? (ng.trainerId||'') : ss.trainerId;
+        await put('sessions',{...ss, title:name, time, trainerId, memberIds:[...ids], attended:(ss.attended||[]).filter(x=>ids.has(x))});
       }
       let made=0;
       if(ng.schedule.length){ const from = t>planWeek()? t : planWeek(); made = await fillGroups(from, daysBetween(from, addDays(planWeek(),6))+1, null, g.id, [...sel], true); }
@@ -1039,7 +1148,7 @@ async function fillGroups(fromISO, nDays, part, onlyId, idsOverride, quiet){
       if(e.d!==dow) continue;
       if(part && partOf(e.t)!==part) continue;
       if(S.sessions.some(s=>s.date===ds && s.groupId===g.id && s.time===e.t)) continue;
-      await put('sessions',{id:uid(), date:ds, time:e.t, kind:'grupa', groupId:g.id, title:g.name, memberIds: (onlyId && idsOverride) ? idsOverride.filter(id=>{ const mm=memberById(id); return !mm || !(mm.rotate && mGroups(mm).length>1) || activeGroupsOn(mm,ds).includes(g.id); }) : groupMembersOn(g.id, ds).map(m=>m.id), attended:[]});
+      await put('sessions',{id:uid(), date:ds, time:e.t, kind:'grupa', groupId:g.id, trainerId:g.trainerId||'', title:g.name, memberIds: (onlyId && idsOverride) ? idsOverride.filter(id=>{ const mm=memberById(id); return !mm || !(mm.rotate && mGroups(mm).length>1) || activeGroupsOn(mm,ds).includes(g.id); }) : groupMembersOn(g.id, ds).map(m=>m.id), attended:[]});
       made++;
       }
     }
@@ -1056,11 +1165,10 @@ document.addEventListener('click', async e=>{
   if(a==='att'){
     const key=b.dataset.s; if(busy.has(key)) return; busy.add(key);
     const s=S.sessions.find(x=>x.id===key); if(!s){ busy.delete(key); return; }
-    const att=new Set(s.attended||[]); att.has(b.dataset.m)?att.delete(b.dataset.m):att.add(b.dataset.m);
     b.classList.toggle('on');
-    await put('sessions',{...s, attended:[...att]}); busy.delete(key); return;
+    await toggleAttendance(key, b.dataset.m); busy.delete(key); return;
   }
-  if(a==='open-sess') return sessionSheet(b.dataset.s);
+  if(a==='open-sess') return isTrainer() ? attendanceSheet(b.dataset.s) : sessionSheet(b.dataset.s);
   if(a==='new-sess') return sessionSheet(null,b.dataset.d,b.dataset.t);
   if(a==='part'){ S.part=b.dataset.p; render(); return; }
   if(a==='slots') return slotsSheet(S.part);
@@ -1069,6 +1177,8 @@ document.addEventListener('click', async e=>{
   if(a==='new-mem') return memberSheet(null);
   if(a==='groups'){ S.view='grupe'; render(); window.scrollTo(0,0); return; }
   if(a==='open-grp') return groupSheet(b.dataset.g);
+  if(a==='new-trainer') return trainerSheet(null);
+  if(a==='open-trainer') return trainerSheet(b.dataset.t);
   if(a==='new-grp') return groupSheet(null);
   if(a==='settings') return settingsSheet();
   if(a==='fill-grp') return fillGroups(todayISO() > planWeek() ? todayISO() : planWeek(), daysBetween(todayISO() > planWeek() ? todayISO() : planWeek(), addDays(planWeek(),6))+1, null, b.dataset.g);
@@ -1087,6 +1197,7 @@ document.addEventListener('click', async e=>{
   if(a==='convert'){ const m=memberById(b.dataset.m); await put('members',{...m, status:'aktivna', start:todayISO()}); toast(m.name+' je upisana'); return; }
   if(a==='quickpay'){ const m=memberById(b.dataset.m); await put('payments',{id:uid(), memberId:m.id, amount:+m.cena||0, month:S.month, date:todayISO(), kind:'clanarina', note:''}); toast(m.name+': plaćeno'); return; }
   if(a==='unpay'){ await del('payments',b.dataset.p); toast('Uplata poništena'); return; }
+  if(a==='backup-now'){ b.disabled=true; b.textContent='Pravim…'; try{ const r=await fetch('/api/studio/backups',{method:'POST'}); const j=await r.json(); toast(j.ok?'Online kopija napravljena':'Kopija nije uspela'); }catch(e){ toast('Kopija nije uspela'); } S.backups=undefined; render(); return; }
   if(a==='backup'){
     const blob=new Blob([JSON.stringify({members:S.members,sessions:S.sessions,payments:S.payments,expenses:S.expenses,settings:S.settings},null,1)],{type:'application/json'});
     const u=URL.createObjectURL(blob); const l=document.createElement('a'); l.href=u; l.download='vanja-studio-kopija-'+todayISO()+'.json'; document.body.appendChild(l); l.click(); l.remove(); setTimeout(()=>URL.revokeObjectURL(u),2000); toast('Kopija sačuvana u Preuzimanja'); return;
