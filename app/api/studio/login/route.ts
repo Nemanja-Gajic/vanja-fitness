@@ -18,7 +18,9 @@ export async function POST(req: Request) {
   } else if (secretOk && username && dbReady()) {
     try {
       const t = (await getTrainers()).find((x) => x.username === username && x.active);
-      if (t && (await verifyPassword(lozinka, t.salt, t.hash))) session = { uid: t.id, role: "trener" };
+      const prava = process.env.STUDIO_PASSWORD || "";
+      const ok = t && (t.useAdmin ? !!prava && safeEqual(lozinka, prava) : await verifyPassword(lozinka, t.salt, t.hash));
+      if (t && ok) session = { uid: t.id, role: "trener" };
     } catch {}
   }
 

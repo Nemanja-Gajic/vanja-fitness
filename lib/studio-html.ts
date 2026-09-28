@@ -70,6 +70,10 @@ nav.tabs button{font-size:12px}
 .field .gpick label{font-size:15px;color:var(--ink);font-weight:400}
 .gpick .note{margin-left:auto}
 a.btn{text-decoration:none;color:var(--ink);display:inline-flex;align-items:center}
+.trn{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);margin-top:-2px}
+.trn b{color:var(--ink);font-weight:600}
+.av.sm{width:22px;height:22px;font-size:10.5px}
+.tg-s .tr{font-size:10.5px;font-weight:600;color:var(--ink);opacity:.8;text-transform:uppercase;letter-spacing:.03em;width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 </style>
 
 <script>window.VS_API="/api/studio/data";window.VS_WEB=true;</script>
@@ -478,7 +482,7 @@ function sessionCard(s){
   return \`<div class="card sess" \${gc?\`style="border-left:5px solid \${gc}"\`:''}>
     <div class="sess-h"><div style="display:flex;gap:10px;align-items:baseline;min-width:0"><span class="t num">\${esc(s.time||'')}</span><span class="n">\${esc(s.title)}</span></div>
     <span class="c num">\${att.filter(a=>ids.includes(a)).length}/\${ids.length} došlo</span></div>
-    \${!isTrainer() && s.trainerId && trainerName(s.trainerId)?\`<div class="note" style="margin-top:-4px">Trener: \${esc(trainerName(s.trainerId))}</div>\`:''}
+    \${!isTrainer() && IS_WEB?\`<div class="trn"><span class="av sm">\${esc(initials(trainerLabel(s.trainerId)))}</span>Trener: <b>\${esc(trainerLabel(s.trainerId))}</b></div>\`:''}
     <div class="chips">\${names.map(m=>\`<button class="chip \${att.includes(m.id)?'on':''}" data-act="att" data-s="\${s.id}" data-m="\${m.id}">\${esc(m.name)}</button>\`).join('')}
     \${isTrainer()?'':\`<button class="chip add" data-act="open-sess" data-s="\${s.id}">Izmeni</button>\`}</div>
   </div>\`;
@@ -558,10 +562,12 @@ async function loadTrainers(){
   try{ const r=await fetch('/api/studio/users',{cache:'no-store'}); const j=await r.json(); if(j.ok){ S.trainers=j.trainers; if(!document.querySelector('#scrim')) render(); } }catch(e){}
 }
 const trainerName = id => { const t=(S.trainers||[]).find(x=>x.id===id); return t ? t.name : ''; };
+const trainerLabel = id => trainerName(id) || 'Vanja';
+const firstName = n => (n||'').split(' ')[0];
 function trainerSelect(idAttr, cur){
   if(!IS_WEB || isTrainer()) return '';
-  const opts=[['','Vanja (bez trenera)'], ...(S.trainers||[]).filter(t=>t.active||t.id===cur).map(t=>[t.id,t.name+(t.active?'':' (neaktivan)')])];
-  return \`<div class="field"><label for="\${idAttr}">Trener</label><select id="\${idAttr}">\${opts.map(([v,l])=>\`<option value="\${v}" \${v===(cur||'')?'selected':''}>\${esc(l)}</option>\`).join('')}</select>\${(S.trainers||[]).length?'':'<div class="note">Trenere dodaješ u Grupe, na dnu.</div>'}</div>\`;
+  const opts=[['','Vanja'], ...(S.trainers||[]).filter(t=>t.active||t.id===cur).map(t=>[t.id,t.name+(t.active?'':' (neaktivan)')])];
+  return \`<div class="field"><label for="\${idAttr}">Trener</label><select id="\${idAttr}">\${opts.map(([v,l])=>\`<option value="\${v}" \${v===(cur||'')?'selected':''}>\${esc(l)}</option>\`).join('')}</select></div>\`;
 }
 async function userAction(body){
   try{ const r=await fetch('/api/studio/users',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}); const j=await r.json(); if(!j.ok){ toast(j.error||'Nije uspelo.'); return false; } await loadTrainers(); return true; }catch(e){ toast('Nije uspelo, proveri internet.'); return false; }
@@ -572,14 +578,16 @@ function trainerSheet(id){
     \${t?\`<div class="note">Korisničko ime: <b>\${esc(t.username)}</b>. \${t.active?'Nalog je aktivan.':'Nalog je isključen, ne može da se prijavi.'}</div>\`:''}
     \${t?'':\`<div class="field"><label for="tr-name">Ime i prezime</label><input id="tr-name" autocomplete="off"></div>
     <div class="field"><label for="tr-user">Korisničko ime (za prijavu)</label><input id="tr-user" autocomplete="off" autocapitalize="none" placeholder="npr. marko"></div>\`}
-    <div class="field"><label for="tr-pass">\${t?'Nova lozinka':'Lozinka'} (bar 8 znakova)</label><input id="tr-pass" type="text" autocomplete="new-password"></div>
+    <label style="display:flex;gap:10px;align-items:center"><input id="tr-same" type="checkbox" \${t&&t.sameAsAdmin?'checked':''} style="width:20px;height:20px;accent-color:var(--wine)"> Ista lozinka kao Vanjina</label>
+    <div class="field" id="tr-passf" \${t&&t.sameAsAdmin?'hidden':''}><label for="tr-pass">\${t?'Nova lozinka':'Lozinka'} (bar 8 znakova)</label><input id="tr-pass" type="text" autocomplete="new-password"></div>
     <div class="confirm-slot"></div>
-    <div class="row-btns" style="justify-content:space-between">\${t?\`<div class="row-btns"><button class="btn danger" id="tr-del">Obriši</button><button class="btn" id="tr-act">\${t.active?'Isključi nalog':'Uključi nalog'}</button></div>\`:'<span></span>'}<button class="btn pri" id="tr-save">\${t?'Promeni lozinku':'Napravi trenera'}</button></div>
+    <div class="row-btns" style="justify-content:space-between">\${t?\`<div class="row-btns"><button class="btn danger" id="tr-del">Obriši</button><button class="btn" id="tr-act">\${t.active?'Isključi nalog':'Uključi nalog'}</button></div>\`:'<span></span>'}<button class="btn pri" id="tr-save">\${t?'Sačuvaj lozinku':'Napravi trenera'}</button></div>
     <p class="note" style="margin:0">Trener posle prijave vidi samo termine koje si mu dodelila i štiklira ko je došao. Ne vidi uplate, troškove ni beleške.</p>\`, root=>{
     wireClose(root);
+    const same=root.querySelector('#tr-same'); same.onchange=()=>{ root.querySelector('#tr-passf').hidden=same.checked; };
     root.querySelector('#tr-save').onclick=async()=>{
-      const pass=root.querySelector('#tr-pass').value;
-      const ok = t ? await userAction({action:'password', id:t.id, password:pass}) : await userAction({action:'create', name:root.querySelector('#tr-name').value, username:root.querySelector('#tr-user').value, password:pass});
+      const pass=root.querySelector('#tr-pass').value, sameAsAdmin=same.checked;
+      const ok = t ? await userAction({action:'password', id:t.id, password:pass, sameAsAdmin}) : await userAction({action:'create', name:root.querySelector('#tr-name').value, username:root.querySelector('#tr-user').value, password:pass, sameAsAdmin});
       if(ok){ closeSheet(); render(); toast(t?'Lozinka promenjena':'Trener napravljen'); }
     };
     const a=root.querySelector('#tr-act'); if(a) a.onclick=async()=>{ if(await userAction({action:'active', id:t.id, active:!t.active})){ closeSheet(); render(); toast(t.active?'Nalog isključen':'Nalog uključen'); } };
@@ -611,7 +619,7 @@ function vTermini(){
       body+=\`<div class="tg-c tg-cell \${ds===t?'today':''}">\${list.map(s=>{ const ids=s.memberIds||[]; const att=(s.attended||[]).filter(a=>ids.includes(a)).length;
         const nm = s.kind==='personalni' && ids.length===1 ? (memberById(ids[0])||{name:''}).name.split(' ')[0] : s.title.replace(/ grupa$/i,'');
         const gc = s.groupId ? colorOfId(s.groupId) : '';
-        return \`<button class="tg-s \${s.kind==='personalni'?'p':''}" \${gc?\`style="--gc:\${gc}"\`:''} data-act="open-sess" data-s="\${s.id}"><span class="tm num">\${esc(s.time||'')}</span><span class="nm">\${esc(nm)}</span><span class="ct num">\${att}/\${ids.length}\${!isTrainer() && s.trainerId && trainerName(s.trainerId)?' · '+esc(trainerName(s.trainerId).split(' ')[0]):''}</span></button>\`; }).join('')}
+        return \`<button class="tg-s \${s.kind==='personalni'?'p':''}" \${gc?\`style="--gc:\${gc}"\`:''} data-act="open-sess" data-s="\${s.id}"><span class="tm num">\${esc(s.time||'')}</span><span class="nm">\${esc(nm)}</span><span class="ct num">\${att}/\${ids.length}</span>\${!isTrainer() && IS_WEB?\`<span class="tr num">\${esc(firstName(trainerLabel(s.trainerId)))}</span>\`:''}</button>\`; }).join('')}
         \${isTrainer()?'':\`<button class="tg-add" data-act="new-sess" data-d="\${ds}" data-t="\${h}" aria-label="Dodaj termin \${DANI_K[parse(ds).getDay()]} \${h}">+</button>\`}</div>\`;
     }
   }
@@ -939,7 +947,7 @@ function vGrupe(){
       const ms=sorted(groupMembers(g.id)); const cap=capOf(g);
       const full = cap && ms.length>=cap;
       const pill = cap ? \`<span class="pill \${ms.length>cap?'bad':full?'warn':'ok'} num">\${ms.length}/\${cap} \${full?'puna':'žena'}</span>\` : \`<span class="pill mut num">\${ms.length} žena</span>\`;
-      const when = (schedLabel(g) || 'Nije stavljena u termine') + (g.trainerId && trainerName(g.trainerId) ? ' · Trener: '+trainerName(g.trainerId) : '');
+      const when = (schedLabel(g) || 'Nije stavljena u termine') + (IS_WEB ? ' · Trener: '+trainerLabel(g.trainerId) : '');
       const gc=groupColor(g);
       return \`<div class="card grp" style="border-top:5px solid \${gc}">
         <button class="grp-h" data-act="open-grp" data-g="\${g.id}"><div class="main"><div class="grp-n"><span class="gdot" style="background:\${gc}"></span>\${esc(g.name)}</div><div class="sub">\${esc(when)}\${cap&&!full?\` · ima mesta još \${cap-ms.length}\`:''}</div></div>\${pill}</button>
