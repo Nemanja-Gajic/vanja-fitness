@@ -1,6 +1,6 @@
 // Automatski generisano iz Vanja Studio index.html. Ne menjati ručno.
 const html = `<!doctype html>
-<html lang="sr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="robots" content="noindex,nofollow">
+<html lang="sr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#6E1F33"><link rel="manifest" href="/studio-manifest.webmanifest"><link rel="apple-touch-icon" href="/apple-icon.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Vanja Studio">
 <style>:root{color-scheme:light}body{margin:0}img{max-width:100%}[hidden]{display:none!important}
 .seg.big button{padding:11px 6px;font-size:15px}
 .tg-wrap{overflow-x:auto;margin-inline:-4px;padding-inline:4px}
@@ -298,51 +298,68 @@ const LKEY = 'vf-studio-local-v1';
 function loadLocal(){ try{ return JSON.parse(localStorage.getItem(LKEY))||{}; }catch(e){ return {}; } }
 const API_URL = window.VS_API || '/api/data';
 const IS_WEB = !!window.VS_WEB;
+const SAVED_LBL = IS_WEB ? 'Sačuvano online' : 'Sačuvano u fajl na računaru';
 let fileMode=false, fileHadData=false, pushTimer=null, pushing=false, pushAgain=false;
 const snapshot = () => ({members:S.members,sessions:S.sessions,payments:S.payments,expenses:S.expenses,settings:S.settings,savedAt:S.savedAt||0});
 function saveLocal(){
   S.savedAt=Date.now();
-  try{ localStorage.setItem(LKEY, JSON.stringify(snapshot())); }catch(e){}
+  try{ localStorage.setItem(LKEY, JSON.stringify({...snapshot(), serverAt:S.serverAt||0})); }catch(e){}
   if(fileMode){ clearTimeout(pushTimer); pushTimer=setTimeout(pushFile,400); }
 }
 async function pushFile(){
   if(!fileMode) return;
   if(pushing){ pushAgain=true; return; }
   const d=snapshot();
+  if(S.conflict) return;
   if(fileHadData && !d.members.length && !d.sessions.length && !d.payments.length && !(d.expenses||[]).length) return; // nikad ne prepisuj pun fajl praznim
   pushing=true; clearTimeout(pushTimer); pushTimer=null;
   try{
-    const r=await fetch(API_URL,{method:'POST',headers:{'Content-Type':'application/json','X-Vanja':'1'},body:JSON.stringify(d)});
+    const r=await fetch(API_URL,{method:'POST',headers:{'Content-Type':'application/json','X-Vanja':'1'},body:JSON.stringify({...d, baseAt:S.serverAt||0})});
+    if(r.status===409){ S.conflict=true; setSync('Promenjeno na drugom uređaju','bad'); render(); pushing=false; return; }
     const j=await r.json(); if(!j.ok) throw 0;
+    S.serverAt=d.savedAt;
+    try{ localStorage.setItem(LKEY, JSON.stringify({...snapshot(), serverAt:S.serverAt})); }catch(e){}
     fileHadData = fileHadData || d.members.length>0;
-    setSync('Sačuvano u fajl na računaru','ok');
-  }catch(e){ setSync('Fajl nije sačuvan, proveri da li je server upaljen','bad'); }
+    setSync(SAVED_LBL,'ok');
+  }catch(e){ setSync(IS_WEB?'Nije sačuvano, proveri internet':'Fajl nije sačuvan, proveri da li je server upaljen','bad'); }
   pushing=false; if(pushAgain){ pushAgain=false; pushFile(); }
 }
-window.addEventListener('pagehide',()=>{ if(fileMode && pushTimer){ clearTimeout(pushTimer); try{ fetch(API_URL,{method:'POST',keepalive:true,headers:{'Content-Type':'application/json','X-Vanja':'1'},body:JSON.stringify(snapshot())}); }catch(e){} } });
+window.addEventListener('pagehide',()=>{ if(fileMode && pushTimer){ clearTimeout(pushTimer); try{ fetch(API_URL,{method:'POST',keepalive:true,headers:{'Content-Type':'application/json','X-Vanja':'1'},body:JSON.stringify({...snapshot(), baseAt:S.serverAt||0})}); }catch(e){} } });
+document.addEventListener('visibilitychange', async ()=>{
+  // kad se vratiš na aplikaciju, povuci najnovije (npr. uneto sa telefona)
+  if(document.visibilityState!=='visible' || !fileMode || pushTimer || pushing || S.conflict) return;
+  try{ const r=await fetch(API_URL,{cache:'no-store'}); const j=await r.json();
+    if(j && j.ok && j.exists && (j.data.savedAt||0) > (S.serverAt||0)){ const f=j.data;
+      S.members=f.members||[]; S.sessions=f.sessions||[]; S.payments=f.payments||[]; S.expenses=f.expenses||[]; S.settings=f.settings||S.settings; S.savedAt=f.savedAt; S.serverAt=f.savedAt;
+      try{ localStorage.setItem(LKEY, JSON.stringify({...snapshot(), serverAt:S.serverAt||0})); }catch(e){}
+      if(!document.querySelector('#scrim')) render(); toast('Učitani najnoviji podaci'); } }catch(e){}
+});
 async function connectFile(){
   let j=null;
   try{ const r=await fetch(API_URL,{cache:'no-store'}); j=await r.json(); }catch(e){ j=null; }
-  if(!j || !j.ok){ S.oldServer=true; setSync(IS_WEB?'Samo u ovom pregledaču':'Samo u pregledaču','warn'); render(); return; }
+  if(!j || !j.ok){ S.oldServer=true; setSync('Samo u pregledaču','warn'); render(); return; }
   fileMode=true; S.oldServer=false;
   const f = j.exists ? j.data : null;
   const has = d => !!(d && ((d.members||[]).length || (d.sessions||[]).length || (d.payments||[]).length || (d.expenses||[]).length));
   fileHadData = has(f);
   const localHas = has(S);
   const localAt = S.savedAt||0, fileAt = (f && f.savedAt) || 0;
-  if(fileHadData && (!localHas || fileAt >= localAt)){
+  S.serverAt = fileAt;
+  // lokalne izmene se šalju samo ako su nastale na tačno ovoj verziji sa servera (nisu stigle da se sačuvaju)
+  const localIsAhead = localHas && localAt > fileAt && (S.localBase||0) === fileAt;
+  if(fileHadData && !localIsAhead){
     // fajl je noviji: pre nego što zamenimo, sačuvaj stare podatke iz pregledača sa strane
     if(localHas){ try{ localStorage.setItem(LKEY+'-pre-fajla-'+Date.now(), JSON.stringify(snapshot())); }catch(e){} }
-    S.members=f.members||[]; S.sessions=f.sessions||[]; S.payments=f.payments||[]; S.expenses=f.expenses||[]; S.settings=f.settings||S.settings; S.savedAt=fileAt;
-    try{ localStorage.setItem(LKEY, JSON.stringify(snapshot())); }catch(e){}
-    setSync('Sačuvano u fajl na računaru','ok'); render();
+    S.members=f.members||[]; S.sessions=f.sessions||[]; S.payments=f.payments||[]; S.expenses=f.expenses||[]; S.settings=f.settings||S.settings; S.savedAt=fileAt; S.serverAt=fileAt;
+    try{ localStorage.setItem(LKEY, JSON.stringify({...snapshot(), serverAt:S.serverAt||0})); }catch(e){}
+    setSync(SAVED_LBL,'ok'); render();
   } else if(localHas){
     // pregledač ima podatke, a fajl je prazan ili stariji: upiši ih u fajl
     if(!S.savedAt) S.savedAt=Date.now();
     await pushFile(); render();
   } else {
     // oboje prazno: ništa ne upisuj dok ne uneseš nešto
-    setSync('Sačuvano u fajl na računaru','ok');
+    setSync(SAVED_LBL,'ok');
   }
 }
 const COLS = ['members','sessions','payments'];
@@ -381,7 +398,7 @@ async function boot(){
     DB.doc('config/main').onSnapshot(s=>{ S.settings = s.exists ? s.data() : null; got.config=1; done(); }, onErr);
   } else {
     mode='local'; const L=loadLocal();
-    S.members=L.members||[]; S.sessions=L.sessions||[]; S.payments=L.payments||[]; S.expenses=L.expenses||[]; S.settings=L.settings||JSON.parse(JSON.stringify(DEFAULT_SETTINGS)); S.savedAt=L.savedAt||0;
+    S.members=L.members||[]; S.sessions=L.sessions||[]; S.payments=L.payments||[]; S.expenses=L.expenses||[]; S.settings=L.settings||JSON.parse(JSON.stringify(DEFAULT_SETTINGS)); S.savedAt=L.savedAt||0; S.localBase=L.serverAt||0;
     setSync('Povezujem se sa fajlom…','warn'); render();
     connectFile();
   }
@@ -488,7 +505,7 @@ function vDanas(){
     \${alerts.length? \`<div class="card list">\${alerts.join('')}</div>\` : '<div class="empty">Sve je u redu. Sve su platile i redovno dolaze.</div>'}
   </section>\`;
 }
-function bannerLocal(){ if(IS_WEB && S.oldServer) return '<div class="banner">Probna verzija na sajtu: podaci se za sad čuvaju samo u ovom pregledaču, na ovom uređaju. Kad povežemo bazu, telefon i laptop će videti iste podatke.</div>'; return S.oldServer ? '<div class="banner">Podaci su sačuvani samo u pregledaču. Da bi se čuvali i u fajl: zatvori prozor „Vanja Studio server“ na traci dole, pa ponovo pokreni „Pokreni Vanja Studio“.</div>' : ''; }
+function bannerLocal(){ if(S.conflict) return '<div class="banner" style="background:var(--bad-bg);color:var(--bad)">Podaci su u međuvremenu promenjeni na drugom uređaju, pa ova izmena nije sačuvana. <button class="btn sm" onclick="location.reload()">Učitaj najnovije</button></div>'; if(IS_WEB && S.oldServer) return '<div class="banner">Baza još nije povezana: podaci se za sad čuvaju samo u ovom pregledaču, na ovom uređaju.</div>'; return S.oldServer ? '<div class="banner">Podaci su sačuvani samo u pregledaču. Da bi se čuvali i u fajl: zatvori prozor „Vanja Studio server“ na traci dole, pa ponovo pokreni „Pokreni Vanja Studio“.</div>' : ''; }
 
 const PARTS={jutro:{label:'Jutarnji termini'}, vece:{label:'Večernji termini'}};
 const DEFAULT_SLOTS={jutro:['06:00','07:00','08:00','09:00','10:00','11:00','12:00','13:00'], vece:['14:00','15:00','16:00','17:00','18:00','19:00','20:00','21:00','22:00']};
@@ -620,7 +637,7 @@ function vPregled(){
     <p class="note" style="margin:0;padding:0 14px 12px">Donji red je zarada po mesecu (prihod minus troškovi).</p></div>
     \${tpls.length?\`<div class="sec-h"><h2 style="font-size:17px">Stalni troškovi</h2></div><div class="card list">\${tpls.map(t=>\`<div class="alert"><div class="main"><div class="nm">\${esc(t.cat)}</div>\${t.note?\`<div class="sub">\${esc(t.note)}</div>\`:''}</div><span class="num">\${money(t.amount)}</span><button class="btn ghost sm" data-act="rm-tpl" data-t="\${t.id}" style="color:var(--bad)">Ukloni</button></div>\`).join('')}</div>\`:''}
     <div class="sec-h"><h2>Rezervna kopija</h2></div>
-    <div class="card" style="padding:14px;display:flex;flex-direction:column;gap:10px"><p class="note" style="margin:0">\${fileMode?'Sve se automatski čuva u fajl: Documents, Vanja Studio, podaci. Svaki dan se sama pravi i dnevna kopija u podaci, rezervne-kopije. Dugme ispod pravi dodatnu kopiju, npr. za USB.':'Podaci su trenutno samo u pregledaču. Jednom nedeljno sačuvaj kopiju.'}</p>
+    <div class="card" style="padding:14px;display:flex;flex-direction:column;gap:10px"><p class="note" style="margin:0">\${fileMode&&IS_WEB?'Sve se automatski čuva online, pa isto vidiš na telefonu i na računaru. Svaki dan se sama pravi i dnevna kopija u bazi (čuva se 60 dana). Dugme ispod pravi dodatnu kopiju u fajl.':fileMode?'Sve se automatski čuva u fajl: Documents, Vanja Studio, podaci. Svaki dan se sama pravi i dnevna kopija u podaci, rezervne-kopije. Dugme ispod pravi dodatnu kopiju, npr. za USB.':'Podaci su trenutno samo u pregledaču. Jednom nedeljno sačuvaj kopiju.'}</p>
     <div class="row-btns"><button class="btn pri" data-act="backup">Sačuvaj kopiju</button><button class="btn" data-act="restore">Učitaj kopiju</button></div></div>
   </section>\`;
 }

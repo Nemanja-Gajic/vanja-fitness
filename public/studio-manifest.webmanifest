@@ -1,0 +1,10 @@
+{
+  "name": "Vanja Studio",
+  "short_name": "Vanja Studio",
+  "start_url": "/studio",
+  "scope": "/studio",
+  "display": "standalone",
+  "background_color": "#F6F1F2",
+  "theme_color": "#6E1F33",
+  "icons": [{ "src": "/apple-icon.png", "sizes": "180x180", "type": "image/png" }]
+}
