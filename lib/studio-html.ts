@@ -74,6 +74,10 @@ a.btn{text-decoration:none;color:var(--ink);display:inline-flex;align-items:cent
 .trn b{color:var(--ink);font-weight:600}
 .av.sm{width:22px;height:22px;font-size:10.5px}
 .tg-s .tr{font-size:10.5px;font-weight:600;color:var(--ink);opacity:.8;text-transform:uppercase;letter-spacing:.03em;width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hdr-links{display:flex;gap:12px;align-items:center}
+.hdr-links a,.hdr-btn{font-size:12.5px;color:var(--wine);background:none;border:0;padding:0;text-decoration:underline;cursor:pointer;font-weight:500}
+.hdr-btn{text-decoration:none;border:1px solid var(--line);border-radius:999px;padding:3px 10px;background:var(--surface)}
+.seg button:disabled{opacity:.45;cursor:not-allowed}
 </style>
 
 <script>window.VS_API="/api/studio/data";window.VS_WEB=true;</script>
@@ -253,7 +257,7 @@ section.view{display:flex;flex-direction:column;gap:18px}
 <div class="wrap">
   <header class="top">
     <div class="brand"><div class="mono">VF</div><div><h1>Vanja Studio</h1><small id="today-lbl"></small></div></div>
-    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px"><div class="sync" id="sync">Učitavam…</div><a id="logout" href="/api/studio/logout" hidden style="font-size:12px;color:var(--wine)">Odjavi se</a></div>
+    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px"><div class="sync" id="sync">Učitavam…</div><div class="hdr-links"><button id="accounts" class="hdr-btn" data-act="accounts" hidden>Nalozi</button><a id="logout" href="/api/studio/logout" hidden>Odjavi se</a></div></div>
   </header>
   <nav class="tabs" id="tabs">
     <button data-v="danas"><svg viewBox="0 0 24 24"><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M5.6 18.4L7 17M17 7l1.4-1.4"/><circle cx="12" cy="12" r="4"/></svg>Danas</button>
@@ -556,6 +560,7 @@ function applyRole(){
   document.getElementById('tabs').style.gridTemplateColumns = tr ? 'repeat(2,1fr)' : '';
   if(tr && !['danas','termini'].includes(S.view)) S.view='danas';
   const lo=document.getElementById('logout'); if(lo && IS_WEB) lo.hidden=false;
+  const ac=document.getElementById('accounts'); if(ac) ac.hidden = !IS_WEB || tr;
 }
 S.trainers=[];
 async function loadTrainers(){
@@ -572,23 +577,38 @@ function trainerSelect(idAttr, cur){
 async function userAction(body){
   try{ const r=await fetch('/api/studio/users',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}); const j=await r.json(); if(!j.ok){ toast(j.error||'Nije uspelo.'); return false; } await loadTrainers(); return true; }catch(e){ toast('Nije uspelo, proveri internet.'); return false; }
 }
+function accountsSheet(){
+  const tr=S.trainers||[];
+  openSheet(\`\${sheetHead('Nalozi')}
+    <p class="note" style="margin:0">Ovde praviš naloge za prijavu na Vanja Studio. Svako se prijavljuje svojim korisničkim imenom i lozinkom.</p>
+    <div class="card list">
+      <div class="alert"><span class="av">V</span><div class="main"><div class="nm">Vanja</div><div class="sub">@vanja · vidi i menja sve</div></div><span class="pill mut">Admin</span></div>
+      \${tr.map(t=>\`<button class="item" data-tr="\${t.id}"><span class="av">\${esc(initials(t.name))}</span><div class="main"><div class="nm">\${esc(t.name)}</div><div class="sub">@\${esc(t.username)} · \${t.active?'aktivan':'isključen'}</div></div><span class="pill \${t.active?'ok':'mut'}">Trener</span></button>\`).join('')}
+    </div>
+    <button class="btn pri" id="acc-new" style="align-self:flex-start">+ Nov nalog</button>\`, root=>{
+    wireClose(root);
+    root.querySelector('.card.list').onclick=e=>{ const b=e.target.closest('[data-tr]'); if(b) trainerSheet(b.dataset.tr); };
+    root.querySelector('#acc-new').onclick=()=>trainerSheet(null);
+  });
+}
 function trainerSheet(id){
   const t = id ? S.trainers.find(x=>x.id===id) : null;
-  openSheet(\`\${sheetHead(t?t.name:'Nov trener')}
+  openSheet(\`\${sheetHead(t?t.name:'Nov nalog')}
     \${t?\`<div class="note">Korisničko ime: <b>\${esc(t.username)}</b>. \${t.active?'Nalog je aktivan.':'Nalog je isključen, ne može da se prijavi.'}</div>\`:''}
-    \${t?'':\`<div class="field"><label for="tr-name">Ime i prezime</label><input id="tr-name" autocomplete="off"></div>
+    \${t?'':\`<div class="field"><span class="fl">Vrsta naloga</span><div class="seg" id="tr-role"><button type="button" class="on" data-k="trener">Trener</button><button type="button" data-k="clanica" disabled title="Uskoro">Članica (uskoro)</button></div></div>
+    <div class="field"><label for="tr-name">Ime i prezime</label><input id="tr-name" autocomplete="off"></div>
     <div class="field"><label for="tr-user">Korisničko ime (za prijavu)</label><input id="tr-user" autocomplete="off" autocapitalize="none" placeholder="npr. marko"></div>\`}
     <label style="display:flex;gap:10px;align-items:center"><input id="tr-same" type="checkbox" \${t&&t.sameAsAdmin?'checked':''} style="width:20px;height:20px;accent-color:var(--wine)"> Ista lozinka kao Vanjina</label>
     <div class="field" id="tr-passf" \${t&&t.sameAsAdmin?'hidden':''}><label for="tr-pass">\${t?'Nova lozinka':'Lozinka'} (bar 8 znakova)</label><input id="tr-pass" type="text" autocomplete="new-password"></div>
     <div class="confirm-slot"></div>
-    <div class="row-btns" style="justify-content:space-between">\${t?\`<div class="row-btns"><button class="btn danger" id="tr-del">Obriši</button><button class="btn" id="tr-act">\${t.active?'Isključi nalog':'Uključi nalog'}</button></div>\`:'<span></span>'}<button class="btn pri" id="tr-save">\${t?'Sačuvaj lozinku':'Napravi trenera'}</button></div>
+    <div class="row-btns" style="justify-content:space-between">\${t?\`<div class="row-btns"><button class="btn danger" id="tr-del">Obriši</button><button class="btn" id="tr-act">\${t.active?'Isključi nalog':'Uključi nalog'}</button></div>\`:'<span></span>'}<button class="btn pri" id="tr-save">\${t?'Sačuvaj lozinku':'Napravi nalog'}</button></div>
     <p class="note" style="margin:0">Trener posle prijave vidi samo termine koje si mu dodelila i štiklira ko je došao. Ne vidi uplate, troškove ni beleške.</p>\`, root=>{
     wireClose(root);
     const same=root.querySelector('#tr-same'); same.onchange=()=>{ root.querySelector('#tr-passf').hidden=same.checked; };
     root.querySelector('#tr-save').onclick=async()=>{
       const pass=root.querySelector('#tr-pass').value, sameAsAdmin=same.checked;
       const ok = t ? await userAction({action:'password', id:t.id, password:pass, sameAsAdmin}) : await userAction({action:'create', name:root.querySelector('#tr-name').value, username:root.querySelector('#tr-user').value, password:pass, sameAsAdmin});
-      if(ok){ closeSheet(); render(); toast(t?'Lozinka promenjena':'Trener napravljen'); }
+      if(ok){ closeSheet(); render(); toast(t?'Lozinka promenjena':'Nalog napravljen'); accountsSheet(); }
     };
     const a=root.querySelector('#tr-act'); if(a) a.onclick=async()=>{ if(await userAction({action:'active', id:t.id, active:!t.active})){ closeSheet(); render(); toast(t.active?'Nalog isključen':'Nalog uključen'); } };
     const d=root.querySelector('#tr-del'); if(d) d.onclick=()=>confirmBox(root,'Obrisati trenera '+t.name+'? Termini ostaju, samo bez trenera.',async()=>{ if(await userAction({action:'delete', id:t.id})){ closeSheet(); render(); for(const s of S.sessions.filter(s=>s.trainerId===t.id && s.date>=todayISO())) await put('sessions',{...s, trainerId:''}); toast('Trener obrisan'); } });
@@ -956,8 +976,7 @@ function vGrupe(){
         <div class="row-btns"><button class="btn sm" data-act="open-grp" data-g="\${g.id}">Uredi grupu</button>\${schedOf(g).length?\`<button class="btn sm ghost" data-act="fill-grp" data-g="\${g.id}">Napravi termine ove nedelje</button>\`:''}</div>
       </div>\`; }).join('') : \`<div class="card emptybox"><p>Još nema grupa. Napravi prvu, na primer „Pon Sre 18h“ ili „Početnice“.</p><button class="btn pri" data-act="new-grp">+ Nova grupa</button></div>\`}
     \${noGroup?\`<p class="note" style="margin:0">\${noGroup} \${noGroup===1?'članica nije':'članica nisu'} ni u jednoj grupi.</p>\`:''}
-    \${IS_WEB?\`<div class="sec-h"><h2>Treneri <span class="note num">(\${(S.trainers||[]).length})</span></h2><button class="btn ghost" data-act="new-trainer">+ Nov trener</button></div>
-    \${(S.trainers||[]).length?\`<div class="card list">\${S.trainers.map(t=>{ const n=S.sessions.filter(s=>s.trainerId===t.id && s.date>=todayISO()).length; return \`<button class="item" data-act="open-trainer" data-t="\${t.id}"><span class="av">\${esc(initials(t.name))}</span><div class="main"><div class="nm">\${esc(t.name)}</div><div class="sub">@\${esc(t.username)} · \${n} \${n===1?'budući termin':'budućih termina'}</div></div>\${t.active?'<span class="pill ok">Aktivan</span>':'<span class="pill mut">Isključen</span>'}</button>\`; }).join('')}</div>\`:'<div class="empty">Još nema trenera. Napravi nalog, pa mu u grupi ili terminu izaberi trenera.</div>'}\`:''}
+    \${IS_WEB?\`<button class="btn ghost" data-act="accounts" style="align-self:flex-start">Nalozi i treneri (\${(S.trainers||[]).length})</button>\`:''}
     <button class="btn ghost" data-act="settings" style="align-self:flex-start">Podešavanja (probe, upozorenja)</button>
   </section>\`;
 }
@@ -1186,6 +1205,7 @@ document.addEventListener('click', async e=>{
   if(a==='groups'){ S.view='grupe'; render(); window.scrollTo(0,0); return; }
   if(a==='open-grp') return groupSheet(b.dataset.g);
   if(a==='new-trainer') return trainerSheet(null);
+  if(a==='accounts') return accountsSheet();
   if(a==='open-trainer') return trainerSheet(b.dataset.t);
   if(a==='new-grp') return groupSheet(null);
   if(a==='settings') return settingsSheet();
