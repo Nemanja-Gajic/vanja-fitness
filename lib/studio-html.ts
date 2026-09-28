@@ -257,11 +257,33 @@ section.view{display:flex;flex-direction:column;gap:18px}
 .pbars .b.cur{background:var(--gold,#B8801F)}
 .pbars .b span{position:absolute;top:-18px;left:0;right:0;text-align:center;font-size:11.5px;color:var(--muted)}
 .kgline{width:100%;height:120px;display:block}
-.ph-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px}
-.ph-grid a{display:block;aspect-ratio:3/4;border-radius:10px;overflow:hidden;background:var(--line);position:relative}
-.ph-grid img{width:100%;height:100%;object-fit:cover;display:block}
-.ph-grid .d{position:absolute;left:0;right:0;bottom:0;font-size:11px;padding:3px 6px;background:rgba(0,0,0,.45);color:#fff}
-.ph-grid .x{position:absolute;top:4px;right:4px;border:0;border-radius:999px;width:24px;height:24px;background:rgba(0,0,0,.55);color:#fff;cursor:pointer;font-size:14px;line-height:24px;padding:0}
+.fgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:10px}
+.ft{position:relative;display:flex;flex-direction:column;gap:6px;cursor:pointer;border-radius:12px;padding:6px;background:var(--surface);border:1px solid var(--line);text-align:left;color:inherit}
+.ft:hover,.ft:focus-visible{border-color:var(--wine)}
+.ft .pv{position:relative;aspect-ratio:3/4;border-radius:8px;overflow:hidden;background:var(--bg);display:flex;align-items:center;justify-content:center}
+.ft .pv img{width:100%;height:100%;object-fit:cover;display:block}
+.ft .pv img.pdf{object-fit:contain;object-position:top;background:#fff}
+.ft .pv img:not([src]){display:none}
+.ft .ico{display:flex;flex-direction:column;align-items:center;gap:4px;color:var(--muted);font-size:11px}
+.ft .ico svg{width:34px;height:34px;fill:none;stroke:currentColor;stroke-width:1.5}
+.ft.ready .ico{display:none}
+.ft .ty{position:absolute;left:5px;top:5px;font-size:10.5px;font-weight:700;letter-spacing:.04em;padding:2px 6px;border-radius:6px;color:#fff;background:var(--wine)}
+.ft .ty.pdf{background:#B3261E}
+.ft .lb{display:flex;flex-direction:column;line-height:1.25;padding:0 2px 2px;min-width:0}
+.ft .lb b{font-size:12.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ft .lb span{font-size:11.5px;color:var(--muted)}
+.ft .x{position:absolute;top:10px;right:10px;border:0;border-radius:999px;width:26px;height:26px;background:rgba(0,0,0,.6);color:#fff;cursor:pointer;font-size:15px;line-height:26px;padding:0}
+.viewer{position:fixed;inset:0;z-index:70;background:#140c0f;display:flex;flex-direction:column}
+.viewer .vh{display:flex;align-items:center;gap:10px;padding:10px 12px;padding-top:max(10px,env(safe-area-inset-top));color:#fff}
+.viewer .vh .t{flex:1;min-width:0;font-size:14px}
+.viewer .vh .t b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.viewer .vh .t span{opacity:.7;font-size:12.5px}
+.viewer .vh a,.viewer .vh button{color:#fff;background:rgba(255,255,255,.14);border:0;border-radius:999px;padding:8px 14px;font-size:13.5px;text-decoration:none;cursor:pointer}
+.viewer .vb{flex:1;overflow:auto;display:flex;flex-direction:column;align-items:center;gap:12px;padding:8px 8px 24px;-webkit-overflow-scrolling:touch}
+.viewer .vb img{max-width:100%;max-height:100%;object-fit:contain;margin:auto}
+.viewer .vb canvas{max-width:100%;height:auto;background:#fff;border-radius:4px;box-shadow:0 2px 12px rgba(0,0,0,.4)}
+.viewer .vn{position:absolute;top:50%;transform:translateY(-50%);width:44px;height:44px;border-radius:999px;border:0;background:rgba(0,0,0,.6);color:#fff;font-size:22px;cursor:pointer;box-shadow:0 0 0 1px rgba(255,255,255,.25)}
+.viewer .vn.p{left:8px}.viewer .vn.n{right:8px}
 .doc-add{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .doc-add select{border:1px solid var(--line);border-radius:10px;padding:8px;background:var(--surface);color:inherit}
 .doc-add label.btn{cursor:pointer}
@@ -492,6 +514,7 @@ function render(){
   const app=$('#app');
   const y=window.scrollY;
   app.innerHTML = isMember() ? vProfil() : (S.view!=='danas'?bannerLocal():'') + ({danas:vDanas, termini:vTermini, grupe:vGrupe, clanice:vClanice, pregled:vPregled}[S.view])();
+  if(isMember()) hydrateThumbs(app);
   const si=$('#q'); if(si && S._focusQ){ si.focus(); si.setSelectionRange(si.value.length,si.value.length); }
   window.scrollTo(0,y);
 }
@@ -658,18 +681,49 @@ async function loadDocs(mid, after){
   try{ const r=await fetch('/api/studio/docs?m='+encodeURIComponent(mid),{cache:'no-store'}); const j=await r.json(); S.docs[mid]= j.ok ? j.docs : {error:true}; }catch(e){ S.docs[mid]={error:true}; }
   after && after();
 }
+const extOf = x => x.contentType==='application/pdf' ? 'PDF' : ((x.contentType.split('/')[1]||'').replace('jpeg','jpg').toUpperCase() || 'FAJL');
+const docDay = x => { const t=(x.uploadedAt||'').slice(0,10); return t?fmtShort(t)+' '+t.slice(0,4):''; };
+const ICO_PDF='<svg viewBox="0 0 24 24"><path d="M6 2.5h8l4 4v15H6z"/><path d="M14 2.5v4h4M9 13h6M9 16.5h6M9 9.5h3"/></svg>';
 function docsHtml(mid, canDel){
   const d=S.docs[mid];
   if(d===undefined || d===null) return '<div class="note">Učitavam…</div>';
   if(d.error) return '<div class="note">Dokumenti trenutno nisu dostupni.</div>';
-  const pics=d.filter(x=>x.contentType.startsWith('image/'));
-  const files=d.filter(x=>!x.contentType.startsWith('image/'));
-  const day = x => { const t=(x.uploadedAt||'').slice(0,10); return t?fmtShort(t)+' '+t.slice(0,4):''; };
-  let h='';
-  if(pics.length) h+=\`<div class="ph-grid">\${pics.map(x=>\`<a href="\${docUrl(mid,x)}" target="_blank" rel="noopener" title="\${esc(DOC_KINDS[x.kind]||'')}"><img loading="lazy" src="\${docUrl(mid,x)}" alt="\${esc(DOC_KINDS[x.kind]||'Slika')} \${esc(day(x))}"><span class="d num">\${esc(day(x))}</span>\${canDel?\`<button type="button" class="x" data-dcdel="\${x.id}" aria-label="Obriši sliku">×</button>\`:''}</a>\`).join('')}</div>\`;
-  if(files.length) h+=\`<div class="card list">\${files.map(x=>\`<div class="alert" style="padding:9px 12px"><div class="main"><div class="nm">\${esc(DOC_KINDS[x.kind]||'Dokument')}</div><div class="sub">\${esc(x.name)} · \${esc(day(x))}</div></div><a class="btn sm" href="\${docUrl(mid,x)}" target="_blank" rel="noopener">Otvori</a>\${canDel?\`<button type="button" class="btn ghost sm" data-dcdel="\${x.id}" style="color:var(--bad)">Obriši</button>\`:''}</div>\`).join('')}</div>\`;
-  return h || \`<div class="empty">\${canDel?'Još nema slika ni dokumenata.':'Još nema slika ni dokumenata.'}</div>\`;
+  if(!d.length) return '<div class="empty">Još nema slika ni dokumenata.</div>';
+  return \`<div class="fgrid">\${d.map(x=>{ const u=docUrl(mid,x), img=x.contentType.startsWith('image/'), pdf=x.contentType==='application/pdf', th=pdf&&pdfThumbs[u];
+    return \`<div class="ft \${img||th?'ready':''}" role="button" tabindex="0" data-view="\${x.id}" data-mid="\${esc(mid)}" aria-label="Otvori \${esc(DOC_KINDS[x.kind]||'dokument')} \${esc(docDay(x))}">
+      <div class="pv">\${img?\`<img loading="lazy" src="\${u}" alt="" onerror="this.closest('.ft').classList.remove('ready');this.remove()">\`:\`<img class="pdf" alt="" \${th?\`src="\${th}"\`:\`data-pdf="\${u}"\`}>\`}<span class="ico">\${ICO_PDF}\${esc(extOf(x))}</span><span class="ty \${pdf?'pdf':''}">\${esc(extOf(x))}</span></div>
+      <div class="lb"><b>\${esc(DOC_KINDS[x.kind]||'Dokument')}</b><span class="num">\${esc(docDay(x))}</span></div>
+      \${canDel?\`<button type="button" class="x" data-dcdel="\${x.id}" aria-label="Obriši">×</button>\`:''}</div>\`; }).join('')}</div>\`;
 }
+/* pdf pregled: pdf.js je na samom sajtu, ne sa strane */
+let pdfLibP=null; const pdfThumbs={};
+function pdfLib(){ if(!pdfLibP) pdfLibP=new Promise((res,rej)=>{ const sc=document.createElement('script'); sc.src='/studio-pdf/pdf.min.js'; sc.onload=()=>{ const L=window.pdfjsLib; L.GlobalWorkerOptions.workerSrc='/studio-pdf/pdf.worker.min.js'; res(L); }; sc.onerror=()=>{ pdfLibP=null; rej(new Error('pdf')); }; document.head.appendChild(sc); }); return pdfLibP; }
+async function renderPdfPage(doc, n, width){ const pg=await doc.getPage(n); const v1=pg.getViewport({scale:1}); const vp=pg.getViewport({scale:width/v1.width}); const c=document.createElement('canvas'); c.width=Math.round(vp.width); c.height=Math.round(vp.height); await pg.render({canvasContext:c.getContext('2d'), viewport:vp}).promise; return c; }
+async function pdfThumb(url){ if(pdfThumbs[url]) return pdfThumbs[url]; const L=await pdfLib(); const doc=await L.getDocument({url, withCredentials:true}).promise; const c=await renderPdfPage(doc,1,300); doc.destroy(); return (pdfThumbs[url]=c.toDataURL('image/jpeg',.82)); }
+function hydrateThumbs(root){ (root||document).querySelectorAll('img[data-pdf]').forEach(async img=>{ const u=img.dataset.pdf; img.removeAttribute('data-pdf'); try{ img.src=await pdfThumb(u); img.closest('.ft')&&img.closest('.ft').classList.add('ready'); }catch(e){} }); }
+function closeViewer(){ const v=document.getElementById('viewer'); if(v){ v.remove(); if(!document.getElementById('scrim')) document.body.style.overflow=''; } }
+function openViewer(mid, id){
+  const list=Array.isArray(S.docs[mid])?S.docs[mid]:[]; let i=list.findIndex(x=>x.id===id); if(i<0) return;
+  closeViewer();
+  const v=document.createElement('div'); v.className='viewer'; v.id='viewer'; v.setAttribute('role','dialog'); v.setAttribute('aria-modal','true');
+  document.body.appendChild(v); document.body.style.overflow='hidden';
+  const show=async()=>{
+    const x=list[i], u=docUrl(mid,x);
+    v.innerHTML=\`<div class="vh"><div class="t"><b>\${esc(DOC_KINDS[x.kind]||'Dokument')}</b><span class="num">\${esc(docDay(x))} · \${esc(extOf(x))}\${list.length>1?' · '+(i+1)+' od '+list.length:''}</span></div><a href="\${docUrl(mid,x,true)}">Preuzmi</a><button type="button" data-vclose aria-label="Zatvori">Zatvori</button></div><div class="vb"></div>\${list.length>1?'<button type="button" class="vn p" data-vp aria-label="Prethodni">‹</button><button type="button" class="vn n" data-vn aria-label="Sledeći">›</button>':''}\`;
+    const body=v.querySelector('.vb');
+    if(x.contentType.startsWith('image/')){ body.innerHTML=\`<img src="\${u}" alt="\${esc(DOC_KINDS[x.kind]||'Slika')}">\`; return; }
+    body.innerHTML='<div class="note" style="color:#fff;margin:auto">Učitavam…</div>';
+    try{ const L=await pdfLib(); const doc=await L.getDocument({url:u, withCredentials:true}).promise; if(!v.isConnected || list[i]!==x) return; body.innerHTML='';
+      const w=Math.min(body.clientWidth-16, 900)*(window.devicePixelRatio||1);
+      for(let n=1;n<=doc.numPages;n++){ const c=await renderPdfPage(doc,n,w); if(!v.isConnected || list[i]!==x) return; body.appendChild(c); } }
+    catch(e){ body.innerHTML=\`<div class="note" style="color:#fff;margin:auto;text-align:center">Pregled nije uspeo.<br><a href="\${u}" target="_blank" rel="noopener" style="color:#fff">Otvori u novom prozoru</a></div>\`; }
+  };
+  v.onclick=e=>{ if(e.target.closest('[data-vclose]')) return closeViewer(); if(e.target.closest('[data-vp]')){ i=(i-1+list.length)%list.length; show(); } else if(e.target.closest('[data-vn]')){ i=(i+1)%list.length; show(); } };
+  show();
+}
+window.addEventListener('keydown',e=>{ const v=document.getElementById('viewer'); if(!v) return; if(e.key==='Escape'){ e.stopImmediatePropagation(); closeViewer(); } else if(e.key==='ArrowRight'){ const b=v.querySelector('[data-vn]'); b&&b.click(); } else if(e.key==='ArrowLeft'){ const b=v.querySelector('[data-vp]'); b&&b.click(); } }, true);
+document.addEventListener('click',e=>{ if(e.target.closest('[data-dcdel]')) return; const t=e.target.closest('[data-view]'); if(t) openViewer(t.dataset.mid, t.dataset.view); });
+document.addEventListener('keydown',e=>{ if(e.key!=='Enter' && e.key!==' ') return; const t=e.target.closest && e.target.closest('[data-view]'); if(t && e.target===t){ e.preventDefault(); openViewer(t.dataset.mid, t.dataset.view); } });
 async function shrinkImage(file){
   if(!/^image\\/(jpeg|png|webp)$/.test(file.type)) return file;
   try{
@@ -965,7 +1019,7 @@ function memberSheet(id){
         : \`<div class="card" style="padding:10px 12px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><div class="note">Nema nalog. Sa nalogom vidi svoje dolaske, kilažu, slike i upitnik.</div><button type="button" class="btn sm pri" id="m-accbtn">Napravi nalog</button></div>\`;
       accBox.querySelector('#m-accbtn').onclick=()=> acc ? trainerSheet(acc.id) : trainerSheet(null,{role:'clanica', memberId:m.id});
       const dl=root.querySelector('#dc-list');
-      const drawDocs=()=>{ if(dl.isConnected) dl.innerHTML=docsHtml(m.id,true); };
+      const drawDocs=()=>{ if(dl.isConnected){ dl.innerHTML=docsHtml(m.id,true); hydrateThumbs(dl); } };
       S.docs[m.id]=null; drawDocs(); loadDocs(m.id, drawDocs);
       root.querySelector('#dc-file').onchange=async e=>{
         const files=[...e.target.files]; e.target.value=''; if(!files.length) return;
