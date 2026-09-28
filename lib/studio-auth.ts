@@ -3,7 +3,7 @@ export const STUDIO_COOKIE = "vs_session";
 export const STUDIO_MAX_AGE = 60 * 60 * 24 * 30; // 30 dana
 export const ADMIN_USERNAME = "vanja";
 
-export type Role = "admin" | "trener";
+export type Role = "admin" | "trener" | "clanica";
 export type Session = { uid: string; role: Role };
 
 const enc = new TextEncoder();
@@ -38,7 +38,7 @@ export async function readSession(token: string | undefined): Promise<Session | 
   const parts = token.split(".");
   if (parts.length !== 4) return null;
   const [uid, role, exp, sig] = parts;
-  if (!/^[a-z0-9_-]{1,40}$/.test(uid) || (role !== "admin" && role !== "trener") || !/^\d+$/.test(exp)) return null;
+  if (!/^[a-z0-9_-]{1,40}$/.test(uid) || (role !== "admin" && role !== "trener" && role !== "clanica") || !/^\d+$/.test(exp)) return null;
   if (Number(exp) < Date.now()) return null;
   if (!safeEqual(await hmacHex(s, `${uid}.${role}.${exp}`), sig)) return null;
   return { uid, role };

@@ -24,7 +24,8 @@ export async function getJSON<T>(key: string): Promise<T | null> {
   return JSON.parse(v) as T;
 }
 
-export type Trainer = { id: string; username: string; name: string; salt: string; hash: string; active: boolean; createdAt: string; useAdmin?: boolean };
+export type Trainer = { id: string; username: string; name: string; salt: string; hash: string; active: boolean; createdAt: string; useAdmin?: boolean; role?: "trener" | "clanica"; memberId?: string };
+export const roleOf = (t: Trainer) => (t.role === "clanica" ? "clanica" : "trener") as "trener" | "clanica";
 
 export async function getTrainers(): Promise<Trainer[]> {
   return (await getJSON<Trainer[]>(USERS_KEY)) || [];

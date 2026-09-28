@@ -250,6 +250,21 @@ section.view{display:flex;flex-direction:column;gap:18px}
 .mstats .s{font-size:12px;color:var(--muted)}
 .toast{position:fixed;left:50%;bottom:86px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:999px;font-size:14px;z-index:60;box-shadow:var(--shadow)}
 .note{font-size:13px;color:var(--muted)}
+.pf-hero{display:flex;gap:14px;align-items:center}
+.pf-hero .av{width:52px;height:52px;font-size:18px}
+.pbars{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;align-items:end;height:110px;padding:14px 14px 0}
+.pbars .b{background:var(--wine);border-radius:6px 6px 0 0;min-height:3px;position:relative}
+.pbars .b.cur{background:var(--gold,#B8801F)}
+.pbars .b span{position:absolute;top:-18px;left:0;right:0;text-align:center;font-size:11.5px;color:var(--muted)}
+.kgline{width:100%;height:120px;display:block}
+.ph-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px}
+.ph-grid a{display:block;aspect-ratio:3/4;border-radius:10px;overflow:hidden;background:var(--line);position:relative}
+.ph-grid img{width:100%;height:100%;object-fit:cover;display:block}
+.ph-grid .d{position:absolute;left:0;right:0;bottom:0;font-size:11px;padding:3px 6px;background:rgba(0,0,0,.45);color:#fff}
+.ph-grid .x{position:absolute;top:4px;right:4px;border:0;border-radius:999px;width:24px;height:24px;background:rgba(0,0,0,.55);color:#fff;cursor:pointer;font-size:14px;line-height:24px;padding:0}
+.doc-add{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.doc-add select{border:1px solid var(--line);border-radius:10px;padding:8px;background:var(--surface);color:inherit}
+.doc-add label.btn{cursor:pointer}
 .banner{background:var(--warn-bg);color:var(--warn);border-radius:12px;padding:10px 14px;font-size:13.5px}
 @media (prefers-reduced-motion:no-preference){.sheet{animation:up .18s ease-out}@keyframes up{from{transform:translateY(24px);opacity:.6}}}
 </style>
@@ -310,10 +325,11 @@ const IS_WEB = !!window.VS_WEB;
 const SAVED_LBL = IS_WEB ? 'Sačuvano online' : 'Sačuvano u fajl na računaru';
 let ME={role:'admin', name:'Vanja', id:'admin'};
 const isTrainer = () => ME.role==='trener';
+const isMember = () => ME.role==='clanica';
 let fileMode=false, fileHadData=false, pushTimer=null, pushing=false, pushAgain=false;
 const snapshot = () => ({members:S.members,sessions:S.sessions,payments:S.payments,expenses:S.expenses,settings:S.settings,savedAt:S.savedAt||0});
 function saveLocal(){
-  if(isTrainer()) return;
+  if(ME.role!=='admin') return;
   S.savedAt=Date.now();
   try{ localStorage.setItem(LKEY, JSON.stringify({...snapshot(), serverAt:S.serverAt||0})); }catch(e){}
   if(fileMode){ clearTimeout(pushTimer); pushTimer=setTimeout(pushFile,400); }
@@ -340,7 +356,7 @@ window.addEventListener('pagehide',()=>{ if(fileMode && pushTimer){ clearTimeout
 document.addEventListener('visibilitychange', async ()=>{
   // kad se vratiš na aplikaciju, povuci najnovije (npr. uneto sa telefona)
   if(document.visibilityState!=='visible' || !fileMode || pushTimer || pushing || S.conflict) return;
-  if(isTrainer()){ try{ const r=await fetch(API_URL,{cache:'no-store'}); if(r.status===401){ location.href='/studio/prijava'; return; } const j=await r.json(); if(j&&j.ok&&j.exists){ const f=j.data; S.members=f.members||[]; S.sessions=f.sessions||[]; S.settings=f.settings||S.settings; S.serverAt=f.savedAt||0; if(!document.querySelector('#scrim')) render(); } }catch(e){} return; }
+  if(isTrainer()||isMember()){ try{ const r=await fetch(API_URL,{cache:'no-store'}); if(r.status===401){ location.href='/studio/prijava'; return; } const j=await r.json(); if(j&&j.ok&&j.exists){ const f=j.data; S.members=f.members||[]; S.sessions=f.sessions||[]; S.settings=f.settings||S.settings; S.serverAt=f.savedAt||0; if(!document.querySelector('#scrim')) render(); } }catch(e){} return; }
   try{ const r=await fetch(API_URL,{cache:'no-store'}); const j=await r.json();
     if(j && j.ok && j.exists && (j.data.savedAt||0) > (S.serverAt||0)){ const f=j.data;
       S.members=f.members||[]; S.sessions=f.sessions||[]; S.payments=f.payments||[]; S.expenses=f.expenses||[]; S.settings=f.settings||S.settings; S.savedAt=f.savedAt; S.serverAt=f.savedAt;
@@ -353,10 +369,10 @@ async function connectFile(){
   if(!j || !j.ok){ S.oldServer=true; setSync('Samo u pregledaču','warn'); render(); return; }
   fileMode=true; S.oldServer=false;
   if(j.me){ ME=j.me; applyRole(); }
-  if(isTrainer()){
+  if(isTrainer()||isMember()){
     const f=j.exists?j.data:{};
     S.members=f.members||[]; S.sessions=f.sessions||[]; S.payments=[]; S.expenses=[]; S.settings=f.settings||S.settings; S.serverAt=f.savedAt||0;
-    setSync('Trener: '+ME.name,'ok'); render(); return;
+    setSync(isMember()?ME.name:'Trener: '+ME.name,'ok'); render(); return;
   }
   if(IS_WEB) loadTrainers();
   const f = j.exists ? j.data : null;
@@ -385,7 +401,7 @@ async function connectFile(){
 const COLS = ['members','sessions','payments'];
 
 async function put(col,obj){
-  if(isTrainer()){ toast('Trener može samo da štiklira dolazak.'); return; }
+  if(ME.role!=='admin'){ toast('Trener može samo da štiklira dolazak.'); return; }
   if(mode==='db'){
     try{ await DB.collection(col).doc(obj.id).set(obj); }
     catch(e){ toast(e && e.code==='quota_exceeded' ? 'Baza je puna, obriši stare termine.' : 'Nije sačuvano, probaj ponovo.'); }
@@ -471,7 +487,7 @@ function render(){
   document.querySelectorAll('#tabs button').forEach(b=>b.setAttribute('aria-current', b.dataset.v===S.view?'page':'false'));
   const app=$('#app');
   const y=window.scrollY;
-  app.innerHTML = (S.view!=='danas'?bannerLocal():'') + ({danas:vDanas, termini:vTermini, grupe:vGrupe, clanice:vClanice, pregled:vPregled}[S.view])();
+  app.innerHTML = isMember() ? vProfil() : (S.view!=='danas'?bannerLocal():'') + ({danas:vDanas, termini:vTermini, grupe:vGrupe, clanice:vClanice, pregled:vPregled}[S.view])();
   const si=$('#q'); if(si && S._focusQ){ si.focus(); si.setSelectionRange(si.value.length,si.value.length); }
   window.scrollTo(0,y);
 }
@@ -556,6 +572,8 @@ async function loadBackups(){
 }
 function applyRole(){
   const tr=isTrainer();
+  document.getElementById('tabs').hidden = isMember();
+  if(isMember()){ const lo=document.getElementById('logout'); if(lo) lo.hidden=false; const ac=document.getElementById('accounts'); if(ac) ac.hidden=true; return; }
   document.querySelectorAll('#tabs button').forEach(b=>{ b.hidden = tr && !['danas','termini'].includes(b.dataset.v); });
   document.getElementById('tabs').style.gridTemplateColumns = tr ? 'repeat(2,1fr)' : '';
   if(tr && !['danas','termini'].includes(S.view)) S.view='danas';
@@ -566,12 +584,14 @@ S.trainers=[];
 async function loadTrainers(){
   try{ const r=await fetch('/api/studio/users',{cache:'no-store'}); const j=await r.json(); if(j.ok){ S.trainers=j.trainers; if(!document.querySelector('#scrim')) render(); } }catch(e){}
 }
-const trainerName = id => { const t=(S.trainers||[]).find(x=>x.id===id); return t ? t.name : ''; };
+const trainersOnly = () => (S.trainers||[]).filter(t=>t.role!=='clanica');
+const accountOfMember = mid => (S.trainers||[]).find(t=>t.role==='clanica' && t.memberId===mid);
+const trainerName = id => { const t=trainersOnly().find(x=>x.id===id); return t ? t.name : ''; };
 const trainerLabel = id => trainerName(id) || 'Vanja';
 const firstName = n => (n||'').split(' ')[0];
 function trainerSelect(idAttr, cur){
   if(!IS_WEB || isTrainer()) return '';
-  const opts=[['','Vanja'], ...(S.trainers||[]).filter(t=>t.active||t.id===cur).map(t=>[t.id,t.name+(t.active?'':' (neaktivan)')])];
+  const opts=[['','Vanja'], ...trainersOnly().filter(t=>t.active||t.id===cur).map(t=>[t.id,t.name+(t.active?'':' (neaktivan)')])];
   return \`<div class="field"><label for="\${idAttr}">Trener</label><select id="\${idAttr}">\${opts.map(([v,l])=>\`<option value="\${v}" \${v===(cur||'')?'selected':''}>\${esc(l)}</option>\`).join('')}</select></div>\`;
 }
 async function userAction(body){
@@ -583,7 +603,7 @@ function accountsSheet(){
     <p class="note" style="margin:0">Ovde praviš naloge za prijavu na Vanja Studio. Svako se prijavljuje svojim korisničkim imenom i lozinkom.</p>
     <div class="card list">
       <div class="alert"><span class="av">V</span><div class="main"><div class="nm">Vanja</div><div class="sub">@vanja · vidi i menja sve</div></div><span class="pill mut">Admin</span></div>
-      \${tr.map(t=>\`<button class="item" data-tr="\${t.id}"><span class="av">\${esc(initials(t.name))}</span><div class="main"><div class="nm">\${esc(t.name)}</div><div class="sub">@\${esc(t.username)} · \${t.active?'aktivan':'isključen'}</div></div><span class="pill \${t.active?'ok':'mut'}">Trener</span></button>\`).join('')}
+      \${[...tr].sort((a,b)=>(a.role==='clanica')-(b.role==='clanica') || a.name.localeCompare(b.name,'sr')).map(t=>\`<button class="item" data-tr="\${t.id}"><span class="av">\${esc(initials(t.name))}</span><div class="main"><div class="nm">\${esc(t.name)}</div><div class="sub">@\${esc(t.username)} · \${t.needsPassword?'nema lozinku':t.active?'aktivan':'isključen'}</div></div><span class="pill \${t.active?'ok':'mut'}">\${t.role==='clanica'?'Članica':'Trener'}</span></button>\`).join('')}
     </div>
     <button class="btn pri" id="acc-new" style="align-self:flex-start">+ Nov nalog</button>\`, root=>{
     wireClose(root);
@@ -591,28 +611,127 @@ function accountsSheet(){
     root.querySelector('#acc-new').onclick=()=>trainerSheet(null);
   });
 }
-function trainerSheet(id){
+function trainerSheet(id, preset){
   const t = id ? S.trainers.find(x=>x.id===id) : null;
+  const pre = preset||{};
+  const isCl = t ? t.role==='clanica' : pre.role==='clanica';
+  const freeMem = sorted(S.members.filter(m=>!accountOfMember(m.id) || m.id===pre.memberId));
   openSheet(\`\${sheetHead(t?t.name:'Nov nalog')}
     \${t?\`<div class="note">Korisničko ime: <b>\${esc(t.username)}</b>. \${t.active?'Nalog je aktivan.':'Nalog je isključen, ne može da se prijavi.'}</div>\`:''}
-    \${t?'':\`<div class="field"><span class="fl">Vrsta naloga</span><div class="seg" id="tr-role"><button type="button" class="on" data-k="trener">Trener</button><button type="button" data-k="clanica" disabled title="Uskoro">Članica (uskoro)</button></div></div>
-    <div class="field"><label for="tr-name">Ime i prezime</label><input id="tr-name" autocomplete="off"></div>
-    <div class="field"><label for="tr-user">Korisničko ime (za prijavu)</label><input id="tr-user" autocomplete="off" autocapitalize="none" placeholder="npr. marko"></div>\`}
-    <label style="display:flex;gap:10px;align-items:center"><input id="tr-same" type="checkbox" \${t&&t.sameAsAdmin?'checked':''} style="width:20px;height:20px;accent-color:var(--wine)"> Ista lozinka kao Vanjina</label>
-    <div class="field" id="tr-passf" \${t&&t.sameAsAdmin?'hidden':''}><label for="tr-pass">\${t?'Nova lozinka':'Lozinka'} (bar 8 znakova)</label><input id="tr-pass" type="text" autocomplete="new-password"></div>
+    \${t?'':\`<div class="field"><span class="fl">Vrsta naloga</span><div class="seg" id="tr-role"><button type="button" class="\${isCl?'':'on'}" data-k="trener">Trener</button><button type="button" class="\${isCl?'on':''}" data-k="clanica">Članica</button></div></div>
+    <div class="field" id="tr-namef"><label for="tr-name">Ime i prezime</label><input id="tr-name" autocomplete="off"></div>
+    <div class="field" id="tr-memf"><label for="tr-mem">Članica</label><select id="tr-mem" style="width:100%;border:1px solid var(--line);border-radius:10px;padding:9px;background:var(--surface);color:inherit"><option value="">Izaberi članicu</option>\${freeMem.map(m=>\`<option value="\${m.id}" \${m.id===pre.memberId?'selected':''}>\${esc(m.name)}</option>\`).join('')}</select></div>
+    <div class="field"><label for="tr-user">Korisničko ime (za prijavu)</label><input id="tr-user" autocomplete="off" autocapitalize="none"></div>\`}
+    \${t&&t.needsPassword?'<div class="banner">Ovaj nalog nema svoju lozinku i ne može da se prijavi. Upiši mu lozinku ispod.</div>':''}
+    <div class="field" id="tr-passf"><label for="tr-pass">\${t?'Nova lozinka':'Lozinka'} (bar 8 znakova)</label><input id="tr-pass" type="text" autocomplete="new-password"></div>
     <div class="confirm-slot"></div>
     <div class="row-btns" style="justify-content:space-between">\${t?\`<div class="row-btns"><button class="btn danger" id="tr-del">Obriši</button><button class="btn" id="tr-act">\${t.active?'Isključi nalog':'Uključi nalog'}</button></div>\`:'<span></span>'}<button class="btn pri" id="tr-save">\${t?'Sačuvaj lozinku':'Napravi nalog'}</button></div>
-    <p class="note" style="margin:0">Trener posle prijave vidi samo termine koje si mu dodelila i štiklira ko je došao. Ne vidi uplate, troškove ni beleške.</p>\`, root=>{
+    <p class="note" style="margin:0" id="tr-info"></p>\`, root=>{
     wireClose(root);
-    const same=root.querySelector('#tr-same'); same.onchange=()=>{ root.querySelector('#tr-passf').hidden=same.checked; };
+    const INFO={trener:'Trener posle prijave vidi samo termine koje si mu dodelila i štiklira ko je došao. Ne vidi uplate, troškove ni beleške.', clanica:'Članica posle prijave vidi samo svoj profil: dolaske, kilažu i merenja, svoje slike i dokumente. Ne vidi druge članice ni uplate. Ništa ne može da menja.'};
+    const seg=root.querySelector('#tr-role');
+    const role=()=> t ? (t.role||'trener') : seg.querySelector('.on').dataset.k;
+    const drawRole=()=>{ const r=role(); root.querySelector('#tr-info').textContent=INFO[r]||INFO.trener; if(!t){ root.querySelector('#tr-namef').hidden = r==='clanica'; root.querySelector('#tr-memf').hidden = r!=='clanica'; } };
+    if(seg) seg.onclick=e=>{ const b=e.target.closest('button'); if(!b) return; seg.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b)); drawRole(); };
+    drawRole();
     root.querySelector('#tr-save').onclick=async()=>{
-      const pass=root.querySelector('#tr-pass').value, sameAsAdmin=same.checked;
-      const ok = t ? await userAction({action:'password', id:t.id, password:pass, sameAsAdmin}) : await userAction({action:'create', name:root.querySelector('#tr-name').value, username:root.querySelector('#tr-user').value, password:pass, sameAsAdmin});
+      const pass=root.querySelector('#tr-pass').value;
+      let body;
+      if(!t && role()==='clanica'){ const mid=root.querySelector('#tr-mem').value; const mm=memberById(mid); if(!mm){ toast('Izaberi članicu.'); return; } body={action:'create', role:'clanica', memberId:mid, name:mm.name, username:root.querySelector('#tr-user').value, password:pass}; }
+      else if(!t) body={action:'create', role:'trener', name:root.querySelector('#tr-name').value, username:root.querySelector('#tr-user').value, password:pass};
+      const ok = t ? await userAction({action:'password', id:t.id, password:pass}) : await userAction(body);
       if(ok){ closeSheet(); render(); toast(t?'Lozinka promenjena':'Nalog napravljen'); accountsSheet(); }
     };
     const a=root.querySelector('#tr-act'); if(a) a.onclick=async()=>{ if(await userAction({action:'active', id:t.id, active:!t.active})){ closeSheet(); render(); toast(t.active?'Nalog isključen':'Nalog uključen'); } };
-    const d=root.querySelector('#tr-del'); if(d) d.onclick=()=>confirmBox(root,'Obrisati trenera '+t.name+'? Termini ostaju, samo bez trenera.',async()=>{ if(await userAction({action:'delete', id:t.id})){ closeSheet(); render(); for(const s of S.sessions.filter(s=>s.trainerId===t.id && s.date>=todayISO())) await put('sessions',{...s, trainerId:''}); toast('Trener obrisan'); } });
+    const d=root.querySelector('#tr-del'); if(d) d.onclick=()=>confirmBox(root, isCl ? 'Obrisati nalog za '+t.name+'? Članica, merenja i dokumenti ostaju, samo više ne može da se prijavi.' : 'Obrisati trenera '+t.name+'? Termini ostaju, a vodi ih Vanja.',async()=>{ if(await userAction({action:'delete', id:t.id})){ closeSheet(); render(); if(!isCl) for(const s of S.sessions.filter(s=>s.trainerId===t.id && s.date>=todayISO())) await put('sessions',{...s, trainerId:''}); toast('Nalog obrisan'); } });
   });
+}
+/* ---------- privatni dokumenti i profil članice ---------- */
+S.docs={};
+const DOC_KINDS={slika:'Slika merenja', upitnik:'Upitnik', dokument:'Dokument'};
+const docUrl = (mid,d,dl) => \`/api/studio/docs/file?m=\${encodeURIComponent(mid)}&id=\${encodeURIComponent(d.id)}\${dl?'&dl=1':''}\`;
+async function loadDocs(mid, after){
+  try{ const r=await fetch('/api/studio/docs?m='+encodeURIComponent(mid),{cache:'no-store'}); const j=await r.json(); S.docs[mid]= j.ok ? j.docs : {error:true}; }catch(e){ S.docs[mid]={error:true}; }
+  after && after();
+}
+function docsHtml(mid, canDel){
+  const d=S.docs[mid];
+  if(d===undefined || d===null) return '<div class="note">Učitavam…</div>';
+  if(d.error) return '<div class="note">Dokumenti trenutno nisu dostupni.</div>';
+  const pics=d.filter(x=>x.contentType.startsWith('image/'));
+  const files=d.filter(x=>!x.contentType.startsWith('image/'));
+  const day = x => { const t=(x.uploadedAt||'').slice(0,10); return t?fmtShort(t)+' '+t.slice(0,4):''; };
+  let h='';
+  if(pics.length) h+=\`<div class="ph-grid">\${pics.map(x=>\`<a href="\${docUrl(mid,x)}" target="_blank" rel="noopener" title="\${esc(DOC_KINDS[x.kind]||'')}"><img loading="lazy" src="\${docUrl(mid,x)}" alt="\${esc(DOC_KINDS[x.kind]||'Slika')} \${esc(day(x))}"><span class="d num">\${esc(day(x))}</span>\${canDel?\`<button type="button" class="x" data-dcdel="\${x.id}" aria-label="Obriši sliku">×</button>\`:''}</a>\`).join('')}</div>\`;
+  if(files.length) h+=\`<div class="card list">\${files.map(x=>\`<div class="alert" style="padding:9px 12px"><div class="main"><div class="nm">\${esc(DOC_KINDS[x.kind]||'Dokument')}</div><div class="sub">\${esc(x.name)} · \${esc(day(x))}</div></div><a class="btn sm" href="\${docUrl(mid,x)}" target="_blank" rel="noopener">Otvori</a>\${canDel?\`<button type="button" class="btn ghost sm" data-dcdel="\${x.id}" style="color:var(--bad)">Obriši</button>\`:''}</div>\`).join('')}</div>\`;
+  return h || \`<div class="empty">\${canDel?'Još nema slika ni dokumenata.':'Još nema slika ni dokumenata.'}</div>\`;
+}
+async function shrinkImage(file){
+  if(!/^image\\/(jpeg|png|webp)$/.test(file.type)) return file;
+  try{
+    const bmp=await createImageBitmap(file); const max=1600; const k=Math.min(1, max/Math.max(bmp.width,bmp.height));
+    if(k===1 && file.size<1500000) return file;
+    const c=document.createElement('canvas'); c.width=Math.round(bmp.width*k); c.height=Math.round(bmp.height*k);
+    c.getContext('2d').drawImage(bmp,0,0,c.width,c.height);
+    const blob=await new Promise(r=>c.toBlob(r,'image/jpeg',0.85)); if(!blob) return file;
+    return new File([blob], (file.name||'slika').replace(/\\.\\w+$/,'')+'.jpg', {type:'image/jpeg'});
+  }catch(e){ return file; }
+}
+async function uploadDoc(mid, kind, file){
+  const f=await shrinkImage(file);
+  if(f.size>4000000){ toast('Fajl je veći od 4 MB.'); return false; }
+  const fd=new FormData(); fd.append('m',mid); fd.append('kind',kind); fd.append('file',f);
+  try{ const r=await fetch('/api/studio/docs',{method:'POST',body:fd}); const j=await r.json().catch(()=>({})); if(!j.ok){ toast(j.error||'Slanje nije uspelo.'); return false; } return true; }
+  catch(e){ toast('Slanje nije uspelo, proveri internet.'); return false; }
+}
+async function deleteDoc(mid, id){
+  try{ const r=await fetch('/api/studio/docs?m='+encodeURIComponent(mid)+'&id='+encodeURIComponent(id),{method:'DELETE'}); return r.ok; }catch(e){ return false; }
+}
+function kgSvg(pts){
+  if(pts.length<2) return '';
+  const W=320,H=120,P=16; const ks=pts.map(x=>x.kg); const lo=Math.min(...ks), hi=Math.max(...ks), span=Math.max(1,hi-lo);
+  const t0=parse(pts[0].d).getTime(), t1=parse(pts[pts.length-1].d).getTime(), ts=Math.max(1,t1-t0);
+  const xy=pts.map(x=>[P+(parse(x.d).getTime()-t0)/ts*(W-2*P), P+(hi-x.kg)/span*(H-2*P)]);
+  return \`<svg class="kgline" viewBox="0 0 \${W} \${H}" preserveAspectRatio="none" role="img" aria-label="Kilaža kroz vreme"><polyline points="\${xy.map(p=>p.map(n=>n.toFixed(1)).join(',')).join(' ')}" fill="none" stroke="var(--wine)" stroke-width="2.5" vector-effect="non-scaling-stroke" stroke-linejoin="round"/>\${xy.map(p=>\`<circle cx="\${p[0].toFixed(1)}" cy="\${p[1].toFixed(1)}" r="3.5" fill="var(--wine)"/>\`).join('')}</svg>\`;
+}
+function vProfil(){
+  const m=S.members[0];
+  if(!m) return '<section class="view"><div class="empty">Profil nije pronađen. Javi se Vanji.</div></section>';
+  const t=todayISO(), mk=monthKey(t);
+  const mine=S.sessions.filter(s=>(s.memberIds||[]).includes(m.id));
+  const past=mine.filter(s=>s.date<=t);
+  const came=past.filter(s=>(s.attended||[]).includes(m.id));
+  const pct = past.length ? Math.round(came.length/past.length*100) : null;
+  const months=[...Array(6)].map((_,i)=>shiftMonth(mk,i-5));
+  const perM=months.map(k=>came.filter(s=>s.date.startsWith(k)).length); const mx=Math.max(1,...perM);
+  const next=mine.filter(s=>s.date>t || (s.date===t)).sort((a,b)=>(a.date+(a.time||'')).localeCompare(b.date+(b.time||''))).slice(0,5);
+  const mere=[...(m.mere||[])].sort((a,b)=>a.d.localeCompare(b.d));
+  const withKg=mere.filter(x=>x.kg!==null && x.kg!==undefined);
+  const fk = n => (Math.round(n*10)/10).toString().replace('.',',');
+  let kgBox='';
+  if(withKg.length){ const a=withKg[0], z=withKg[withKg.length-1], diff=z.kg-a.kg;
+    kgBox=\`<div class="kpis"><div class="kpi"><div class="label">Početak</div><div class="v num">\${fk(a.kg)}</div><div class="s">kg, \${fmtShort(a.d)}</div></div><div class="kpi"><div class="label">Sada</div><div class="v num">\${fk(z.kg)}</div><div class="s">kg, \${fmtShort(z.d)}</div></div><div class="kpi"><div class="label">Promena</div><div class="v num" style="color:var(--\${diff<=0?'ok':'warn'})">\${diff>0?'+':diff<0?'−':''}\${fk(Math.abs(diff))}</div><div class="s">kg ukupno</div></div></div>\${withKg.length>1?\`<div class="card" style="padding:8px 6px">\${kgSvg(withKg)}</div>\`:''}\`; }
+  if(S.docs[m.id]===undefined){ S.docs[m.id]=null; loadDocs(m.id, ()=>{ if(isMember()) render(); }); }
+  const gs=mGroups(m);
+  return \`<section class="view">
+    <div class="pf-hero"><span class="av">\${esc(initials(m.name))}</span><div><h2 style="margin:0">Zdravo, \${esc(firstName(m.name))}</h2><div class="note">\${gs.length?esc(gs.map(groupName).join(' / ')):'Vanja Fitness'}\${m.start?' · sa nama od '+fmtShort(m.start)+' '+m.start.slice(0,4):''}</div></div></div>
+    <div class="kpis">
+      <div class="kpi"><div class="label">Ovog meseca</div><div class="v num">\${perM[5]}</div><div class="s">\${perM[5]===1?'trening':'treninga'}</div></div>
+      <div class="kpi"><div class="label">Ukupno</div><div class="v num">\${came.length}</div><div class="s">treninga</div></div>
+      <div class="kpi"><div class="label">Dolaznost</div><div class="v num">\${pct===null?'–':pct+'%'}</div><div class="s">\${past.length?came.length+' od '+past.length+' termina':'još nema termina'}</div></div>
+    </div>
+    <div class="sec-h"><h2>Dolasci po mesecima</h2></div>
+    <div class="card"><div class="pbars">\${perM.map((v,i)=>\`<div class="b \${i===5?'cur':''}" style="height:\${Math.round(v/mx*100)}%"><span class="num">\${v||''}</span></div>\`).join('')}</div><div class="bars-x">\${months.map(k=>\`<span>\${MES_K[+k.slice(5)-1]}</span>\`).join('')}</div></div>
+    \${m.paket?\`<div class="card" style="padding:12px 14px"><div style="font-weight:500">Personalni paket: ostalo \${Math.max(paketLeft(m),0)} od \${m.paket}</div></div>\`:''}
+    <div class="sec-h"><h2>Sledeći treninzi</h2></div>
+    \${next.length?\`<div class="card list">\${next.map(s=>\`<div class="alert"><span class="dot" style="background:\${s.groupId?colorOfId(s.groupId):'var(--wine)'}"></span><div class="main"><div class="nm">\${esc(fmtDay(s.date))} u \${esc(s.time||'')}</div><div class="sub">\${esc(s.title||'')}\${s.trainerName?' · trener '+esc(s.trainerName):''}</div></div></div>\`).join('')}</div>\`:'<div class="empty">Nema zakazanih treninga.</div>'}
+    <div class="sec-h"><h2>Kilaža i merenja</h2></div>
+    \${kgBox}
+    \${mere.length?\`<div class="card list">\${[...mere].reverse().map(x=>\`<div class="alert" style="padding:9px 12px"><div class="main"><div class="nm num">\${fmtShort(x.d)} \${x.d.slice(0,4)}\${x.kg!=null?' · '+fk(x.kg)+' kg':''}</div>\${x.t?\`<div class="sub">\${esc(x.t)}</div>\`:''}</div></div>\`).join('')}</div>\`:'<div class="empty">Još nema merenja.</div>'}
+    <div class="sec-h"><h2>Moje slike i dokumenti</h2></div>
+    \${docsHtml(m.id,false)}
+    <p class="note" style="margin:0">Ovo vidite samo ti i Vanja.</p>
+  </section>\`;
 }
 function bannerLocal(){ if(S.conflict) return '<div class="banner" style="background:var(--bad-bg);color:var(--bad)">Podaci su u međuvremenu promenjeni na drugom uređaju, pa ova izmena nije sačuvana. <button class="btn sm" onclick="location.reload()">Učitaj najnovije</button></div>'; if(IS_WEB && S.oldServer) return '<div class="banner">Baza još nije povezana: podaci se za sad čuvaju samo u ovom pregledaču, na ovom uređaju.</div>'; return S.oldServer ? '<div class="banner">Podaci su sačuvani samo u pregledaču. Da bi se čuvali i u fajl: zatvori prozor „Vanja Studio server“ na traci dole, pa ponovo pokreni „Pokreni Vanja Studio“.</div>' : ''; }
 
@@ -797,6 +916,11 @@ function memberSheet(id){
       <div class="mr-add"><input type="date" id="mr-d" value="\${todayISO()}" aria-label="Datum merenja"><input id="mr-kg" inputmode="decimal" placeholder="kg" aria-label="Kilaža"><input id="mr-t" placeholder="struk, kukovi, butina…" aria-label="Mere" autocomplete="off"><button type="button" class="btn sm" id="mr-add">+ Dodaj</button></div>
       <div id="mr-list"></div>
     </div>
+    \${!isNew && IS_WEB?\`<div class="field"><span class="fl">Nalog za prijavu</span><div id="m-acc"></div></div>
+    <div class="field"><span class="fl">Slike i dokumenti (privatno)</span>
+      <div class="doc-add"><select id="dc-kind" aria-label="Vrsta"><option value="slika">Slika merenja</option><option value="upitnik">Upitnik</option><option value="dokument">Drugi dokument</option></select><label class="btn sm">+ Dodaj fajl<input type="file" id="dc-file" accept="image/*,application/pdf" multiple hidden></label></div>
+      <div id="dc-list"></div>
+      <div class="note">Vidite ih samo ti i ona, kad ima nalog. Trener ih ne vidi. Slike i PDF do 4 MB.</div></div>\`:''}
     \${!isNew?\`<div class="field"><span class="fl">Uplate</span>\${pays.length?\`<div class="card list">\${pays.map(p=>\`<div class="alert"><div class="main"><div class="nm">\${fmtMonth(p.month)}</div><div class="sub">\${fmtShort(p.date)}\${p.kind==='paket'?' · paket':''}</div></div><span class="num" style="font-weight:600">\${money(p.amount)}</span></div>\`).join('')}</div>\`:'<div class="empty">Nema uplata.</div>'}<button class="btn" id="m-pay" style="align-self:flex-start">Evidentiraj uplatu</button></div>\`:''}
     <div class="confirm-slot"></div>
     <div class="row-btns" style="justify-content:space-between">\${!isNew?'<button class="btn danger" id="m-del">Obriši</button>':'<span></span>'}<button class="btn pri" id="m-save">Sačuvaj</button></div>
@@ -821,6 +945,28 @@ function memberSheet(id){
       mere.push({id:uid(), d, kg, t}); root.querySelector('#mr-kg').value=''; root.querySelector('#mr-t').value=''; drawMere(); toast('Dodato, klikni Sačuvaj');
     };
     root.querySelector('#mr-list').onclick=e=>{ const b=e.target.closest('[data-mrm]'); if(!b) return; mere=mere.filter(x=>x.id!==b.dataset.mrm); drawMere(); };
+    const accBox=root.querySelector('#m-acc');
+    if(accBox){
+      const acc=accountOfMember(m.id);
+      accBox.innerHTML = acc ? \`<div class="card" style="padding:10px 12px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><div><div style="font-weight:500">@\${esc(acc.username)}</div><div class="note">\${acc.active?'Može da se prijavi i vidi svoj profil.':'Nalog je isključen.'}</div></div><button type="button" class="btn sm" id="m-accbtn">Uredi nalog</button></div>\`
+        : \`<div class="card" style="padding:10px 12px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><div class="note">Nema nalog. Sa nalogom vidi svoje dolaske, kilažu, slike i upitnik.</div><button type="button" class="btn sm pri" id="m-accbtn">Napravi nalog</button></div>\`;
+      accBox.querySelector('#m-accbtn').onclick=()=> acc ? trainerSheet(acc.id) : trainerSheet(null,{role:'clanica', memberId:m.id});
+      const dl=root.querySelector('#dc-list');
+      const drawDocs=()=>{ if(dl.isConnected) dl.innerHTML=docsHtml(m.id,true); };
+      S.docs[m.id]=null; drawDocs(); loadDocs(m.id, drawDocs);
+      root.querySelector('#dc-file').onchange=async e=>{
+        const files=[...e.target.files]; e.target.value=''; if(!files.length) return;
+        const kind=root.querySelector('#dc-kind').value; let n=0;
+        toast('Šaljem…');
+        for(const f of files){ if(await uploadDoc(m.id, kind, f)) n++; }
+        if(n){ toast(n===1?'Fajl dodat':'Dodato fajlova: '+n); await loadDocs(m.id, drawDocs); }
+      };
+      dl.onclick=e=>{ const b=e.target.closest('[data-dcdel]'); if(!b) return; e.preventDefault(); e.stopPropagation();
+        const id=b.dataset.dcdel;
+        confirmBox(root,'Obrisati ovaj fajl? Ne može da se vrati.',async()=>{ root.querySelector('.confirm-slot').innerHTML=''; if(await deleteDoc(m.id,id)){ toast('Obrisano'); await loadDocs(m.id, drawDocs); } else toast('Brisanje nije uspelo.'); });
+        root.querySelector('.confirm-slot').scrollIntoView({block:'nearest'});
+      };
+    }
     const gBox=root.querySelector('#m-groups'), rotWrap=root.querySelector('#m-rotwrap'), rotSeg=root.querySelector('#m-rot'), rotCur=root.querySelector('#m-rotcur'), rotSel=root.querySelector('#m-rotsel');
     const checkedG=()=>[...gBox.querySelectorAll('input:checked')].map(x=>x.value);
     const curIdx=()=>{ const gs=mGroups(m); if(!(m.rotate && gs.length>1)) return 0; const a=activeGroupsOn(m,planWeek())[0]; return Math.max(0, gs.indexOf(a)); };
@@ -844,8 +990,8 @@ function memberSheet(id){
     };
     const np=root.querySelector('#m-newpak'); if(np) np.onclick=async()=>{ await put('members',{...m, paketOd:todayISO()}); closeSheet(); toast('Nov paket počinje danas'); };
     const pb=root.querySelector('#m-pay'); if(pb) pb.onclick=()=>paySheet(m.id);
-    const db=root.querySelector('#m-del'); if(db) db.onclick=()=>confirmBox(root,'Obrisati '+m.name+'? Uplate ostaju u istoriji.',async()=>{
-      closeSheet(); await del('members',m.id);
+    const db=root.querySelector('#m-del'); if(db) db.onclick=()=>confirmBox(root,'Obrisati '+m.name+'? Uplate ostaju u istoriji.'+(IS_WEB?' Briše se i njen nalog za prijavu, a slike i dokumenti ostaju sačuvani.':''),async()=>{
+      closeSheet(); const acc=IS_WEB && accountOfMember(m.id); if(acc) await userAction({action:'delete', id:acc.id}); await del('members',m.id);
       for(const s of S.sessions.filter(s=>(s.memberIds||[]).includes(m.id) && s.date>=todayISO())){ await put('sessions',{...s, memberIds:s.memberIds.filter(x=>x!==m.id), attended:(s.attended||[]).filter(x=>x!==m.id)}); }
       toast('Obrisano');
     });

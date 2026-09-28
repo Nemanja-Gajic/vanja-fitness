@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { ADMIN_USERNAME, STUDIO_COOKIE, STUDIO_MAX_AGE, createSessionToken, safeEqual, verifyPassword } from "../../../../lib/studio-auth";
-import { dbReady, getTrainers } from "../../../../lib/studio-db";
+import { dbReady, getTrainers, roleOf } from "../../../../lib/studio-db";
 
 export const dynamic = "force-dynamic";
 
@@ -11,16 +11,16 @@ export async function POST(req: Request) {
   const base = new URL(req.url);
   const secretOk = (process.env.STUDIO_SECRET || "").length >= 16;
 
-  let session: { uid: string; role: "admin" | "trener" } | null = null;
+  let session: { uid: string; role: "admin" | "trener" | "clanica" } | null = null;
   if (secretOk && username === ADMIN_USERNAME) {
     const prava = process.env.STUDIO_PASSWORD || "";
     if (prava && safeEqual(lozinka, prava)) session = { uid: "admin", role: "admin" };
   } else if (secretOk && username && dbReady()) {
     try {
       const t = (await getTrainers()).find((x) => x.username === username && x.active);
-      const prava = process.env.STUDIO_PASSWORD || "";
-      const ok = t && (t.useAdmin ? !!prava && safeEqual(lozinka, prava) : await verifyPassword(lozinka, t.salt, t.hash));
-      if (t && ok) session = { uid: t.id, role: "trener" };
+      // nalog mora imati svoju lozinku (deljenje Vanjine lozinke nije dozvoljeno)
+      const ok = t && !t.useAdmin && !!t.hash && (await verifyPassword(lozinka, t.salt, t.hash));
+      if (t && ok) session = { uid: t.id, role: roleOf(t) };
     } catch {}
   }
 

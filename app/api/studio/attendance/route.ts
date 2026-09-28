@@ -8,6 +8,7 @@ export const dynamic = "force-dynamic";
 export async function POST(req: Request) {
   const me = await sessionFrom(req);
   if (!me) return NextResponse.json({ ok: false }, { status: 401 });
+  if (me.role === "clanica") return NextResponse.json({ ok: false }, { status: 403 });
   if (!dbReady()) return NextResponse.json({ ok: false }, { status: 501 });
   const b = (await req.json().catch(() => null)) as { sessionId?: string; memberId?: string; present?: boolean } | null;
   if (!b || typeof b.sessionId !== "string" || typeof b.memberId !== "string") return NextResponse.json({ ok: false }, { status: 400 });

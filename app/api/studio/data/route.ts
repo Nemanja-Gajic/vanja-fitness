@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { DATA_KEY, dbReady, getTrainers, redis } from "../../../../lib/studio-db";
+import { DATA_KEY, dbReady, getTrainers, redis, roleOf } from "../../../../lib/studio-db";
 import { sessionFrom } from "../../../../lib/studio-session";
 
 export const dynamic = "force-dynamic";
@@ -8,7 +8,7 @@ const BACKUP_DAYS = 60;
 const MAX_BYTES = 4_000_000;
 const noStore = { "Cache-Control": "no-store" };
 
-type Sess = { id: string; trainerId?: string; memberIds?: string[] };
+type Sess = { id: string; trainerId?: string; memberIds?: string[]; attended?: string[]; date?: string; time?: string; title?: string; groupId?: string; kind?: string };
 type Data = { members?: { id: string; name: string }[]; sessions?: Sess[]; settings?: { groups?: unknown[]; slots?: unknown }; savedAt?: number };
 
 // Trener vidi samo svoje termine i imena članica iz njih. Bez uplata, troškova i beleški.
@@ -20,6 +20,18 @@ function forTrainer(d: Data, uid: string) {
   return { members, sessions, payments: [], expenses: [], settings, savedAt: d.savedAt || 0 };
 }
 
+// Članica vidi samo sebe: svoje termine (bez drugih imena), svoje merenja i grupe.
+function forMember(d: Data & { members?: Record<string, unknown>[] }, memberId: string, trainerNames: Record<string, string>) {
+  const m = (d.members || []).find((x) => x.id === memberId) as Record<string, unknown> | undefined;
+  if (!m) return null;
+  const me = { id: m.id, name: m.name, groups: m.groups || (m.group ? [m.group] : []), mere: m.mere || [], start: m.start || "", status: m.status || "aktivna", paket: m.paket || 0, paketOd: m.paketOd || "" };
+  const sessions = (d.sessions || [])
+    .filter((s) => (s.memberIds || []).includes(memberId))
+    .map((s) => ({ id: s.id, date: s.date, time: s.time, title: s.title, groupId: s.groupId, kind: s.kind, trainerName: s.trainerId ? trainerNames[s.trainerId] || "" : "Vanja", memberIds: [memberId], attended: (s.attended || []).includes(memberId) ? [memberId] : [] }));
+  const settings = { groups: d.settings?.groups || [], slots: d.settings?.slots };
+  return { members: [me], sessions, payments: [], expenses: [], settings, savedAt: d.savedAt || 0 };
+}
+
 export async function GET(req: Request) {
   const me = await sessionFrom(req);
   if (!me) return NextResponse.json({ ok: false }, { status: 401 });
@@ -27,17 +39,27 @@ export async function GET(req: Request) {
   try {
     const v = await redis(["GET", DATA_KEY]);
     let name = "Vanja";
-    if (me.role === "trener") {
-      const t = (await getTrainers()).find((x) => x.id === me.uid && x.active);
+    let memberId = "";
+    const accounts = me.role === "admin" ? [] : await getTrainers();
+    if (me.role !== "admin") {
+      const t = accounts.find((x) => x.id === me.uid && x.active && roleOf(x) === me.role);
       if (!t) return NextResponse.json({ ok: false }, { status: 401 });
       name = t.name;
+      memberId = t.memberId || "";
     }
-    const meOut = { id: me.uid, role: me.role, name };
+    const meOut = { id: me.uid, role: me.role, name, memberId };
     if (typeof v !== "string" || !v) return NextResponse.json({ ok: true, exists: false, me: meOut }, { headers: noStore });
     if (me.role === "admin") {
       return new NextResponse(`{"ok":true,"exists":true,"me":${JSON.stringify(meOut)},"data":${v}}`, {
         headers: { ...noStore, "Content-Type": "application/json; charset=utf-8" },
       });
+    }
+    if (me.role === "clanica") {
+      const names: Record<string, string> = {};
+      accounts.forEach((a) => (names[a.id] = a.name));
+      const out = forMember(JSON.parse(v), memberId, names);
+      if (!out) return NextResponse.json({ ok: false }, { status: 401 });
+      return NextResponse.json({ ok: true, exists: true, me: meOut, data: out }, { headers: noStore });
     }
     return NextResponse.json({ ok: true, exists: true, me: meOut, data: forTrainer(JSON.parse(v), me.uid) }, { headers: noStore });
   } catch {
