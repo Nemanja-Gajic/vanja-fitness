@@ -23,9 +23,19 @@ const html = `<!doctype html>
 @media (min-width:600px){.tg{grid-template-columns:56px repeat(5,1fr)}.tg-s{font-size:13px;padding:6px 7px}.tg-hr{font-size:12.5px}}
 .filters .fc{font-weight:600;margin-left:3px;opacity:.75}
 .item .kn{font-size:13px;color:var(--gold);font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.mr-add{display:grid;grid-template-columns:auto 70px 1fr auto;gap:6px}
-.mr-add input{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:9px 10px;min-width:0;width:100%}
-@media (max-width:480px){.mr-add{grid-template-columns:1fr 80px}.mr-add #mr-t{grid-column:1/-1}.mr-add .btn{grid-column:1/-1}}
+.mr-add{display:flex;flex-direction:column;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px}
+.mr-add input{border:1px solid var(--line);background:var(--bg);border-radius:10px;padding:9px 10px;min-width:0;width:100%;color:inherit}
+.mr-top{display:grid;grid-template-columns:1fr 110px;gap:8px}
+.mr-f{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+@media (max-width:480px){.mr-f{grid-template-columns:repeat(3,1fr)}}
+.mr-f label,.mr-top label{display:flex;flex-direction:column;gap:3px;font-size:12px;color:var(--muted)}
+.mr-vals{display:flex;flex-wrap:wrap;gap:4px 10px;font-size:12.5px;color:var(--muted);margin-top:2px}
+.mr-vals b{color:var(--ink);font-weight:600}
+.mr-tbl{width:100%;border-collapse:collapse;font-size:13.5px}
+.mr-tbl th,.mr-tbl td{padding:8px 10px;text-align:right;border-bottom:1px solid var(--line)}
+.mr-tbl th:first-child,.mr-tbl td:first-child{text-align:left}
+.mr-tbl th{font-size:11.5px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.mr-tbl tr:last-child td{border-bottom:0}
 .mr-sum{display:flex;gap:12px;align-items:center;flex-wrap:wrap;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:14px}
 .alert .main{flex:1;min-width:0}
 .alert .nm{font-weight:500}
@@ -764,6 +774,14 @@ async function uploadDoc(mid, kind, file){
 async function deleteDoc(mid, id){
   try{ const r=await fetch('/api/studio/docs?m='+encodeURIComponent(mid)+'&id='+encodeURIComponent(id),{method:'DELETE'}); return r.ok; }catch(e){ return false; }
 }
+const MERE_F=[['ruke','Ruke'],['grudi','Grudi'],['struk','Struk'],['stomak','Stomak'],['kukovi','Kukovi'],['noga','Noga'],['list','List']];
+const fmt1 = n => (Math.round(n*10)/10).toString().replace('.',',');
+const mereVals = x => { const o=[]; if(x.kg!=null) o.push(\`<span>Kilaža <b class="num">\${fmt1(x.kg)} kg</b></span>\`); MERE_F.forEach(([k,l])=>{ const v=(x.m||{})[k]; if(v!=null) o.push(\`<span>\${l} <b class="num">\${fmt1(v)}</b></span>\`); }); return o.length?\`<div class="mr-vals">\${o.join('')}</div>\`:''; };
+function mereTable(mere){
+  const rows=[['kg','Kilaža (kg)',x=>x.kg],...MERE_F.map(([k,l])=>[k,l+' (cm)',x=>(x.m||{})[k]])].map(([k,l,get])=>{ const h=mere.filter(x=>get(x)!=null); if(!h.length) return ''; const a=get(h[0]), z=get(h[h.length-1]), d=z-a;
+    return \`<tr><td>\${l}</td><td class="num">\${fmt1(a)}</td><td class="num">\${fmt1(z)}</td><td class="num">\${h.length>1?(d>0?'+':d<0?'−':'')+fmt1(Math.abs(d)):''}</td></tr>\`; }).join('');
+  return rows ? \`<div class="card" style="padding:4px 2px"><table class="mr-tbl"><thead><tr><th>Mera</th><th>Početak</th><th>Sada</th><th>Promena</th></tr></thead><tbody>\${rows}</tbody></table></div>\` : '';
+}
 function kgSvg(pts){
   if(pts.length<2) return '';
   const W=320,H=120,P=16; const ks=pts.map(x=>x.kg); const lo=Math.min(...ks), hi=Math.max(...ks), span=Math.max(1,hi-lo);
@@ -808,7 +826,8 @@ function vProfil(){
     \${next.length?\`<div class="sec-h"><h2 style="font-size:17px">Posle toga</h2></div><div class="card list">\${next.map(sessRow).join('')}</div>\`:''}
     <div class="sec-h"><h2>Kilaža i merenja</h2></div>
     \${kgBox}
-    \${mere.length?\`<div class="card list">\${[...mere].reverse().map(x=>\`<div class="alert" style="padding:9px 12px"><div class="main"><div class="nm num">\${fmtShort(x.d)} \${x.d.slice(0,4)}\${x.kg!=null?' · '+fk(x.kg)+' kg':''}</div>\${x.t?\`<div class="sub">\${esc(x.t)}</div>\`:''}</div></div>\`).join('')}</div>\`:'<div class="empty">Još nema merenja.</div>'}
+    \${mereTable(mere)}
+    \${mere.length?\`<div class="sec-h"><h2 style="font-size:17px">Sva merenja</h2></div><div class="card list">\${[...mere].reverse().map(x=>\`<div class="alert" style="padding:9px 12px"><div class="main"><div class="nm num">\${fmtShort(x.d)} \${x.d.slice(0,4)}</div>\${mereVals(x)}\${x.t?\`<div class="sub">\${esc(x.t)}</div>\`:''}</div></div>\`).join('')}</div>\`:'<div class="empty">Još nema merenja.</div>'}
     <div class="sec-h"><h2>Moje slike i dokumenti</h2></div>
     \${docsHtml(m.id,false)}
     <p class="note" style="margin:0">Ovo vidite samo ti i Vanja.</p>
@@ -1003,7 +1022,12 @@ function memberSheet(id){
     <div class="field"><label for="m-note">Kada kreće (vidi se pored imena u listi)</label><input id="m-note" value="\${esc(m.note||'')}" placeholder="npr. kreće 1. oktobra, dolazi pon i pet" autocomplete="off"></div>
     <div class="field"><span class="fl">Kilaža i merenja</span>
       <div id="mr-sum"></div>
-      <div class="mr-add"><input type="date" id="mr-d" value="\${todayISO()}" aria-label="Datum merenja"><input id="mr-kg" inputmode="decimal" placeholder="kg" aria-label="Kilaža"><input id="mr-t" placeholder="struk, kukovi, butina…" aria-label="Mere" autocomplete="off"><button type="button" class="btn sm" id="mr-add">+ Dodaj</button></div>
+      <div class="mr-add">
+        <div class="mr-top"><label>Datum<input type="date" id="mr-d" value="\${todayISO()}"></label><label>Kilaža (kg)<input id="mr-kg" inputmode="decimal" autocomplete="off"></label></div>
+        <div class="mr-f">\${MERE_F.map(([k,l])=>\`<label>\${l} (cm)<input data-mf="\${k}" inputmode="decimal" autocomplete="off"></label>\`).join('')}</div>
+        <label style="display:flex;flex-direction:column;gap:3px;font-size:12px;color:var(--muted)">Napomena<input id="mr-t" autocomplete="off"></label>
+        <button type="button" class="btn sm" id="mr-add" style="align-self:flex-start">+ Dodaj merenje</button>
+      </div>
       <div id="mr-list"></div>
     </div>
     \${!isNew && IS_WEB?\`<div class="field"><span class="fl">Nalog za prijavu</span><div id="m-acc"></div></div>
@@ -1022,17 +1046,19 @@ function memberSheet(id){
     const drawMere=()=>{
       mere.sort((a,b)=>a.d.localeCompare(b.d));
       const withKg=mere.filter(x=>x.kg!==null && x.kg!==undefined);
-      const sum=root.querySelector('#mr-sum');
+      const sum=root.querySelector('#mr-sum'); const tbl=mereTable(mere);
       if(withKg.length>=2){ const a=withKg[0], z=withKg[withKg.length-1], diff=z.kg-a.kg;
-        sum.innerHTML=\`<div class="mr-sum"><span>Početak <b class="num">\${fmtKg(a.kg)} kg</b></span><span>Sada <b class="num">\${fmtKg(z.kg)} kg</b></span><span class="pill \${diff<=0?'ok':'warn'} num">\${diff>0?'+':''}\${fmtKg(diff)} kg</span></div>\`; }
-      else sum.innerHTML='';
-      root.querySelector('#mr-list').innerHTML = mere.length ? \`<div class="card list">\${[...mere].reverse().map(x=>\`<div class="alert" style="padding:9px 12px"><div class="main"><div class="nm num">\${fmtShort(x.d)} \${x.d.slice(0,4)}\${x.kg!=null?' · '+fmtKg(x.kg)+' kg':''}</div>\${x.t?\`<div class="sub">\${esc(x.t)}</div>\`:''}</div><button type="button" class="btn ghost sm" data-mrm="\${esc(x.id)}" style="color:var(--bad)">Obriši</button></div>\`).join('')}</div>\` : '<div class="empty">Još nema merenja.</div>';
+        sum.innerHTML=\`<div class="mr-sum"><span>Početak <b class="num">\${fmtKg(a.kg)} kg</b></span><span>Sada <b class="num">\${fmtKg(z.kg)} kg</b></span><span class="pill \${diff<=0?'ok':'warn'} num">\${diff>0?'+':''}\${fmtKg(diff)} kg</span></div>\`+(mere.length>1?tbl:''); }
+      else sum.innerHTML=mere.length>1?tbl:'';
+      root.querySelector('#mr-list').innerHTML = mere.length ? \`<div class="card list">\${[...mere].reverse().map(x=>\`<div class="alert" style="padding:9px 12px"><div class="main"><div class="nm num">\${fmtShort(x.d)} \${x.d.slice(0,4)}</div>\${mereVals(x)}\${x.t?\`<div class="sub">\${esc(x.t)}</div>\`:''}</div><button type="button" class="btn ghost sm" data-mrm="\${esc(x.id)}" style="color:var(--bad)">Obriši</button></div>\`).join('')}</div>\` : '<div class="empty">Još nema merenja.</div>';
     };
     drawMere();
     root.querySelector('#mr-add').onclick=()=>{
       const d=root.querySelector('#mr-d').value||todayISO(), kg=kgNum(root.querySelector('#mr-kg').value), t=root.querySelector('#mr-t').value.trim();
-      if(kg===null && !t){ toast('Upiši kilažu ili mere.'); return; }
-      mere.push({id:uid(), d, kg, t}); root.querySelector('#mr-kg').value=''; root.querySelector('#mr-t').value=''; drawMere(); toast('Dodato, klikni Sačuvaj');
+      const mf={}; root.querySelectorAll('[data-mf]').forEach(i=>{ const v=kgNum(i.value); if(v!==null) mf[i.dataset.mf]=v; });
+      if(kg===null && !t && !Object.keys(mf).length){ toast('Upiši kilažu ili mere.'); return; }
+      const e={id:uid(), d, kg, t}; if(Object.keys(mf).length) e.m=mf;
+      mere.push(e); root.querySelector('#mr-kg').value=''; root.querySelector('#mr-t').value=''; root.querySelectorAll('[data-mf]').forEach(i=>i.value=''); drawMere(); toast('Dodato, klikni Sačuvaj');
     };
     root.querySelector('#mr-list').onclick=e=>{ const b=e.target.closest('[data-mrm]'); if(!b) return; mere=mere.filter(x=>x.id!==b.dataset.mrm); drawMere(); };
     const accBox=root.querySelector('#m-acc');
