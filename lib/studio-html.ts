@@ -351,7 +351,7 @@ function ago(s){ if(!s) return 'još nije dolazila'; const n=daysBetween(s,today
 function toast(t){ document.querySelectorAll('.toast').forEach(x=>x.remove()); const el=document.createElement('div'); el.className='toast'; el.textContent=t; document.body.appendChild(el); setTimeout(()=>el.remove(),1800); }
 
 /* ---------- state + store ---------- */
-const S = { members:[], sessions:[], payments:[], expenses:[], settings:null, view:'danas', week:planWeek(), month:monthKey(todayISO()), filter:'sve', q:'' };
+const S = { members:[], sessions:[], payments:[], expenses:[], settings:null, view:'danas', week:planWeek(), month:monthKey(todayISO()), monthAuto:monthKey(todayISO()), filter:'sve', q:'' };
 const DEFAULT_SETTINGS = { groups:[
   {id:'jutarnja', name:'Jutarnja grupa', time:'09:00', days:[1,2,5]},
   {id:'vecernja', name:'Večernja grupa', time:'19:00', days:[1,2,5]}
@@ -367,41 +367,111 @@ const isTrainer = () => ME.role==='trener';
 const isMember = () => ME.role==='clanica';
 let fileMode=false, fileHadData=false, pushTimer=null, pushing=false, pushAgain=false;
 const snapshot = () => ({members:S.members,sessions:S.sessions,payments:S.payments,expenses:S.expenses,settings:S.settings,savedAt:S.savedAt||0});
+/* ---------- čuvanje: spajanje izmena umesto prepisivanja ----------
+   S.base = poslednja verzija sa servera koju ovaj uređaj zna. Kad server ima noviju verziju
+   (drugi uređaj, trener štiklirao dolazak), lokalne izmene se spoje sa njom i ponovo pošalju. */
+const clone = x => x==null ? x : JSON.parse(JSON.stringify(x));
+const stable = x => JSON.stringify(x, (k,v)=> v && typeof v==='object' && !Array.isArray(v) ? Object.keys(v).sort().reduce((o,kk)=>(o[kk]=v[kk],o),{}) : v);
+// prazno ('' , null, [], {}, nepostojeće) se smatra istim, da forma koja upiše prazno polje ne pregazi tuđu izmenu
+const isEmpty = v => v===undefined || v===null || v==='' || (Array.isArray(v) && !v.length) || (v && typeof v==='object' && !Array.isArray(v) && !Object.keys(v).length);
+const norm = v => { if(Array.isArray(v)) return v.map(norm); if(v && typeof v==='object'){ const o={}; Object.keys(v).sort().forEach(k=>{ const x=norm(v[k]); if(!isEmpty(x)) o[k]=x; }); return o; } return v; };
+const same = (a,b) => { const x=norm(a), y=norm(b); return isEmpty(x)&&isEmpty(y) ? true : stable(x)===stable(y); };
+const isIdList = a => Array.isArray(a) && a.every(x=>x && typeof x==='object' && typeof x.id==='string');
+const isStrList = a => Array.isArray(a) && a.every(x=>typeof x==='string');
+function mergeSet(b,l,r){ b=b||[]; l=l||[]; const out=[...(r||[])]; l.forEach(x=>{ if(!b.includes(x) && !out.includes(x)) out.push(x); }); return out.filter(x=>!(b.includes(x) && !l.includes(x))); }
+function mergeVal(b,l,r){
+  if(same(l,b)) return r;
+  if(same(r,b)) return l;
+  if(isIdList(l) && (r===undefined || isIdList(r))) return mergeList(isIdList(b)?b:[], l, r||[]);
+  if(isStrList(l) && (r===undefined || isStrList(r))) return mergeSet(isStrList(b)?b:[], l, r||[]);
+  if(l && r && typeof l==='object' && typeof r==='object' && !Array.isArray(l) && !Array.isArray(r)) return mergeObj(b&&typeof b==='object'?b:{}, l, r);
+  return l;
+}
+function mergeObj(b,l,r){ const o={}; new Set([...Object.keys(b||{}),...Object.keys(l||{}),...Object.keys(r||{})]).forEach(k=>{ const v=mergeVal((b||{})[k],(l||{})[k],(r||{})[k]); if(v!==undefined) o[k]=v; }); return o; }
+function mergeList(b,l,r){
+  const bm=new Map((b||[]).map(x=>[x.id,x])), lm=new Map((l||[]).map(x=>[x.id,x])), rm=new Map((r||[]).map(x=>[x.id,x]));
+  const pick=id=>{ const bv=bm.get(id), lv=lm.get(id), rv=rm.get(id);
+    if(same(lv,bv)) return rv; if(same(rv,bv)) return lv;
+    if(lv===undefined || rv===undefined) return lv; // obrisano ovde ili tamo: važi ova strana ako je i menjala
+    return mergeObj(bv||{}, lv, rv); };
+  const out=[], seen=new Set();
+  for(const x of [...(r||[]), ...(l||[])]){ if(seen.has(x.id)) continue; seen.add(x.id); const v=pick(x.id); if(v!==undefined) out.push(v); }
+  return out;
+}
+const DATA_KEYS=['members','sessions','payments','expenses'];
+const dataOf = d => ({members:(d&&d.members)||[], sessions:(d&&d.sessions)||[], payments:(d&&d.payments)||[], expenses:(d&&d.expenses)||[], settings:(d&&d.settings)||null});
+function merge3(base, local, remote){
+  const B=dataOf(base), L=dataOf(local), R=dataOf(remote), out={};
+  DATA_KEYS.forEach(k=>{ out[k]=mergeList(B[k],L[k],R[k]); });
+  out.settings = same(L.settings,B.settings) ? R.settings : (R.settings==null || same(R.settings,B.settings) ? L.settings : mergeObj(B.settings||{}, L.settings, R.settings));
+  return out;
+}
+const isDirty = () => !!S.base && !same(dataOf(snapshot()), dataOf(S.base));
+function setBase(d){ S.base=clone(dataOf(d)); try{ localStorage.setItem(LKEY+'-base', JSON.stringify(S.base)); }catch(e){} }
+function persistLocal(){ try{ localStorage.setItem(LKEY, JSON.stringify({...snapshot(), serverAt:S.serverAt||0})); }catch(e){} }
+function applyData(d){ S.members=d.members||[]; S.sessions=d.sessions||[]; S.payments=d.payments||[]; S.expenses=d.expenses||[]; S.settings=d.settings||S.settings; }
+// server ima noviju verziju: spoji lokalne izmene sa njom. Vraća true ako i dalje ima nešto za slanje.
+function adoptRemote(remote){
+  const dirty=isDirty();
+  if(dirty) applyData(merge3(S.base, snapshot(), remote)); else applyData(dataOf(remote));
+  S.serverAt=remote.savedAt||0; if(!dirty) S.savedAt=S.serverAt;
+  setBase(remote); persistLocal();
+  return isDirty();
+}
+let retryTimer=null;
 function saveLocal(){
   if(ME.role!=='admin') return;
   S.savedAt=Date.now();
-  try{ localStorage.setItem(LKEY, JSON.stringify({...snapshot(), serverAt:S.serverAt||0})); }catch(e){}
-  if(fileMode){ clearTimeout(pushTimer); pushTimer=setTimeout(pushFile,400); }
+  persistLocal();
+  if(fileMode){ clearTimeout(pushTimer); pushTimer=setTimeout(pushFile,400); setSync('Čuvam…','warn'); }
 }
 async function pushFile(){
-  if(!fileMode) return;
+  if(!fileMode || ME.role!=='admin') return;
   if(pushing){ pushAgain=true; return; }
-  const d=snapshot();
+  clearTimeout(pushTimer); pushTimer=null; clearTimeout(retryTimer); retryTimer=null;
   if(S.conflict) return;
-  if(fileHadData && !d.members.length && !d.sessions.length && !d.payments.length && !(d.expenses||[]).length) return; // nikad ne prepisuj pun fajl praznim
-  pushing=true; clearTimeout(pushTimer); pushTimer=null;
+  pushing=true;
+  let done=false;
   try{
-    const r=await fetch(API_URL,{method:'POST',headers:{'Content-Type':'application/json','X-Vanja':'1'},body:JSON.stringify({...d, baseAt:S.serverAt||0})});
-    if(r.status===409){ S.conflict=true; setSync('Promenjeno na drugom uređaju','bad'); render(); pushing=false; return; }
-    const j=await r.json(); if(!j.ok) throw 0;
-    S.serverAt=d.savedAt;
-    try{ localStorage.setItem(LKEY, JSON.stringify({...snapshot(), serverAt:S.serverAt})); }catch(e){}
-    fileHadData = fileHadData || d.members.length>0;
-    setSync(SAVED_LBL,'ok');
-  }catch(e){ setSync(IS_WEB?'Nije sačuvano, proveri internet':'Fajl nije sačuvan, proveri da li je server upaljen','bad'); }
+    for(let tries=0; tries<6 && !done; tries++){
+      const d=clone(snapshot());
+      if(fileHadData && !d.members.length && !d.sessions.length && !d.payments.length && !(d.expenses||[]).length) { done=true; break; } // nikad ne prepisuj pun fajl praznim
+      d.savedAt=Math.max(Date.now(), (S.serverAt||0)+1);
+      const r=await fetch(API_URL,{method:'POST',headers:{'Content-Type':'application/json','X-Vanja':'1'},body:JSON.stringify({...d, baseAt:S.serverAt||0})});
+      if(r.status===401){ location.href='/studio/prijava'; return; }
+      if(r.status===409){
+        // neko je sačuvao u međuvremenu: uzmi njegovu verziju, spoji sa ovim izmenama i pošalji ponovo
+        const g=await fetch(API_URL,{cache:'no-store'}); const j=await g.json(); if(!j || !j.ok || !j.exists) throw 0;
+        adoptRemote(j.data); if(!document.querySelector('#scrim')) render();
+        continue;
+      }
+      const j=await r.json(); if(!j.ok) throw 0;
+      S.serverAt=d.savedAt; setBase(d); persistLocal();
+      fileHadData = fileHadData || d.members.length>0;
+      done=true;
+    }
+    if(done) setSync(isDirty()?'Čuvam…':SAVED_LBL, isDirty()?'warn':'ok');
+    else { S.conflict=true; setSync('Nije sačuvano, osveži stranicu','bad'); render(); }
+  }catch(e){
+    setSync(IS_WEB?'Nije sačuvano, proveri internet. Pokušavam ponovo…':'Fajl nije sačuvan, proveri da li je server upaljen','bad');
+    clearTimeout(retryTimer); retryTimer=setTimeout(()=>{ if(isDirty()) pushFile(); }, 8000);
+  }
   pushing=false; if(pushAgain){ pushAgain=false; pushFile(); }
 }
-window.addEventListener('pagehide',()=>{ if(fileMode && pushTimer){ clearTimeout(pushTimer); try{ fetch(API_URL,{method:'POST',keepalive:true,headers:{'Content-Type':'application/json','X-Vanja':'1'},body:JSON.stringify({...snapshot(), baseAt:S.serverAt||0})}); }catch(e){} } });
-document.addEventListener('visibilitychange', async ()=>{
-  // kad se vratiš na aplikaciju, povuci najnovije (npr. uneto sa telefona)
-  if(document.visibilityState!=='visible' || !fileMode || pushTimer || pushing || S.conflict) return;
+window.addEventListener('pagehide',()=>{ if(fileMode && ME.role==='admin' && (pushTimer || isDirty()) && !pushing){ clearTimeout(pushTimer); try{ fetch(API_URL,{method:'POST',keepalive:true,headers:{'Content-Type':'application/json','X-Vanja':'1'},body:JSON.stringify({...snapshot(), savedAt:Math.max(Date.now(),(S.serverAt||0)+1), baseAt:S.serverAt||0})}); }catch(e){} } });
+async function refreshFromServer(quiet){
+  { const cm=monthKey(todayISO()); if(S.monthAuto!==cm){ if(S.month===S.monthAuto) S.month=cm; S.monthAuto=cm; S.week=planWeek(); if(!document.querySelector('#scrim')) render(); } }
+  if(!fileMode || pushing || S.conflict) return;
   if(isTrainer()||isMember()){ try{ const r=await fetch(API_URL,{cache:'no-store'}); if(r.status===401){ location.href='/studio/prijava'; return; } const j=await r.json(); if(j&&j.ok&&j.exists){ const f=j.data; S.members=f.members||[]; S.sessions=f.sessions||[]; S.settings=f.settings||S.settings; S.serverAt=f.savedAt||0; if(!document.querySelector('#scrim')) render(); } }catch(e){} return; }
-  try{ const r=await fetch(API_URL,{cache:'no-store'}); const j=await r.json();
-    if(j && j.ok && j.exists && (j.data.savedAt||0) > (S.serverAt||0)){ const f=j.data;
-      S.members=f.members||[]; S.sessions=f.sessions||[]; S.payments=f.payments||[]; S.expenses=f.expenses||[]; S.settings=f.settings||S.settings; S.savedAt=f.savedAt; S.serverAt=f.savedAt;
-      try{ localStorage.setItem(LKEY, JSON.stringify({...snapshot(), serverAt:S.serverAt||0})); }catch(e){}
-      if(!document.querySelector('#scrim')) render(); toast('Učitani najnoviji podaci'); } }catch(e){}
-});
+  try{ const r=await fetch(API_URL,{cache:'no-store'}); if(r.status===401){ location.href='/studio/prijava'; return; } const j=await r.json();
+    if(j && j.ok && j.exists && (j.data.savedAt||0) > (S.serverAt||0) && !pushing){
+      const more=adoptRemote(j.data);
+      if(!document.querySelector('#scrim')) render();
+      if(more) pushFile(); else setSync(SAVED_LBL,'ok');
+    } }catch(e){}
+}
+document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='visible') refreshFromServer(); });
+setInterval(()=>{ if(document.visibilityState==='visible' && IS_WEB) refreshFromServer(true); }, 45000);
 async function connectFile(){
   let j=null;
   try{ const r=await fetch(API_URL,{cache:'no-store'}); j=await r.json(); }catch(e){ j=null; }
@@ -418,23 +488,22 @@ async function connectFile(){
   const has = d => !!(d && ((d.members||[]).length || (d.sessions||[]).length || (d.payments||[]).length || (d.expenses||[]).length));
   fileHadData = has(f);
   const localHas = has(S);
-  const localAt = S.savedAt||0, fileAt = (f && f.savedAt) || 0;
-  S.serverAt = fileAt;
-  // lokalne izmene se šalju samo ako su nastale na tačno ovoj verziji sa servera (nisu stigle da se sačuvaju)
-  const localIsAhead = localHas && localAt > fileAt && (S.localBase||0) === fileAt;
-  if(fileHadData && !localIsAhead){
-    // fajl je noviji: pre nego što zamenimo, sačuvaj stare podatke iz pregledača sa strane
-    if(localHas){ try{ localStorage.setItem(LKEY+'-pre-fajla-'+Date.now(), JSON.stringify(snapshot())); }catch(e){} }
-    S.members=f.members||[]; S.sessions=f.sessions||[]; S.payments=f.payments||[]; S.expenses=f.expenses||[]; S.settings=f.settings||S.settings; S.savedAt=fileAt; S.serverAt=fileAt;
-    try{ localStorage.setItem(LKEY, JSON.stringify({...snapshot(), serverAt:S.serverAt||0})); }catch(e){}
-    setSync(SAVED_LBL,'ok'); render();
+  if(fileHadData){
+    if(S.base && isDirty()){
+      // ostale su nesačuvane izmene sa ovog uređaja: spoji ih sa serverom i pošalji
+      const more=adoptRemote(f); render();
+      if(more) await pushFile(); else setSync(SAVED_LBL,'ok');
+    } else {
+      if(localHas && !S.base && (S.savedAt||0) > (f.savedAt||0)){ try{ localStorage.setItem(LKEY+'-pre-fajla-'+Date.now(), JSON.stringify(snapshot())); }catch(e){} }
+      applyData(dataOf(f)); S.savedAt=f.savedAt||0; S.serverAt=f.savedAt||0; setBase(f); persistLocal();
+      setSync(SAVED_LBL,'ok'); render();
+    }
   } else if(localHas){
-    // pregledač ima podatke, a fajl je prazan ili stariji: upiši ih u fajl
-    if(!S.savedAt) S.savedAt=Date.now();
+    // pregledač ima podatke, a server je prazan: upiši ih
+    S.serverAt=(f&&f.savedAt)||0; if(!S.savedAt) S.savedAt=Date.now();
     await pushFile(); render();
   } else {
-    // oboje prazno: ništa ne upisuj dok ne uneseš nešto
-    setSync(SAVED_LBL,'ok');
+    S.serverAt=(f&&f.savedAt)||0; setBase(f||{}); setSync(SAVED_LBL,'ok');
   }
 }
 const COLS = ['members','sessions','payments'];
@@ -474,7 +543,7 @@ async function boot(){
     DB.doc('config/main').onSnapshot(s=>{ S.settings = s.exists ? s.data() : null; got.config=1; done(); }, onErr);
   } else {
     mode='local'; const L=loadLocal();
-    S.members=L.members||[]; S.sessions=L.sessions||[]; S.payments=L.payments||[]; S.expenses=L.expenses||[]; S.settings=L.settings||JSON.parse(JSON.stringify(DEFAULT_SETTINGS)); S.savedAt=L.savedAt||0; S.localBase=L.serverAt||0;
+    S.members=L.members||[]; S.sessions=L.sessions||[]; S.payments=L.payments||[]; S.expenses=L.expenses||[]; S.settings=L.settings||JSON.parse(JSON.stringify(DEFAULT_SETTINGS)); S.savedAt=L.savedAt||0; S.serverAt=L.serverAt||0; try{ const bb=JSON.parse(localStorage.getItem(LKEY+'-base')); S.base = bb && typeof bb==='object' ? bb : null; }catch(e){ S.base=null; }
     setSync('Povezujem se sa fajlom…','warn'); render();
     connectFile();
   }
@@ -1041,6 +1110,8 @@ function memberSheet(id){
   \`, root=>{
     wireClose(root);
     let mere=[...(m.mere||[])];
+    // merenja se čuvaju odmah (postojeća članica), ne čekaju dugme Sačuvaj
+    const saveMere = async () => { if(isNew) return; const cur=memberById(m.id); if(!cur) return; m.mere=[...mere]; await put('members',{...cur, mere:[...mere]}); };
     const kgNum = v => { const n=parseFloat(String(v||'').replace(',','.')); return isNaN(n)?null:n; };
     const fmtKg = n => (Math.round(n*10)/10).toString().replace('.',',');
     const drawMere=()=>{
@@ -1058,9 +1129,9 @@ function memberSheet(id){
       const mf={}; root.querySelectorAll('[data-mf]').forEach(i=>{ const v=kgNum(i.value); if(v!==null) mf[i.dataset.mf]=v; });
       if(kg===null && !t && !Object.keys(mf).length){ toast('Upiši kilažu ili mere.'); return; }
       const e={id:uid(), d, kg, t}; if(Object.keys(mf).length) e.m=mf;
-      mere.push(e); root.querySelector('#mr-kg').value=''; root.querySelector('#mr-t').value=''; root.querySelectorAll('[data-mf]').forEach(i=>i.value=''); drawMere(); toast('Dodato, klikni Sačuvaj');
+      mere.push(e); root.querySelector('#mr-kg').value=''; root.querySelector('#mr-t').value=''; root.querySelectorAll('[data-mf]').forEach(i=>i.value=''); drawMere(); saveMere(); toast(isNew?'Dodato, klikni Sačuvaj':'Merenje sačuvano');
     };
-    root.querySelector('#mr-list').onclick=e=>{ const b=e.target.closest('[data-mrm]'); if(!b) return; mere=mere.filter(x=>x.id!==b.dataset.mrm); drawMere(); };
+    root.querySelector('#mr-list').onclick=e=>{ const b=e.target.closest('[data-mrm]'); if(!b) return; mere=mere.filter(x=>x.id!==b.dataset.mrm); drawMere(); saveMere(); };
     const accBox=root.querySelector('#m-acc');
     if(accBox){
       const acc=accountOfMember(m.id);
@@ -1113,8 +1184,8 @@ function memberSheet(id){
     rotSeg.onclick=e=>{ const b=e.target.closest('button'); if(!b) return; rotSeg.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b)); drawRot(); };
     drawRot();
     ['m-status'].forEach(sid=>{ const seg=root.querySelector('#'+sid); seg.onclick=e=>{ const b=e.target.closest('button'); if(!b) return; seg.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b)); }; });
-    root.querySelector('#m-save').onclick=async()=>{
-      const name=root.querySelector('#m-name').value.trim(); if(!name){ root.querySelector('#m-name').focus(); toast('Upiši ime.'); return; }
+    const doSave=async()=>{
+      const name=root.querySelector('#m-name').value.trim(); if(!name){ root.querySelector('#m-name').focus(); toast('Upiši ime.'); return null; }
       const paket=parseInt(root.querySelector('#m-paket').value)||0;
       const o={...m, name, phone:root.querySelector('#m-phone').value.trim(), cena:parseInt(String(root.querySelector('#m-cena').value).replace(/\\D/g,''))||0,
         groups:checkedG(), group:checkedG()[0]||'', status:root.querySelector('#m-status .on').dataset.k, start:root.querySelector('#m-start').value,
@@ -1127,10 +1198,11 @@ function memberSheet(id){
         o.dayPlans={}; ks.forEach(x=>{ if(x>=cut || x===keepOld) o.dayPlans[x]=dp[x]; }); }
       else { delete o.byDay; }
       if(o.rotate){ const idx=Math.max(0,o.groups.indexOf(rotSel.value)); o.rotAnchor=addDays(planWeek(), -7*idx); } else { delete o.rotAnchor; }
-      closeSheet(); await put('members',o); await syncMemberSessions(o); toast(isNew?'Članica dodata':'Sačuvano');
+      closeSheet(); await put('members',o); await syncMemberSessions(o); return o;
     };
+    root.querySelector('#m-save').onclick=async()=>{ if(await doSave()) toast(isNew?'Članica dodata':'Sačuvano'); };
     const np=root.querySelector('#m-newpak'); if(np) np.onclick=async()=>{ await put('members',{...m, paketOd:todayISO()}); closeSheet(); toast('Nov paket počinje danas'); };
-    const pb=root.querySelector('#m-pay'); if(pb) pb.onclick=()=>paySheet(m.id);
+    const pb=root.querySelector('#m-pay'); if(pb) pb.onclick=async()=>{ const o=await doSave(); if(o) paySheet(o.id); }; // prvo sačuvaj izmene u kartici, pa otvori uplatu
     const db=root.querySelector('#m-del'); if(db) db.onclick=()=>confirmBox(root,'Obrisati '+m.name+'? Uplate ostaju u istoriji.'+(IS_WEB?' Briše se i njen nalog za prijavu, a slike i dokumenti ostaju sačuvani.':''),async()=>{
       closeSheet(); const acc=IS_WEB && accountOfMember(m.id); if(acc) await userAction({action:'delete', id:acc.id}); await del('members',m.id);
       for(const s of S.sessions.filter(s=>(s.memberIds||[]).includes(m.id) && s.date>=todayISO())){ await put('sessions',{...s, memberIds:s.memberIds.filter(x=>x!==m.id), attended:(s.attended||[]).filter(x=>x!==m.id)}); }
@@ -1221,16 +1293,18 @@ async function toggleAttendance(sid, mid){
 function memberSessionCopy(id){ const s=S.sessions.find(x=>x.id===id); return {...s, memberIds:[...(s.memberIds||[])], attended:[...(s.attended||[])]}; }
 
 function paySheet(mid){
-  const mk=S.view==='pregled'?S.month:monthKey(todayISO());
   const m=mid?memberById(mid):null;
+  // uvek isti mesec kao u Pregledu (sam prelazi na novi mesec kad on počne), da se uplata odmah vidi tamo
+  const mk = S.month || monthKey(todayISO());
   const opts=sorted(S.members).map(x=>\`<option value="\${x.id}" \${x.id===mid?'selected':''}>\${esc(x.name)}</option>\`).join('');
   openSheet(\`\${sheetHead('Nova uplata')}
     <div class="field"><label for="p-m">Članica</label><select id="p-m">\${opts}</select></div>
-    <div class="grid2"><div class="field"><label for="p-a">Iznos (din)</label><input id="p-a" inputmode="numeric" value="\${m?m.cena||'':''}"></div><div class="field"><label for="p-mo">Za mesec</label><input id="p-mo" type="month" value="\${mk}"></div></div>
+    <div class="grid2"><div class="field"><label for="p-a">Iznos (din)</label><input id="p-a" inputmode="numeric" value="\${m?m.cena||'':''}"></div><div class="field"><label for="p-mo">Za mesec</label><input id="p-mo" type="month" value="\${mk}"><span class="note" id="p-mol" style="margin-top:2px">\${fmtMonth(mk)}</span></div></div>
     <div class="field"><span class="fl">Šta je plaćeno</span><div class="seg" id="p-k"><button type="button" data-k="clanarina" class="on">Članarina</button><button type="button" data-k="paket">Personalni paket</button></div></div>
     <div class="field"><label for="p-n">Beleška</label><input id="p-n" placeholder="npr. keš, pola sada"></div>
     <button class="btn pri" id="p-save">Sačuvaj uplatu</button>\`, root=>{
     wireClose(root);
+    const mo=root.querySelector('#p-mo'); mo.oninput=()=>{ root.querySelector('#p-mol').textContent = mo.value ? fmtMonth(mo.value) : ''; };
     const sel=root.querySelector('#p-m'); sel.onchange=()=>{ const x=memberById(sel.value); if(x) root.querySelector('#p-a').value=x.cena||''; };
     const seg=root.querySelector('#p-k'); seg.onclick=e=>{ const b=e.target.closest('button'); if(!b) return; seg.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b)); };
     root.querySelector('#p-save').onclick=async()=>{
@@ -1239,7 +1313,7 @@ function paySheet(mid){
       const p={id:uid(), memberId:sel.value, amount, month:root.querySelector('#p-mo').value||mk, date:todayISO(), kind, note:root.querySelector('#p-n').value.trim()};
       closeSheet(); await put('payments',p);
       if(kind==='paket'){ const x=memberById(p.memberId); if(x) await put('members',{...x, paketOd:todayISO(), personalni:true}); }
-      toast('Uplata sačuvana');
+      toast('Uplata sačuvana za '+fmtMonth(p.month).toLowerCase());
     };
   });
 }

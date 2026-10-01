@@ -98,7 +98,11 @@ export async function POST(req: Request) {
       const day = new Date().toISOString().slice(0, 10);
       await redis(["SET", `vanja-studio:kopija:${day}`, cur, "NX", "EX", BACKUP_DAYS * 86400]);
     }
-    await redis(["SET", DATA_KEY, JSON.stringify(body)]);
+    // upis samo ako se u međuvremenu (između čitanja i upisa) nije promenilo: provera i upis u jednom koraku
+    const script =
+      "local c=redis.call('GET',KEYS[1]) if c then local ok,d=pcall(cjson.decode,c) if ok and type(d)=='table' and (tonumber(d.savedAt) or 0)>tonumber(ARGV[1]) then return 0 end end redis.call('SET',KEYS[1],ARGV[2]) return 1";
+    const ok = await redis(["EVAL", script, 1, DATA_KEY, String(baseAt), JSON.stringify(body)]);
+    if (ok !== 1) return NextResponse.json({ ok: false, conflict: true }, { status: 409 });
     return NextResponse.json({ ok: true }, { headers: noStore });
   } catch {
     return NextResponse.json({ ok: false, reason: "greska-baze" }, { status: 502 });
