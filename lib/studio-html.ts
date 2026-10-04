@@ -636,13 +636,14 @@ function vDanasTrener(){
 function vDanas(){
   if(isTrainer()) return vDanasTrener();
   const t=todayISO(), mk=monthKey(t);
-  const todays=S.sessions.filter(s=>s.date===t && trMatch(s.trainerId)).sort((a,b)=>(a.time||'').localeCompare(b.time||''));
+  const dv=S.dayView||t, dvToday=dv===t;
+  const todays=S.sessions.filter(s=>s.date===dv && trMatch(s.trainerId)).sort((a,b)=>(a.time||'').localeCompare(b.time||''));
   const act=S.members.filter(m=>m.status==='aktivna');
   const trial=S.members.filter(m=>m.status==='proba');
   const due=act.filter(m=>shouldPay(m,mk));
   const unpaid=due.filter(m=>!paidFor(m.id,mk).length);
-  const dow=parse(t).getDay();
-  const missingGroups=groups().filter(g=>grpMatch(g) && schedOf(g).some(e=>e.d===dow && !S.sessions.some(s=>s.date===t && s.groupId===g.id && s.time===e.t)));
+  const dow=parse(dv).getDay();
+  const missingGroups=groups().filter(g=>grpMatch(g) && schedOf(g).some(e=>e.d===dow && !S.sessions.some(s=>s.date===dv && s.groupId===g.id && s.time===e.t)));
   const lim=settings().alertDays||10;
   const away=act.filter(m=>{ const lv=lastVisit(m.id); const ref=lv || m.start || null; return ref && daysBetween(ref,t)>=lim; });
   const lowPak=S.members.filter(m=>m.status!=='neaktivna' && m.paket && paketLeft(m)<=2);
@@ -662,10 +663,11 @@ function vDanas(){
       <div class="kpi"><div class="label">Danas</div><div class="v num">\${todays.length}</div><div class="s">\${todays.length===1?'termin':'termina'}</div></div>
     </div>
     \${trainerFilterBar()}
-    <div class="sec-h"><h2>Današnji termini\${trOn()?\` <span class="note">(\${esc(firstName(trainerLabel(S.trf)))})</span>\`:''}</h2><button class="btn ghost" data-act="new-sess" data-d="\${t}">+ Termin</button></div>
-    \${missingGroups.length?\`<div class="card sess" style="flex-direction:row;align-items:center;justify-content:space-between;flex-wrap:wrap"><div><div class="nm" style="font-weight:500">\${esc(missingGroups.map(g=>g.name).join(' i '))} danas</div><div class="note">Napravi termin sa svim članicama grupe.</div></div><button class="btn pri sm" data-act="fill-day" data-d="\${t}">Napravi</button></div>\`:''}
-    \${todays.length? todays.map(sessionCard).join('') : (missingGroups.length?'':'<div class="empty">Danas nema termina.</div>')}
-    <p class="note" style="margin:-6px 0 0">Klikni na ime kad članica dođe.</p>
+    <div class="weeknav" style="margin:0"><button class="iconbtn" data-act="day" data-n="-1" aria-label="Prethodni dan"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button><div class="lbl">\${dvToday?'Danas':dv===addDays(t,-1)?'Juče':dv===addDays(t,1)?'Sutra':esc(DANI[parse(dv).getDay()])}, \${fmtShort(dv)}</div><button class="iconbtn" data-act="day" data-n="1" aria-label="Sledeći dan"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button></div>
+    <div class="sec-h"><h2>\${dvToday?'Današnji termini':'Termini'}\${trOn()?\` <span class="note">(\${esc(firstName(trainerLabel(S.trf)))})</span>\`:''}</h2><div class="row-btns">\${dvToday?'':'<button class="btn ghost sm" data-act="day0">Nazad na danas</button>'}<button class="btn ghost" data-act="new-sess" data-d="\${dv}">+ Termin</button></div></div>
+    \${missingGroups.length?\`<div class="card sess" style="flex-direction:row;align-items:center;justify-content:space-between;flex-wrap:wrap"><div><div class="nm" style="font-weight:500">\${esc(missingGroups.map(g=>g.name).join(' i '))} \${dvToday?'danas':'tog dana'}</div><div class="note">Napravi termin sa svim članicama grupe.</div></div><button class="btn pri sm" data-act="fill-day" data-d="\${dv}">Napravi</button></div>\`:''}
+    \${todays.length? todays.map(sessionCard).join('') : (missingGroups.length?'':\`<div class="empty">\${dvToday?'Danas nema termina.':'Tog dana nema termina.'}</div>\`)}
+    <p class="note" style="margin:-6px 0 0">Klikni na ime kad članica dođe.\${dvToday?' Strelicama gore ideš na juče ili ranije, ako si zaboravila da štikliraš.':''}</p>
     <div class="sec-h"><h2>Treba pažnje</h2></div>
     \${alerts.length? \`<div class="card list">\${alerts.join('')}</div>\` : '<div class="empty">Sve je u redu. Sve su platile i redovno dolaze.</div>'}
   </section>\`;
@@ -1227,6 +1229,7 @@ function sessionSheet(id, date, time){
     <div class="grid2"><div class="field"><label for="s-date">Datum</label><input id="s-date" type="date" value="\${s.date}"></div><div class="field"><label for="s-time">Vreme</label><input id="s-time" type="time" value="\${esc(s.time)}"></div></div>
     \${trainerSelect('s-trainer', s.trainerId || (isNew ? (groups().find(g=>g.id===s.groupId)||{}).trainerId : ''))}
     <div class="field"><label for="s-title">Naziv</label><input id="s-title" value="\${esc(s.title)}" placeholder="npr. Personalni sa Anom"></div>
+    \${!isNew?\`<div class="field"><span class="fl">Ko je došao <span class="note" id="s-attn"></span></span><div class="chips" id="s-att"></div><div class="note">Klikni na ime. Čuva se odmah, i za prošle termine.</div></div>\`:''}
     <div class="field"><span class="fl" id="s-cnt"></span><input class="search" id="s-q" placeholder="Traži članicu" autocomplete="off"><div class="pick" id="s-pick"></div></div>
     \${isNew?\`<div class="field"><label for="s-rep">Ponovi</label><select id="s-rep"><option value="1">Samo ovaj put</option><option value="4">Svake nedelje, 4 nedelje</option><option value="8">Svake nedelje, 8 nedelja</option><option value="12">Svake nedelje, 12 nedelja</option></select></div>\`:''}
     <div class="confirm-slot"></div>
@@ -1241,13 +1244,24 @@ function sessionSheet(id, date, time){
       pick.innerHTML = ms.length? ms.map(m=>\`<label><input type="checkbox" data-m="\${m.id}" \${sel.has(m.id)?'checked':''}>\${esc(m.name)}<span class="g">\${esc(memberTag(m))}</span></label>\`).join('') : '<div class="empty" style="padding:12px">Nema članica. Prvo ih dodaj u Članice.</div>';
       cnt.textContent='Članice u terminu: '+sel.size;
     };
-    pick.onchange=e=>{ const c=e.target; if(!c.dataset.m) return; c.checked?sel.add(c.dataset.m):(sel.delete(c.dataset.m),att.delete(c.dataset.m)); cnt.textContent='Članice u terminu: '+sel.size; };
+    const attBox=root.querySelector('#s-att');
+    const drawAtt=()=>{ if(!attBox) return; const ms=[...sel].map(memberById).filter(Boolean).sort((a,b)=>a.name.localeCompare(b.name,'sr'));
+      attBox.innerHTML = ms.length ? ms.map(m=>\`<button type="button" class="chip \${att.has(m.id)?'on':''}" data-am="\${m.id}">\${esc(m.name)}</button>\`).join('') : '<span class="note">Prvo izaberi članice ispod.</span>';
+      root.querySelector('#s-attn').textContent = ms.length ? '('+ms.filter(m=>att.has(m.id)).length+' od '+ms.length+')' : ''; };
+    if(attBox) attBox.onclick=async e=>{ const c=e.target.closest('[data-am]'); if(!c) return; const mid=c.dataset.am;
+      att.has(mid)?att.delete(mid):att.add(mid); drawAtt();
+      const cur=S.sessions.find(x=>x.id===s.id); if(!cur) return;
+      // dolazak se čuva odmah; ako članica još nije u terminu na serveru, dodaje se i nju
+      const ids=new Set(cur.memberIds||[]); ids.add(mid);
+      await put('sessions',{...cur, memberIds:[...ids], attended:[...att].filter(x=>ids.has(x)||sel.has(x))}); };
+    drawAtt();
+    pick.onchange=e=>{ const c=e.target; if(!c.dataset.m) return; c.checked?sel.add(c.dataset.m):(sel.delete(c.dataset.m),att.delete(c.dataset.m)); cnt.textContent='Članice u terminu: '+sel.size; drawAtt(); };
     root.querySelector('#s-q').oninput=drawPick;
     drawPick();
     const seg=root.querySelector('#s-kind');
     const gsel=root.querySelector('#s-group'), gwrap=root.querySelector('#s-gwrap');
     gsel.onchange=()=>{ const g=groups().find(g=>g.id===gsel.value); if(!g) return; if(!time){ const e=schedOf(g).find(e=>e.d===parse(root.querySelector('#s-date').value||s.date).getDay()) || schedOf(g)[0]; if(e) root.querySelector('#s-time').value=e.t; } root.querySelector('#s-title').value=g.name;
-      const ids=groupMembersOn(g.id, root.querySelector('#s-date').value||s.date).map(m=>m.id); ids.forEach(x=>sel.add(x)); if(isNew) sel=new Set(ids); drawPick(); };
+      const ids=groupMembersOn(g.id, root.querySelector('#s-date').value||s.date).map(m=>m.id); ids.forEach(x=>sel.add(x)); if(isNew) sel=new Set(ids); drawPick(); drawAtt(); };
     seg.onclick=e=>{ const b=e.target.closest('button'); if(!b) return; seg.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));
       const k=b.dataset.k; gwrap.hidden = k!=='grupa';
       if(k==='grupa'){ if(gsel.value) gsel.onchange(); }
@@ -1581,6 +1595,8 @@ document.addEventListener('click', async e=>{
   if(a==='wk'){ S.week=addDays(S.week,7*+b.dataset.n); render(); return; }
   if(a==='wk0'){ S.week=planWeek(); render(); return; }
   if(a==='mo'){ S.month=shiftMonth(S.month,+b.dataset.n); render(); return; }
+  if(a==='day'){ S.dayView=addDays(S.dayView||todayISO(), +b.dataset.n); if(S.dayView===todayISO()) S.dayView=null; render(); return; }
+  if(a==='day0'){ S.dayView=null; render(); return; }
   if(a==='trf'){ S.trf = b.dataset.t==='*' ? null : b.dataset.t; if(S.filter.startsWith('g:') && !grpMatch(groups().find(g=>g.id===S.filter.slice(2)))) S.filter='sve'; render(); return; }
   if(a==='flt'){ S.filter=b.dataset.f; S._focusQ=false; render(); return; }
   if(a==='fill-week') return fillGroups(S.week,7);
