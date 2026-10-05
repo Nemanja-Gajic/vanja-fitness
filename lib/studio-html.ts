@@ -304,6 +304,11 @@ section.view{display:flex;flex-direction:column;gap:18px}
 .doc-add{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .doc-add select{border:1px solid var(--line);border-radius:10px;padding:8px;background:var(--surface);color:inherit}
 .doc-add label.btn{cursor:pointer}
+.rv-card{border:2px solid #B8801F;background:linear-gradient(0deg,rgba(184,128,31,.08),rgba(184,128,31,.08)),var(--surface);border-radius:14px;padding:12px 14px;display:flex;flex-direction:column;gap:8px}
+.rv-card .t{font-weight:800;letter-spacing:.04em;color:#8A5E12;display:flex;align-items:center;gap:8px}
+.rv-card .t svg{width:20px;height:20px;fill:#B8801F}
+.rv-ok{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;border:1px solid var(--line);border-radius:12px;padding:9px 12px;font-size:14px;background:var(--surface)}
+.rv-ok b{color:var(--ok)}
 .banner{background:var(--warn-bg);color:var(--warn);border-radius:12px;padding:10px 14px;font-size:13.5px}
 @media (prefers-reduced-motion:no-preference){.sheet{animation:up .18s ease-out}@keyframes up{from{transform:translateY(24px);opacity:.6}}}
 </style>
@@ -592,6 +597,50 @@ function daysLabel(ds){ const o=[1,2,3,4,5,6,0].filter(d=>(ds||[]).includes(d));
 const GPAL=['#963049','#B8801F','#1F7A70','#2F5FA8','#7A4BB0','#3F8A3A','#C4622D','#C24D8C','#56627A','#7C5A3C'];
 function groupColor(g){ if(!g) return ''; if(g.color) return g.color; const i=groups().findIndex(x=>x.id===g.id); return GPAL[(i<0?0:i)%GPAL.length]; }
 const colorOfId = id => groupColor(groups().find(g=>g.id===id));
+/* Google recenzije (vidi samo Vanja; ne šalje se treneru ni članici) */
+const STAR='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.8l2.8 5.9 6.4.8-4.7 4.4 1.2 6.4L12 17.2l-5.7 3.1 1.2-6.4L2.8 9.5l6.4-.8z"/></svg>';
+const rvOf = m => (m && m.review) || {};
+const paidMembership = mid => S.payments.some(p=>p.memberId===mid && p.kind!=='paket');
+const rvEligible = m => !!m && m.status==='aktivna' && paidMembership(m.id);
+const rvDue = m => rvEligible(m) && !rvOf(m).left && !rvOf(m).asked;
+const rvWaiting = m => !!m && !rvOf(m).left && !!rvOf(m).asked;
+async function setReview(mid, patch){ const m=memberById(mid); if(!m) return; const r={...rvOf(m), ...patch}; Object.keys(r).forEach(k=>{ if(r[k]===null) delete r[k]; }); await put('members',{...m, review:r}); }
+async function shareReview(mid){
+  const m=memberById(mid); const link=(settings().reviewLink||'').trim();
+  if(!m || !link){ toast('Prvo dodaj link za Google recenziju u Podešavanja.'); return false; }
+  const text=\`Zdravo \${firstName(m.name)}! Hvala ti što treniraš sa nama. Ako ti se sviđa kod nas, ostavi nam kratku Google recenziju, mnogo nam znači: \${link}\`;
+  try{ if(navigator.share){ await navigator.share({text}); } else { await navigator.clipboard.writeText(text); toast('Poruka kopirana, nalepi je u Viber ili WhatsApp'); } }
+  catch(e){ try{ await navigator.clipboard.writeText(text); toast('Poruka kopirana'); }catch(_){ return false; } }
+  await setReview(mid,{asked:todayISO()}); return true;
+}
+function reviewBox(m){
+  const r=rvOf(m);
+  if(r.left) return \`<div class="rv-ok"><span><b>✓ Ostavila Google recenziju</b>\${r.left!==true?' <span class="note">'+fmtShort(r.left)+'</span>':''}</span><button type="button" class="btn ghost sm" data-rv="undo" data-m="\${m.id}">Poništi</button></div>\`;
+  if(r.asked) return \`<div class="rv-card"><div class="t">\${STAR}GOOGLE REVIEW ZATRAŽEN</div><div class="note" style="margin:0">Zatraženo \${fmtShort(r.asked)}. Da li je ostavila recenziju?</div><div class="row-btns"><button type="button" class="btn pri sm" data-rv="left" data-m="\${m.id}">Ostavila je</button>\${settings().reviewLink?\`<button type="button" class="btn sm" data-rv="share" data-m="\${m.id}">Pošalji ponovo</button>\`:''}<button type="button" class="btn ghost sm" data-rv="undo" data-m="\${m.id}">Poništi</button></div></div>\`;
+  if(rvEligible(m)) return \`<div class="rv-card"><div class="t">\${STAR}ZATRAŽI GOOGLE REVIEW</div><div class="note" style="margin:0">Upisala se i platila članarinu. Pravo vreme da je zamoliš za recenziju.</div><div class="row-btns">\${settings().reviewLink?\`<button type="button" class="btn pri sm" data-rv="share" data-m="\${m.id}">Pošalji link</button>\`:''}<button type="button" class="btn \${settings().reviewLink?'':'pri '}sm" data-rv="asked" data-m="\${m.id}">Zatražila sam</button><button type="button" class="btn ghost sm" data-rv="left" data-m="\${m.id}">Već je ostavila</button></div></div>\`;
+  return '';
+}
+async function reviewAction(act, mid){
+  if(act==='share') return shareReview(mid);
+  if(act==='asked'){ await setReview(mid,{asked:todayISO()}); toast('Zapisano: recenzija zatražena'); }
+  if(act==='left'){ await setReview(mid,{left:todayISO()}); toast('Super, zapisano da je ostavila recenziju'); }
+  if(act==='undo'){ await setReview(mid,{asked:null,left:null}); toast('Poništeno'); }
+}
+function reviewsSheet(){
+  const act=sorted(S.members.filter(m=>m.status!=='neaktivna'));
+  const due=act.filter(rvDue), wait=act.filter(rvWaiting), left=S.members.filter(m=>rvOf(m).left);
+  const row=m=>\`<div class="alert"><span class="av">\${esc(initials(m.name))}</span><div class="main"><div class="nm">\${esc(m.name)}</div><div class="sub">\${rvOf(m).left?'Ostavila '+(rvOf(m).left!==true?fmtShort(rvOf(m).left):''):rvOf(m).asked?'Zatraženo '+fmtShort(rvOf(m).asked):'Nije zatraženo'}</div></div><div class="row-btns">\${rvOf(m).left?\`<button class="btn ghost sm" data-rv="undo" data-m="\${m.id}">Poništi</button>\`:rvOf(m).asked?\`<button class="btn pri sm" data-rv="left" data-m="\${m.id}">Ostavila</button>\`:\`\${settings().reviewLink?\`<button class="btn pri sm" data-rv="share" data-m="\${m.id}">Pošalji</button>\`:''}<button class="btn sm" data-rv="asked" data-m="\${m.id}">Zatražila</button>\`}</div></div>\`;
+  openSheet(\`\${sheetHead('Google recenzije')}
+    <div class="kpis"><div class="kpi"><div class="label">Ostavile</div><div class="v num" style="color:var(--ok)">\${left.length}</div></div><div class="kpi"><div class="label">Čeka se</div><div class="v num">\${wait.length}</div></div><div class="kpi"><div class="label">Zatraži</div><div class="v num" style="color:#8A5E12">\${due.length}</div></div></div>
+    \${settings().reviewLink?'':'<div class="banner">Dodaj link za Google recenziju u Podešavanja (Grupe, Podešavanja). Onda jednim klikom šalješ poruku sa linkom.</div>'}
+    <div class="sec-h"><h2 style="font-size:17px">Zatraži od njih</h2></div>\${due.length?\`<div class="card list">\${due.map(row).join('')}</div>\`:'<div class="empty">Nema nikoga za sada.</div>'}
+    \${wait.length?\`<div class="sec-h"><h2 style="font-size:17px">Zatraženo, da li su ostavile?</h2></div><div class="card list">\${wait.map(row).join('')}</div>\`:''}
+    \${left.length?\`<div class="sec-h"><h2 style="font-size:17px">Ostavile recenziju</h2></div><div class="card list">\${sorted(left).map(row).join('')}</div>\`:''}
+    <p class="note" style="margin:0">Lista je samo za tebe. Treneri i članice je ne vide.</p>\`, root=>{
+    wireClose(root);
+    root.onclick=async e=>{ const b=e.target.closest('[data-rv]'); if(!b) return; await reviewAction(b.dataset.rv, b.dataset.m); reviewsSheet(); };
+  });
+}
 function memberTag(m){ const t=[]; const gs=mGroups(m); if(gs.length) t.push(gs.map(groupName).join(' / ')+(gs.length>1?(m.byDay?' (po danima)':m.rotate?' (smene)':''):'')); if(m.personalni) t.push('Personalni'); return t.join(' · ')||'Bez grupe'; }
 
 /* ---------- render ---------- */
@@ -648,6 +697,8 @@ function vDanas(){
   const away=act.filter(m=>{ const lv=lastVisit(m.id); const ref=lv || m.start || null; return ref && daysBetween(ref,t)>=lim; });
   const lowPak=S.members.filter(m=>m.status!=='neaktivna' && m.paket && paketLeft(m)<=2);
   const alerts=[];
+  const rvList=sorted(S.members.filter(rvDue));
+  if(rvList.length) alerts.push(\`<button class="alert item" data-act="reviews"><span class="dot gold"></span><div class="main"><div class="nm">Zatraži Google review: \${rvList.length}</div><div class="sub">\${esc(rvList.slice(0,4).map(m=>m.name).join(', '))}\${rvList.length>4?' …':''}</div></div><span class="pill warn">Zatraži</span></button>\`);
   if(unpaid.length) alerts.push(\`<button class="alert item" data-act="goto" data-v="pregled"><span class="dot bad"></span><div class="main"><div class="nm">Bez uplate za \${MESECI[+mk.slice(5)-1]}: \${unpaid.length}</div><div class="sub">\${esc(unpaid.slice(0,4).map(m=>m.name).join(', '))}\${unpaid.length>4?' …':''}</div></div><span class="pill bad">Naplati</span></button>\`);
   away.forEach(m=>alerts.push(\`<button class="alert item" data-act="open-mem" data-m="\${m.id}"><span class="dot warn"></span><div class="main"><div class="nm">\${esc(m.name)} ne dolazi</div><div class="sub">Poslednji dolazak \${ago(lastVisit(m.id))}. Javi joj se.</div></div></button>\`));
   trial.forEach(m=>{ const n=attendedDates(m.id).length; const ft=settings().freeTrials||3; alerts.push(\`<div class="alert"><span class="dot gold"></span><div class="main"><div class="nm">\${esc(m.name)} na probi</div><div class="sub">\${n} od \${ft} besplatna treninga\${n>=ft?'. Vreme je za odluku.':''}</div></div><button class="btn sm pri" data-act="convert" data-m="\${m.id}">Upisala se</button></div>\`); });
@@ -952,6 +1003,7 @@ function countFor(k){
   if(k==='neaktivne') return S.members.filter(m=>m.status==='neaktivna' && memberTr(m)).length;
   if(k==='proba') return act.filter(m=>m.status==='proba').length;
   if(k==='personalni') return act.filter(m=>m.personalni).length;
+  if(k==='review') return act.filter(rvDue).length;
   if(k.startsWith('g:')) return act.filter(m=>inGroup(m,k.slice(2))).length;
   return 0;
 }
@@ -963,6 +1015,7 @@ function vClanice(){
     if(m.status==='neaktivna' && f!=='sve') return false;
     if(f==='proba') return m.status==='proba';
     if(f==='personalni') return m.personalni;
+    if(f==='review') return rvDue(m);
     if(f==='bez') return !mGroups(m).length && !m.personalni;
     if(f.startsWith('g:')) return inGroup(m,f.slice(2));
     return true;
@@ -970,7 +1023,7 @@ function vClanice(){
   list=list.filter(memberTr);
   if(q) list=list.filter(m=>(m.name+' '+(m.phone||'')).toLowerCase().includes(q));
   list=sorted(list);
-  const fl=[['sve','Sve'],...groups().filter(grpMatch).map(g=>['g:'+g.id,g.name.replace(/ grupa$/i,'')]),['personalni','Personalni'],['proba','Proba'],['neaktivne','Neaktivne']];
+  const fl=[['sve','Sve'],...groups().filter(grpMatch).map(g=>['g:'+g.id,g.name.replace(/ grupa$/i,'')]),['personalni','Personalni'],['proba','Proba'],['review','Traži review'],['neaktivne','Neaktivne']];
   return \`<section class="view">
     <div class="sec-h"><h2>Članice <span class="note num">(\${S.members.filter(m=>m.status!=='neaktivna').length})</span></h2><div class="row-btns"><button class="btn ghost" data-act="groups">Grupe</button><button class="btn pri" data-act="new-mem">+ Nova</button></div></div>
     <input class="search" id="q" placeholder="Traži po imenu ili telefonu" value="\${esc(S.q)}" autocomplete="off">
@@ -981,6 +1034,7 @@ function vClanice(){
       if(m.status==='proba') pill='<span class="pill warn">Proba</span>';
       else if(m.status==='neaktivna') pill='<span class="pill mut">Neaktivna</span>';
       else if(shouldPay(m,mk)) pill = paidFor(m.id,mk).length?'<span class="pill ok">Platila</span>':'<span class="pill bad">Nije platila</span>';
+      if(rvDue(m)) pill+='<span class="pill warn" title="Zatraži Google review" style="margin-left:4px">★ Review</span>';
       return \`<button class="item" data-act="open-mem" data-m="\${m.id}"><span class="av num">\${idx+1}.</span><div class="main"><div class="nm">\${esc(m.name)}</div>\${m.note?\`<div class="kn">\${esc(m.note)}</div>\`:''}<div class="sub">\${mGroups(m).map(id=>\`<span class="gdot sm" style="background:\${colorOfId(id)}"></span>\`).join('')}\${esc(memberTag(m))} · \${ago(lastVisit(m.id))}</div></div>\${pill}</button>\`; }).join('')}</div>\`
       : \`<div class="empty">\${S.members.length?'Nema članica za ovaj filter.':'Još nema članica.'}</div>\`}
   </section>\`;
@@ -1025,6 +1079,7 @@ function vPregled(){
       \${byGroup.slice(0,2).map(([n,c])=>\`<div><div class="v num">\${c}</div><div class="s">\${esc(n)}</div></div>\`).join('')}
       <div><div class="v num">\${nPers}</div><div class="s">Personalni</div></div>
     </div>
+    \${(()=>{ const due=S.members.filter(rvDue).length, wait=S.members.filter(rvWaiting).length, left=S.members.filter(m=>rvOf(m).left).length; return \`<button class="card" data-act="reviews" style="padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px;text-align:left;color:inherit;cursor:pointer"><div><div style="font-weight:600">Google recenzije</div><div class="note">Ostavilo \${left} · čeka se \${wait} · zatraži od \${due}</div></div><span class="pill \${due?'warn':'ok'}">\${due?'Zatraži':'Otvori'}</span></button>\`; })()}
     <div class="sec-h"><h2>Nisu platile</h2>\${unpaid.length?\`<span class="pill bad num">\${money(unpaid.reduce((a,m)=>a+(+m.cena||0),0))}</span>\`:''}</div>
     \${unpaid.length? \`<div class="card list">\${unpaid.map(m=>\`<div class="alert"><span class="av">\${esc(initials(m.name))}</span><div class="main"><div class="nm">\${esc(m.name)}</div><div class="sub num">\${money(m.cena)} · \${esc(memberTag(m))}</div></div><div class="row-btns"><button class="btn sm" data-act="remind" data-m="\${m.id}">Podsetnik</button><button class="btn sm pri" data-act="quickpay" data-m="\${m.id}">Platila</button></div></div>\`).join('')}</div>\` : '<div class="empty">Nema dugovanja za ovaj mesec.</div>'}
     <div class="sec-h"><h2>Uplate</h2><button class="btn ghost" data-act="new-pay">+ Druga uplata</button></div>
@@ -1072,6 +1127,7 @@ function memberSheet(id){
   const pl = id? paketLeft(m) : null;
   openSheet(\`\${sheetHead(isNew?'Nova članica':m.name)}
     \${!isNew?\`<div class="mstats"><div><div class="v num">\${visitsIn(id,mk)}</div><div class="s">dolazaka ovog meseca</div></div><div><div class="v num">\${attendedDates(id).length}</div><div class="s">ukupno dolazaka</div></div><div><div class="v" style="font-size:15px;padding-top:3px">\${ago(lastVisit(id))}</div><div class="s">poslednji dolazak</div></div></div>\`:''}
+    \${!isNew?\`<div id="m-rv">\${reviewBox(m)}</div>\`:''}
     <div class="field"><label for="m-name">Ime i prezime</label><input id="m-name" value="\${esc(m.name)}" autocomplete="off"></div>
     <div class="grid2"><div class="field"><label for="m-phone">Telefon</label><input id="m-phone" inputmode="tel" value="\${esc(m.phone)}"></div>
     <div class="field"><label for="m-cena">Mesečna članarina (din)</label><input id="m-cena" inputmode="numeric" value="\${m.cena||0}"></div></div>
@@ -1134,6 +1190,8 @@ function memberSheet(id){
       mere.push(e); root.querySelector('#mr-kg').value=''; root.querySelector('#mr-t').value=''; root.querySelectorAll('[data-mf]').forEach(i=>i.value=''); drawMere(); saveMere(); toast(isNew?'Dodato, klikni Sačuvaj':'Merenje sačuvano');
     };
     root.querySelector('#mr-list').onclick=e=>{ const b=e.target.closest('[data-mrm]'); if(!b) return; mere=mere.filter(x=>x.id!==b.dataset.mrm); drawMere(); saveMere(); };
+    const rvBox=root.querySelector('#m-rv');
+    if(rvBox) rvBox.onclick=async e=>{ const b=e.target.closest('[data-rv]'); if(!b) return; await reviewAction(b.dataset.rv, m.id); const cur=memberById(m.id); if(cur){ m.review=cur.review; rvBox.innerHTML=reviewBox(cur); } };
     const accBox=root.querySelector('#m-acc');
     if(accBox){
       const acc=accountOfMember(m.id);
@@ -1498,9 +1556,10 @@ function expenseSheet(id){
 function settingsSheet(){
   openSheet(\`\${sheetHead('Podešavanja')}
     <div class="grid2"><div class="field"><label for="st-ft">Besplatnih proba</label><input id="st-ft" inputmode="numeric" value="\${settings().freeTrials||3}"></div><div class="field"><label for="st-ad">Upozori posle (dana bez dolaska)</label><input id="st-ad" inputmode="numeric" value="\${settings().alertDays||10}"></div></div>
+    <div class="field"><label for="st-rv">Link za Google recenziju</label><input id="st-rv" inputmode="url" autocomplete="off" value="\${esc(settings().reviewLink||'')}"><span class="note">U Google Business profilu: Zatraži recenzije, pa kopiraj link. Šalje se članicama uz poruku.</span></div>
     <button class="btn pri" id="st-save">Sačuvaj</button>\`, root=>{
     wireClose(root);
-    root.querySelector('#st-save').onclick=async()=>{ const st={...settings(), freeTrials:parseInt(root.querySelector('#st-ft').value)||3, alertDays:parseInt(root.querySelector('#st-ad').value)||10}; closeSheet(); await saveSettings(st); toast('Sačuvano'); };
+    root.querySelector('#st-save').onclick=async()=>{ const rl=root.querySelector('#st-rv').value.trim(); if(rl && !/^https:\\/\\//i.test(rl)){ toast('Link mora da počinje sa https://'); return; } const st={...settings(), freeTrials:parseInt(root.querySelector('#st-ft').value)||3, alertDays:parseInt(root.querySelector('#st-ad').value)||10, reviewLink:rl}; closeSheet(); await saveSettings(st); toast('Sačuvano'); };
   });
 }
 
@@ -1597,6 +1656,7 @@ document.addEventListener('click', async e=>{
   if(a==='mo'){ S.month=shiftMonth(S.month,+b.dataset.n); render(); return; }
   if(a==='day'){ S.dayView=addDays(S.dayView||todayISO(), +b.dataset.n); if(S.dayView===todayISO()) S.dayView=null; render(); return; }
   if(a==='day0'){ S.dayView=null; render(); return; }
+  if(a==='reviews') return reviewsSheet();
   if(a==='trf'){ S.trf = b.dataset.t==='*' ? null : b.dataset.t; if(S.filter.startsWith('g:') && !grpMatch(groups().find(g=>g.id===S.filter.slice(2)))) S.filter='sve'; render(); return; }
   if(a==='flt'){ S.filter=b.dataset.f; S._focusQ=false; render(); return; }
   if(a==='fill-week') return fillGroups(S.week,7);
