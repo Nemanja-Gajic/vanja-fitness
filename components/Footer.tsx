@@ -1,4 +1,5 @@
 import { site } from "@/lib/site";
+import CookieSettingsButton from "./CookieSettingsButton";
 
 export default function Footer() {
   return (
@@ -57,6 +58,15 @@ export default function Footer() {
           <p>
             © {new Date().getFullYear()} {site.name}. Sva prava zadržana.
           </p>
+          <div className="flex flex-wrap gap-x-5 gap-y-1">
+            <a
+              href="/politika-privatnosti"
+              className="transition-colors hover:text-cream"
+            >
+              Politika privatnosti
+            </a>
+            <CookieSettingsButton className="text-left transition-colors hover:text-cream" />
+          </div>
           <a
             aria-label="2M Web Studio"
             href="https://www.2m-webstudio.com/"
