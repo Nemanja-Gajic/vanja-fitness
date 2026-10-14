@@ -1,10 +1,27 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { site } from "@/lib/site";
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
+  const [closing, setClosing] = useState(false);
+  const timer = useRef<number>();
+
+  const toggle = () => {
+    window.clearTimeout(timer.current);
+    if (open && !closing) {
+      setClosing(true);
+      timer.current = window.setTimeout(() => {
+        setOpen(false);
+        setClosing(false);
+      }, 150);
+    } else {
+      setClosing(false);
+      setOpen(true);
+    }
+  };
+  const shown = open && !closing;
 
   return (
     <header className="sticky top-0 z-50 border-b border-espresso/10 bg-cream/85 backdrop-blur-md">
@@ -46,15 +63,20 @@ export default function Navbar() {
 
         <button
           aria-label="Meni"
-          className="text-2xl text-espresso md:hidden"
-          onClick={() => setOpen((v) => !v)}
+          aria-expanded={shown}
+          className="btn-press text-2xl text-espresso md:hidden"
+          onClick={toggle}
         >
-          {open ? "✕" : "☰"}
+          <span key={shown ? "x" : "m"} className="menu-icon">
+            {shown ? "✕" : "☰"}
+          </span>
         </button>
       </nav>
 
       {open && (
-        <div className="border-t border-espresso/10 bg-cream md:hidden">
+        <div
+          className={`mobile-menu ${closing ? "is-closing" : ""} border-t border-espresso/10 bg-cream md:hidden`}
+        >
           <div className="wrap flex flex-col gap-1 py-4">
             {site.nav.map((item) => (
               <a

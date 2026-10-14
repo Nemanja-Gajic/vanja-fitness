@@ -9,6 +9,7 @@ const SRC =
 // Google mapa postavlja kolačiće, pa se učitava tek uz pristanak ili na klik.
 export default function MapEmbed({ title, address }: { title: string; address: string }) {
   const [show, setShow] = useState(false);
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
     if (getConsent() === "granted") setShow(true);
@@ -26,7 +27,9 @@ export default function MapEmbed({ title, address }: { title: string; address: s
         src={SRC}
         width="100%"
         height="380"
-        style={{ border: 0, display: "block" }}
+        className="map-frame"
+        style={{ border: 0, display: "block", opacity: loaded ? 1 : 0 }}
+        onLoad={() => setLoaded(true)}
         loading="lazy"
         referrerPolicy="no-referrer-when-downgrade"
         allowFullScreen

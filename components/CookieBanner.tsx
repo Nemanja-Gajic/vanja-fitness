@@ -5,11 +5,15 @@ import { OPEN_SETTINGS_EVENT, getConsent, setConsent } from "@/lib/consent";
 
 export default function CookieBanner() {
   const [open, setOpen] = useState(false);
+  const [leaving, setLeaving] = useState(false);
 
   useEffect(() => {
     if (window.location.pathname.startsWith("/studio")) return;
     if (getConsent() === null) setOpen(true);
-    const onOpen = () => setOpen(true);
+    const onOpen = () => {
+      setLeaving(false);
+      setOpen(true);
+    };
     window.addEventListener(OPEN_SETTINGS_EVENT, onOpen);
     return () => window.removeEventListener(OPEN_SETTINGS_EVENT, onOpen);
   }, []);
@@ -17,8 +21,12 @@ export default function CookieBanner() {
   if (!open) return null;
 
   const choose = (v: "granted" | "denied") => {
-    setOpen(false);
     setConsent(v);
+    setLeaving(true);
+    window.setTimeout(() => {
+      setOpen(false);
+      setLeaving(false);
+    }, 200);
   };
 
   return (
@@ -26,7 +34,7 @@ export default function CookieBanner() {
       role="dialog"
       aria-live="polite"
       aria-label="Podešavanja kolačića"
-      className="fixed inset-x-3 bottom-3 z-[90] mx-auto max-w-xl rounded-3xl border border-espresso/10 bg-cream p-5 text-espresso shadow-[0_12px_40px_rgba(35,27,21,0.18)] sm:bottom-5 sm:p-6"
+      className={`cookie-banner ${leaving ? "is-leaving" : ""} fixed inset-x-3 bottom-3 z-[90] mx-auto max-w-xl rounded-3xl border border-espresso/10 bg-cream p-5 text-espresso shadow-[0_12px_40px_rgba(35,27,21,0.18)] sm:bottom-5 sm:p-6`}
     >
       <p className="font-display text-sm font-bold uppercase tracking-[0.18em]">
         Kolačići
@@ -47,14 +55,14 @@ export default function CookieBanner() {
         <button
           type="button"
           onClick={() => choose("denied")}
-          className="rounded-full border border-espresso/30 px-5 py-3 text-sm font-medium transition-colors hover:border-espresso hover:bg-espresso hover:text-cream"
+          className="rounded-full border border-espresso/30 px-5 py-3 btn-press text-sm font-medium hover:border-espresso hover:bg-espresso hover:text-cream"
         >
           Odbijam
         </button>
         <button
           type="button"
           onClick={() => choose("granted")}
-          className="rounded-full border border-espresso bg-espresso px-5 py-3 text-sm font-medium text-cream transition-colors hover:bg-cocoa"
+          className="rounded-full border border-espresso bg-espresso px-5 py-3 btn-press text-sm font-medium text-cream hover:bg-cocoa"
         >
           Prihvatam
         </button>

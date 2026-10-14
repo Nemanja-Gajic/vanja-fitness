@@ -40,19 +40,17 @@ body {
 
   .btn-primary {
     @apply inline-flex items-center justify-center rounded-full bg-espresso px-7 py-3.5
-           text-[15px] font-medium text-cream transition-all duration-300
-           hover:bg-cocoa hover:-translate-y-0.5;
+           text-[15px] font-medium text-cream hover:bg-cocoa;
   }
 
   .btn-light {
     @apply inline-flex items-center justify-center rounded-full bg-cream px-7 py-3.5
-           text-[15px] font-medium text-espresso transition-all duration-300
-           hover:bg-latte hover:-translate-y-0.5;
+           text-[15px] font-medium text-espresso hover:bg-latte;
   }
 
   .btn-outline {
     @apply inline-flex items-center justify-center rounded-full border border-espresso/25
-           px-7 py-3.5 text-[15px] font-medium text-espresso transition-all duration-300
+           px-7 py-3.5 text-[15px] font-medium text-espresso
            hover:border-espresso hover:bg-espresso hover:text-cream;
   }
 
@@ -165,6 +163,114 @@ html.app-ready .hero-in {
   }
 }
 
+/* ---- Button press feedback ----
+   Boje prelaze za 300ms, a pritisak (transform) za 160ms.
+   Podizanje na hover samo za miš, da se na telefonu ne "zalepi". */
+:is(.btn-primary, .btn-light, .btn-outline, .btn-press) {
+  transition-property: color, background-color, border-color, transform;
+  transition-duration: 300ms, 300ms, 300ms, 160ms;
+  transition-timing-function: ease, ease, ease, cubic-bezier(0.22, 1, 0.36, 1);
+}
+:is(.btn-primary, .btn-light, .btn-outline, .btn-press):active {
+  transform: scale(0.97);
+}
+@media (hover: hover) and (pointer: fine) {
+  :is(.btn-primary, .btn-light, .btn-lift):hover {
+    transform: translateY(-2px);
+  }
+  :is(.btn-primary, .btn-light, .btn-lift):active {
+    transform: translateY(-2px) scale(0.97);
+  }
+}
+
+/* ---- Mobilni meni ---- */
+.mobile-menu {
+  transition:
+    opacity 200ms ease-out,
+    transform 200ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+@starting-style {
+  .mobile-menu {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+}
+.mobile-menu.is-closing {
+  opacity: 0;
+  transform: translateY(-8px);
+  transition-duration: 150ms;
+  transition-timing-function: ease-in;
+}
+.menu-icon {
+  display: inline-block;
+  transition:
+    opacity 150ms ease-out,
+    transform 150ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+@starting-style {
+  .menu-icon {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+}
+
+/* ---- Cookie baner: ulazi i izlazi kroz donju ivicu ---- */
+.cookie-banner {
+  transition:
+    transform 400ms cubic-bezier(0.32, 0.72, 0, 1),
+    opacity 400ms ease-out;
+}
+@starting-style {
+  .cookie-banner {
+    transform: translateY(calc(100% + 24px));
+  }
+}
+/* čeka da loader završi, inače bi se animacija odigrala ispod njega */
+html:not(.app-ready) .cookie-banner,
+.cookie-banner.is-leaving {
+  transform: translateY(calc(100% + 24px));
+}
+.cookie-banner.is-leaving {
+  transition-duration: 200ms;
+  transition-timing-function: ease-in;
+}
+
+/* ---- FAQ odgovori ---- */
+.faq-item[open] .faq-answer {
+  animation: faqIn 220ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+@keyframes faqIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+/* glatka visina gde pregledač to podržava; ostali otvaraju kao ranije */
+@supports (interpolate-size: allow-keywords) {
+  .faq-item {
+    interpolate-size: allow-keywords;
+  }
+  .faq-item::details-content {
+    block-size: 0;
+    overflow: hidden;
+    transition:
+      block-size 250ms cubic-bezier(0.22, 1, 0.36, 1),
+      content-visibility 250ms allow-discrete;
+  }
+  .faq-item[open]::details-content {
+    block-size: auto;
+  }
+}
+
+/* ---- Mapa ---- */
+.map-frame {
+  transition: opacity 300ms ease-out;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .reveal,
   .hero-in,
@@ -176,5 +282,46 @@ html.app-ready .hero-in {
   }
   .hero-zoom {
     animation: none;
+  }
+  /* blaže, ne nula: ostaje samo fade, bez pomeranja */
+  :is(.btn-primary, .btn-light, .btn-lift):hover,
+  :is(.btn-primary, .btn-light, .btn-lift):active {
+    transform: scale(0.97);
+  }
+  :is(.btn-primary, .btn-light, .btn-lift):not(:active):hover {
+    transform: none;
+  }
+  .mobile-menu,
+  .mobile-menu.is-closing,
+  .menu-icon,
+  .cookie-banner,
+  .cookie-banner.is-leaving,
+  html:not(.app-ready) .cookie-banner {
+    transform: none;
+  }
+  html:not(.app-ready) .cookie-banner,
+  .cookie-banner.is-leaving {
+    opacity: 0;
+  }
+  @starting-style {
+    .mobile-menu,
+    .cookie-banner {
+      opacity: 0;
+      transform: none;
+    }
+  }
+  .faq-item[open] .faq-answer {
+    animation-name: faqFade;
+  }
+  .faq-item::details-content {
+    transition: none;
+  }
+}
+@keyframes faqFade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
   }
 }

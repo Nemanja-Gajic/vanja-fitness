@@ -40,7 +40,7 @@ export default function Faq() {
             <Reveal key={i} delay={i * 90}>
               <details
                 open={i === 0}
-                className="group rounded-3xl border border-espresso/[0.08] bg-white px-6 py-5"
+                className="faq-item group rounded-3xl border border-espresso/[0.08] bg-white px-6 py-5"
               >
                 <summary className="flex cursor-pointer list-none items-center justify-between font-display text-lg font-semibold text-espresso">
                   {f.q}
@@ -48,7 +48,7 @@ export default function Faq() {
                     +
                   </span>
                 </summary>
-                <p className="mt-3 text-espresso/65">{f.a}</p>
+                <p className="faq-answer mt-3 text-espresso/65">{f.a}</p>
               </details>
             </Reveal>
           ))}
