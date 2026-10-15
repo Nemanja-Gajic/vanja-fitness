@@ -72,7 +72,7 @@ export default function Footer() {
             href="https://www.2m-webstudio.com/"
             target="_blank"
             rel="noopener"
-            className="inline-flex w-fit items-center rounded-full border border-cream/15 px-4 py-1.5 text-xs transition-colors hover:border-cream/30 hover:text-cream"
+            className="inline-flex w-fit shrink-0 items-center whitespace-nowrap rounded-full border border-cream/15 px-4 py-1.5 text-xs transition-colors hover:border-cream/30 hover:text-cream"
           >
             Made by 2M Web Studio
           </a>
