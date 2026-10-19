@@ -136,12 +136,12 @@ header.top{display:flex;align-items:flex-end;justify-content:space-between;gap:1
 .sync{font-size:12px;color:var(--muted);text-align:right;white-space:nowrap}
 .sync b{font-weight:500}
 
-nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--surface);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(5,1fr);padding-bottom:env(safe-area-inset-bottom,0px)}
+nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--surface);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(6,1fr);padding-bottom:env(safe-area-inset-bottom,0px)}
 nav.tabs button{background:none;border:0;padding:10px 4px 12px;display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--muted);font-size:12.5px;font-weight:500}
 nav.tabs button svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8}
 nav.tabs button[aria-current="page"]{color:var(--wine)}
 @media (min-width:820px){
-  nav.tabs{position:sticky;top:env(safe-area-inset-top,0px);bottom:auto;max-width:760px;margin:0 auto 8px;border:1px solid var(--line);border-radius:999px;padding:4px;grid-template-columns:repeat(5,1fr)}
+  nav.tabs{position:sticky;top:env(safe-area-inset-top,0px);bottom:auto;max-width:760px;margin:0 auto 8px;border:1px solid var(--line);border-radius:999px;padding:4px;grid-template-columns:repeat(6,1fr)}
   nav.tabs button{flex-direction:row;justify-content:center;border-radius:999px;padding:8px;font-size:14px}
   nav.tabs button[aria-current="page"]{background:var(--surface2)}
   body{padding-block:0 40px}
@@ -206,6 +206,7 @@ section.view{display:flex;flex-direction:column;gap:18px}
 .trf button.all{padding-left:11px}
 .trf button.on{background:var(--wine);color:#fff;border-color:var(--wine)}
 .trf button.on .av{background:rgba(255,255,255,.22);color:#fff}
+.filters.wrap{flex-wrap:wrap;overflow:visible}
 .filters button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
 .search{width:100%;border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:11px 14px}
 
@@ -309,6 +310,61 @@ section.view{display:flex;flex-direction:column;gap:18px}
 .rv-card .t svg{width:20px;height:20px;fill:#B8801F}
 .rv-ok{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;border:1px solid var(--line);border-radius:12px;padding:9px 12px;font-size:14px;background:var(--surface)}
 .rv-ok b{color:var(--ok)}
+.wo-step{display:flex;align-items:center;gap:10px;margin-top:4px}
+.wo-step b{font-size:15.5px}
+.wo-num{width:26px;height:26px;border-radius:999px;background:var(--wine);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex:none}
+.wo-badge{width:28px;height:28px;border-radius:8px;background:var(--wine);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex:none}
+.wo-item.flash{animation:woflash 1.2s ease-out}
+@keyframes woflash{from{box-shadow:0 0 0 3px var(--wine)}to{box-shadow:0 0 0 0 transparent}}
+.wo-item .iconbtn{width:40px;height:40px}
+.wo-item .iconbtn[disabled]{opacity:.3}
+.wo-addbtn{display:flex;align-items:center;justify-content:center;gap:8px;min-height:54px;border:2px dashed var(--wine);border-radius:14px;background:transparent;color:var(--wine);font-weight:600;font-size:15px;cursor:pointer}
+.wo-addbtn svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round}
+.wo-addbtn:hover{background:rgba(150,48,73,.06)}
+.wo-empty{display:flex;flex-direction:column;gap:4px;text-align:center;padding:18px 14px;border:1px solid var(--line);border-radius:14px;background:var(--surface);color:var(--muted);font-size:14px}
+.wo-empty b{color:var(--ink);font-size:15px}
+.wo-foot{position:sticky;bottom:calc(-18px - env(safe-area-inset-bottom,0px));margin:0 -16px calc(-18px - env(safe-area-inset-bottom,0px));padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px));background:var(--bg);border-top:1px solid var(--line);display:flex;gap:8px;align-items:center;z-index:2}
+.pk{position:fixed;inset:0;z-index:55;background:var(--bg);display:flex;flex-direction:column;max-width:640px;margin:0 auto}
+@media (min-width:660px){.pk{inset:24px auto;left:50%;transform:translateX(-50%);width:620px;border-radius:18px;box-shadow:0 20px 60px rgba(0,0,0,.35);overflow:hidden}}
+.pk-h{display:flex;align-items:center;gap:8px;padding:12px 12px 6px;padding-top:max(12px,env(safe-area-inset-top))}
+.pk-t{font-family:Gloock,Georgia,serif;font-size:21px}
+.pk-tools{display:flex;flex-direction:column;gap:8px;padding:6px 16px 10px;border-bottom:1px solid var(--line)}
+.pk-sel{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.pk-sel label{display:flex;flex-direction:column;gap:3px;font-size:12px;color:var(--muted)}
+.pk-sel select{border:1px solid var(--line);border-radius:10px;padding:10px 8px;background:var(--surface);color:inherit;font-size:14.5px;min-height:44px}
+#pk-only{align-self:flex-start}
+.pk-list{flex:1;overflow:auto;-webkit-overflow-scrolling:touch}
+.pk-row{display:flex;align-items:center;gap:12px;width:100%;min-height:58px;padding:9px 16px;border:0;border-bottom:1px solid var(--line);border-left:4px solid transparent;background:transparent;text-align:left;color:inherit;cursor:pointer;transition:background .12s}
+.pk-row:hover{background:var(--surface)}
+.pk-row:focus-visible{outline:2px solid var(--wine);outline-offset:-2px}
+.pk-row.on{background:rgba(150,48,73,.09);border-left-color:var(--wine)}
+.pk-tx{display:flex;flex-direction:column;gap:1px;flex:1;min-width:0}
+.pk-tx b{font-weight:500;font-size:15px}
+.pk-row.on .pk-tx b{font-weight:700}
+.pk-ck{width:26px;height:26px;border-radius:999px;border:2px solid var(--line);flex:none;display:inline-flex;align-items:center;justify-content:center;background:var(--surface);transition:background .12s,border-color .12s}
+.pk-row.on .pk-ck{background:var(--wine);border-color:var(--wine)}
+.pk-row.on .pk-ck::after{content:"";width:14px;height:14px;background:#fff;-webkit-mask:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M4 12.5l5 5L20 6.5' fill='none' stroke='black' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'/></svg>") center/contain no-repeat;mask:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M4 12.5l5 5L20 6.5' fill='none' stroke='black' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'/></svg>") center/contain no-repeat}
+.pk-ck.plus{border-style:dashed;border-color:var(--wine)}
+.pk-ck.plus::after{content:"+";color:var(--wine);font-weight:700;font-size:17px;line-height:1}
+.pk-new{background:rgba(184,128,31,.07)}
+.pk-tag{font-size:11.5px;font-weight:700;color:var(--wine);background:rgba(150,48,73,.12);border-radius:999px;padding:3px 9px;flex:none}
+.pk-foot{padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--line);background:var(--bg)}
+@media (prefers-reduced-motion:reduce){.wo-item.flash{animation:none}.pk-row,.pk-ck{transition:none}}
+.wo-item{border:1px solid var(--line);border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:8px;background:var(--surface)}
+.wo-item .h{display:flex;align-items:center;gap:8px}
+.wo-item .h .n{flex:1;font-weight:600;min-width:0;line-height:1.25}
+.wo-item .h .iconbtn{width:32px;height:32px}
+.wo-f{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.wo-f label{display:flex;flex-direction:column;gap:3px;font-size:11.5px;color:var(--muted)}
+.wo-f input::placeholder,.wo-item .nt::placeholder{opacity:.55}
+.wo-f input,.wo-item .nt{border:1px solid var(--line);background:var(--bg);border-radius:9px;padding:7px 8px;min-width:0;width:100%;color:inherit;font-size:14px}
+.cat-pill{display:inline-flex;align-items:center;gap:5px;font-size:12px;padding:2px 9px;border-radius:999px;background:var(--bg);border:1px solid var(--line)}
+.cat-pill i{width:8px;height:8px;border-radius:999px;display:inline-block}
+.wo-view li{padding:9px 0;border-bottom:1px solid var(--line);list-style:none}
+.wo-view li:last-child{border-bottom:0}
+.wo-view ol{margin:0;padding:0}
+.wo-det{font-size:13px;color:var(--muted);margin-top:2px}
+.wo-chip{background:var(--wine);color:#fff;border-color:var(--wine)}
 .banner{background:var(--warn-bg);color:var(--warn);border-radius:12px;padding:10px 14px;font-size:13.5px}
 @media (prefers-reduced-motion:no-preference){.sheet{animation:up .18s ease-out}@keyframes up{from{transform:translateY(24px);opacity:.6}}}
 </style>
@@ -323,6 +379,7 @@ section.view{display:flex;flex-direction:column;gap:18px}
     <button data-v="termini"><svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>Termini</button>
     <button data-v="grupe"><svg viewBox="0 0 24 24"><circle cx="6" cy="9" r="2.5"/><circle cx="12" cy="7" r="2.8"/><circle cx="18" cy="9" r="2.5"/><path d="M2.5 18c.4-2.6 1.8-4 3.5-4M21.5 18c-.4-2.6-1.8-4-3.5-4M7.5 19c.5-3.2 2.2-5 4.5-5s4 1.8 4.5 5"/></svg>Grupe</button>
     <button data-v="clanice"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.6-3.6 3.3-5.5 6.5-5.5s5.9 1.9 6.5 5.5"/><circle cx="17" cy="9" r="2.6"/><path d="M16.5 14.6c2.6.1 4.5 1.8 5 4.9"/></svg>Članice</button>
+    <button data-v="treninzi"><svg viewBox="0 0 24 24"><path d="M3 9v6M6 6.5v11M18 6.5v11M21 9v6M6 12h12"/></svg>Treninzi</button>
     <button data-v="pregled"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Pregled</button>
   </nav>
   <main id="app"></main>
@@ -356,7 +413,7 @@ function ago(s){ if(!s) return 'još nije dolazila'; const n=daysBetween(s,today
 function toast(t){ document.querySelectorAll('.toast').forEach(x=>x.remove()); const el=document.createElement('div'); el.className='toast'; el.textContent=t; document.body.appendChild(el); setTimeout(()=>el.remove(),1800); }
 
 /* ---------- state + store ---------- */
-const S = { members:[], sessions:[], payments:[], expenses:[], settings:null, view:'danas', week:planWeek(), month:monthKey(todayISO()), monthAuto:monthKey(todayISO()), filter:'sve', q:'' };
+const S = { members:[], sessions:[], payments:[], expenses:[], exercises:[], workouts:[], settings:null, view:'danas', week:planWeek(), month:monthKey(todayISO()), monthAuto:monthKey(todayISO()), filter:'sve', q:'' };
 const DEFAULT_SETTINGS = { groups:[
   {id:'jutarnja', name:'Jutarnja grupa', time:'09:00', days:[1,2,5]},
   {id:'vecernja', name:'Večernja grupa', time:'19:00', days:[1,2,5]}
@@ -371,7 +428,7 @@ let ME={role:'admin', name:'Vanja', id:'admin'};
 const isTrainer = () => ME.role==='trener';
 const isMember = () => ME.role==='clanica';
 let fileMode=false, fileHadData=false, pushTimer=null, pushing=false, pushAgain=false;
-const snapshot = () => ({members:S.members,sessions:S.sessions,payments:S.payments,expenses:S.expenses,settings:S.settings,savedAt:S.savedAt||0});
+const snapshot = () => ({members:S.members,sessions:S.sessions,payments:S.payments,expenses:S.expenses,exercises:S.exercises||[],workouts:S.workouts||[],settings:S.settings,savedAt:S.savedAt||0});
 /* ---------- čuvanje: spajanje izmena umesto prepisivanja ----------
    S.base = poslednja verzija sa servera koju ovaj uređaj zna. Kad server ima noviju verziju
    (drugi uređaj, trener štiklirao dolazak), lokalne izmene se spoje sa njom i ponovo pošalju. */
@@ -403,8 +460,8 @@ function mergeList(b,l,r){
   for(const x of [...(r||[]), ...(l||[])]){ if(seen.has(x.id)) continue; seen.add(x.id); const v=pick(x.id); if(v!==undefined) out.push(v); }
   return out;
 }
-const DATA_KEYS=['members','sessions','payments','expenses'];
-const dataOf = d => ({members:(d&&d.members)||[], sessions:(d&&d.sessions)||[], payments:(d&&d.payments)||[], expenses:(d&&d.expenses)||[], settings:(d&&d.settings)||null});
+const DATA_KEYS=['members','sessions','payments','expenses','exercises','workouts'];
+const dataOf = d => ({members:(d&&d.members)||[], sessions:(d&&d.sessions)||[], payments:(d&&d.payments)||[], expenses:(d&&d.expenses)||[], exercises:(d&&d.exercises)||[], workouts:(d&&d.workouts)||[], settings:(d&&d.settings)||null});
 function merge3(base, local, remote){
   const B=dataOf(base), L=dataOf(local), R=dataOf(remote), out={};
   DATA_KEYS.forEach(k=>{ out[k]=mergeList(B[k],L[k],R[k]); });
@@ -414,7 +471,7 @@ function merge3(base, local, remote){
 const isDirty = () => !!S.base && !same(dataOf(snapshot()), dataOf(S.base));
 function setBase(d){ S.base=clone(dataOf(d)); try{ localStorage.setItem(LKEY+'-base', JSON.stringify(S.base)); }catch(e){} }
 function persistLocal(){ try{ localStorage.setItem(LKEY, JSON.stringify({...snapshot(), serverAt:S.serverAt||0})); }catch(e){} }
-function applyData(d){ S.members=d.members||[]; S.sessions=d.sessions||[]; S.payments=d.payments||[]; S.expenses=d.expenses||[]; S.settings=d.settings||S.settings; }
+function applyData(d){ S.members=d.members||[]; S.sessions=d.sessions||[]; S.payments=d.payments||[]; S.expenses=d.expenses||[]; S.exercises=d.exercises||[]; S.workouts=d.workouts||[]; S.settings=d.settings||S.settings; }
 // server ima noviju verziju: spoji lokalne izmene sa njom. Vraća true ako i dalje ima nešto za slanje.
 function adoptRemote(remote){
   const dirty=isDirty();
@@ -467,7 +524,7 @@ window.addEventListener('pagehide',()=>{ if(fileMode && ME.role==='admin' && (pu
 async function refreshFromServer(quiet){
   { const cm=monthKey(todayISO()); if(S.monthAuto!==cm){ if(S.month===S.monthAuto) S.month=cm; S.monthAuto=cm; S.week=planWeek(); if(!document.querySelector('#scrim')) render(); } }
   if(!fileMode || pushing || S.conflict) return;
-  if(isTrainer()||isMember()){ try{ const r=await fetch(API_URL,{cache:'no-store'}); if(r.status===401){ location.href='/studio/prijava'; return; } const j=await r.json(); if(j&&j.ok&&j.exists){ const f=j.data; S.members=f.members||[]; S.sessions=f.sessions||[]; S.settings=f.settings||S.settings; S.serverAt=f.savedAt||0; if(!document.querySelector('#scrim')) render(); } }catch(e){} return; }
+  if(isTrainer()||isMember()){ try{ const r=await fetch(API_URL,{cache:'no-store'}); if(r.status===401){ location.href='/studio/prijava'; return; } const j=await r.json(); if(j&&j.ok&&j.exists){ const f=j.data; S.members=f.members||[]; S.sessions=f.sessions||[]; S.exercises=f.exercises||[]; S.workouts=f.workouts||[]; S.settings=f.settings||S.settings; S.serverAt=f.savedAt||0; if(!document.querySelector('#scrim')) render(); } }catch(e){} return; }
   try{ const r=await fetch(API_URL,{cache:'no-store'}); if(r.status===401){ location.href='/studio/prijava'; return; } const j=await r.json();
     if(j && j.ok && j.exists && (j.data.savedAt||0) > (S.serverAt||0) && !pushing){
       const more=adoptRemote(j.data);
@@ -485,7 +542,7 @@ async function connectFile(){
   if(j.me){ ME=j.me; applyRole(); }
   if(isTrainer()||isMember()){
     const f=j.exists?j.data:{};
-    S.members=f.members||[]; S.sessions=f.sessions||[]; S.payments=[]; S.expenses=[]; S.settings=f.settings||S.settings; S.serverAt=f.savedAt||0;
+    S.members=f.members||[]; S.sessions=f.sessions||[]; S.payments=[]; S.expenses=[]; S.exercises=f.exercises||[]; S.workouts=f.workouts||[]; S.settings=f.settings||S.settings; S.serverAt=f.savedAt||0;
     setSync(isMember()?ME.name:'Trener: '+ME.name,'ok'); render(); return;
   }
   if(IS_WEB) loadTrainers();
@@ -548,7 +605,7 @@ async function boot(){
     DB.doc('config/main').onSnapshot(s=>{ S.settings = s.exists ? s.data() : null; got.config=1; done(); }, onErr);
   } else {
     mode='local'; const L=loadLocal();
-    S.members=L.members||[]; S.sessions=L.sessions||[]; S.payments=L.payments||[]; S.expenses=L.expenses||[]; S.settings=L.settings||JSON.parse(JSON.stringify(DEFAULT_SETTINGS)); S.savedAt=L.savedAt||0; S.serverAt=L.serverAt||0; try{ const bb=JSON.parse(localStorage.getItem(LKEY+'-base')); S.base = bb && typeof bb==='object' ? bb : null; }catch(e){ S.base=null; }
+    S.members=L.members||[]; S.sessions=L.sessions||[]; S.payments=L.payments||[]; S.expenses=L.expenses||[]; S.exercises=L.exercises||[]; S.workouts=L.workouts||[]; S.settings=L.settings||JSON.parse(JSON.stringify(DEFAULT_SETTINGS)); S.savedAt=L.savedAt||0; S.serverAt=L.serverAt||0; try{ const bb=JSON.parse(localStorage.getItem(LKEY+'-base')); S.base = bb && typeof bb==='object' ? bb : null; }catch(e){ S.base=null; }
     setSync('Povezujem se sa fajlom…','warn'); render();
     connectFile();
   }
@@ -648,7 +705,7 @@ function render(){
   document.querySelectorAll('#tabs button').forEach(b=>b.setAttribute('aria-current', b.dataset.v===S.view?'page':'false'));
   const app=$('#app');
   const y=window.scrollY;
-  app.innerHTML = isMember() ? vProfil() : (S.view!=='danas'?bannerLocal():'') + ({danas:vDanas, termini:vTermini, grupe:vGrupe, clanice:vClanice, pregled:vPregled}[S.view])();
+  app.innerHTML = isMember() ? vProfil() : (S.view!=='danas'?bannerLocal():'') + ({danas:vDanas, termini:vTermini, grupe:vGrupe, clanice:vClanice, treninzi:vTreninzi, pregled:vPregled}[S.view])();
   if(isMember()) hydrateThumbs(app);
   const si=$('#q'); if(si && S._focusQ){ si.focus(); si.setSelectionRange(si.value.length,si.value.length); }
   window.scrollTo(0,y);
@@ -667,6 +724,7 @@ function sessionCard(s){
     \${!isTrainer() && IS_WEB?\`<div class="trn"><span class="av sm">\${esc(initials(trainerLabel(s.trainerId)))}</span>Trener: <b>\${esc(trainerLabel(s.trainerId))}</b></div>\`:''}
     <div class="chips">\${names.map(m=>\`<button class="chip \${att.includes(m.id)?'on':''}" data-act="att" data-s="\${s.id}" data-m="\${m.id}">\${esc(m.name)}</button>\`).join('')}
     \${isTrainer()?'':\`<button class="chip add" data-act="open-sess" data-s="\${s.id}">Izmeni</button>\`}</div>
+    \${s.workoutId && woById(s.workoutId)?\`<button class="chip wo-chip" data-act="view-wo" data-w="\${s.workoutId}" data-s="\${s.id}" style="align-self:flex-start">Trening: \${esc(woById(s.workoutId).name)}</button>\`:''}
   </div>\`;
 }
 
@@ -955,6 +1013,187 @@ function vProfil(){
     <p class="note" style="margin:0">Ovo vidite samo ti i Vanja.</p>
   </section>\`;
 }
+/* ---------- treninzi i vežbe ---------- */
+const WCATS=[['noge','Noge'],['gluteus','Zadnjica'],['core','Core'],['stomak','Stomak'],['ruke','Ruke'],['grudi','Grudi'],['ledja','Leđa'],['ramena','Ramena'],['celo','Celo telo'],['hiit','HIIT'],['skokovi','Skokovi i pliometrija'],['kardio','Kardio'],['trx','TRX'],['merdevine','Merdevine'],['mobilnost','Istezanje i mobilnost']];
+const WEQ=[['bez','Bez opreme'],['bucice','Bučice'],['sipka','Šipka'],['tegovi','Tegovi za šipku'],['kettlebell','Kettlebell'],['trake','Elastične trake'],['wallball','Wall ball'],['slamball','Slam ball'],['trx','TRX'],['masina','Mašina'],['sajla','Sajla'],['kutija','Kutija'],['vijaca','Vijača'],['merdevine','Merdevine'],['lopta','Pilates lopta'],['bosu','Bosu lopta'],['valjak','Valjak']];
+const eqName = k => (WEQ.find(c=>c[0]===k)||['',''])[1];
+const catName = k => (WCATS.find(c=>c[0]===k)||[k,k])[1];
+const catColor = k => GPAL[Math.max(0,WCATS.findIndex(c=>c[0]===k))%GPAL.length];
+const catPill = k => \`<span class="cat-pill"><i style="background:\${catColor(k)}"></i>\${esc(catName(k))}</span>\`;
+const exById = id => (S.exercises||[]).find(x=>x.id===id);
+const woById = id => (S.workouts||[]).find(x=>x.id===id);
+const itemName = it => (exById(it.exId)||{}).name || it.name || 'Vežba';
+const itemDet = it => [[it.sets, it.reps].filter(Boolean).join(' x '), it.kg?it.kg+' kg':'', it.rest?'odmor '+it.rest:''].filter(Boolean).join(' · ');
+const EX_LIB={"noge|sipka":["Čučanj sa šipkom (back squat)","Prednji čučanj sa šipkom (front squat)","Iskorak sa šipkom","Hodajući iskorak sa šipkom","Bugarski čučanj sa šipkom","Penjanje na klupu sa šipkom (step up)","Pauza čučanj sa šipkom","Box čučanj sa šipkom","Zercher čučanj","Good morning","Rumunsko mrtvo dizanje sa šipkom","Mrtvo dizanje opruženih nogu","Čučanj sa šipkom iza vrata sa uskim stavom","Bočni iskorak sa šipkom","Iskorak unazad sa šipkom","Jednonožno rumunsko mrtvo dizanje sa šipkom"],"noge|bucice":["Goblet čučanj sa bučicom","Čučanj sa bučicama","Sumo čučanj sa bučicom","Iskorak sa bučicama","Iskorak unazad sa bučicama","Hodajući iskorak sa bučicama","Bočni iskorak sa bučicom","Ukršteni iskorak (curtsy lunge) sa bučicama","Bugarski čučanj sa bučicama","Penjanje na klupu sa bučicama (step up)","Rumunsko mrtvo dizanje sa bučicama","Jednonožno rumunsko mrtvo dizanje sa bučicom","Podizanje na prste sa bučicama","Čučanj sa bučicama i pauzom","Iskorak sa bučicama sa podignute zadnje noge (deficit)","Cik cak iskorak sa bučicama"],"noge|kettlebell":["Goblet čučanj sa kettlebellom","Sumo čučanj sa kettlebellom","Prednji čučanj sa dva kettlebella","Iskorak sa kettlebellom","Jednonožno mrtvo dizanje sa kettlebellom","Kozački čučanj sa kettlebellom","Kettlebell čučanj sa zadržavanjem (goblet hold)","Bočni iskorak sa kettlebellom"],"noge|tegovi":["Čučanj sa tegom ispred grudi","Iskorak sa tegom iznad glave","Sumo čučanj sa tegom","Iskorak unazad sa tegom ispred grudi"],"noge|trake":["Čučanj sa trakom","Bočni hod sa trakom (monster walk)","Čučanj sa trakom iznad kolena","Rumunsko mrtvo dizanje sa trakom","Iskorak sa trakom","Fleksija noge sa trakom ležeći","Ekstenzija noge sa trakom sedeći"],"noge|wallball":["Wall ball čučanj sa bacanjem","Čučanj sa wall ball loptom ispred grudi"],"noge|bez":["Čučanj bez opreme","Iskorak bez opreme","Iskorak unazad bez opreme","Bočni iskorak bez opreme","Ukršteni iskorak bez opreme","Bugarski čučanj bez opreme","Zidni čučanj (wall sit)","Pistol čučanj uz pomoć","Kozački čučanj","Podizanje na prste","Jednonožno podizanje na prste"],"noge|kutija":["Penjanje na kutiju (step up)","Bočno penjanje na kutiju"],"noge|masina":["Leg press","Jednonožni leg press","Hack čučanj","Ekstenzija nogu na mašini","Fleksija nogu ležeći na mašini","Fleksija nogu sedeći na mašini","Primicanje nogu na mašini (adduktori)","Odmicanje nogu na mašini (abduktori)","Podizanje na prste na mašini","Smith čučanj","Smith iskorak"],"noge|sajla":["Fleksija noge na sajli stojeći","Primicanje noge na sajli"],"noge|trx":["TRX čučanj","TRX iskorak unazad","TRX pistol čučanj","TRX fleksija nogu ležeći"],"gluteus|sipka":["Hip thrust sa šipkom","Glute bridge sa šipkom","Sumo mrtvo dizanje sa šipkom","Mrtvo dizanje sa šipkom","Hip thrust jednom nogom sa šipkom"],"gluteus|bucice":["Hip thrust sa bučicom","Glute bridge sa bučicom","Jednonožni glute bridge sa bučicom","Frog pump sa bučicom","Penjanje na klupu bočno sa bučicama","Rumunsko mrtvo dizanje sa bučicama za gluteus","Sumo mrtvo dizanje sa bučicom","Iskorak unazad sa bučicama za gluteus"],"gluteus|kettlebell":["Kettlebell swing za gluteus","Hip thrust sa kettlebellom","Sumo mrtvo dizanje sa kettlebellom","Jednonožni glute bridge sa kettlebellom"],"gluteus|tegovi":["Glute bridge sa tegom","Hip thrust sa tegom"],"gluteus|trake":["Glute bridge sa trakom","Hip thrust sa trakom","Školjka sa trakom (clamshell)","Zabacivanje noge sa trakom (kickback)","Odmicanje noge stojeći sa trakom","Fire hydrant sa trakom","Bočni hod u čučnju sa trakom","Glute bridge sa odmicanjem kolena","Rumunsko mrtvo dizanje jednom nogom sa trakom","Frog pump sa trakom"],"gluteus|bez":["Glute bridge","Jednonožni glute bridge","Frog pump","Zabacivanje noge na sve četiri (donkey kick)","Fire hydrant","Školjka (clamshell)","Odmicanje noge ležeći na boku","Hiperekstenzija za gluteus","Glute bridge sa nogama na klupi","Zabacivanje noge u stranu na sve četiri","Kickback sa opruženom nogom"],"gluteus|masina":["Zabacivanje noge na mašini (glute kickback)","Hip thrust na mašini","Odmicanje nogu na mašini, nagnuto napred","Abduktori na mašini, nagnuto"],"gluteus|sajla":["Zabacivanje noge na sajli","Odmicanje noge na sajli","Pull through na sajli","Zabacivanje noge na sajli, savijena noga"],"gluteus|kutija":["Penjanje na visoku kutiju"],"gluteus|trx":["TRX hip thrust"],"core|bez":["Plank na laktovima","Plank na dlanovima","Bočni plank","Bočni plank sa podizanjem kuka","Plank sa dodirom ramena","Plank sa podizanjem ruke i noge","Plank napred nazad (plank walkout)","Dead bug","Bird dog","Hollow hold","Superman","Medved zadržavanje (bear hold)","Medved hodanje (bear crawl)","Rakova šetnja (crab walk)","Hollow rock","Bočni plank sa rotacijom","Plank sa skokom stopala unutra van","Copenhagen plank"],"core|bucice":["Farmerski hod sa bučicama","Hod sa bučicom u jednoj ruci (suitcase carry)","Renegade veslanje sa bučicama","Plank sa provlačenjem bučice","Dead bug sa bučicom"],"core|kettlebell":["Turski ustanak (Turkish get up)","Kettlebell halo","Kettlebell windmill","Hod sa kettlebellom iznad glave","Hod sa kettlebellom u ruci (suitcase carry)","Kettlebell prenos ispod nogu (figure 8)","Kettlebell prenos oko tela"],"core|trake":["Pallof press sa trakom","Rotacija trupa sa trakom","Dead bug sa trakom","Antirotacija u iskoraku sa trakom"],"core|sajla":["Pallof press na sajli","Rotacija na sajli (woodchop odozgo)","Rotacija na sajli (woodchop odozdo)"],"core|slamball":["Slam ball bočni udarac","Slam ball rotacija sa bacanjem"],"core|wallball":["Wall ball bočno bacanje u zid","Wall ball rotacija u sedu","Plank sa rukama na wall ball lopti"],"core|trx":["TRX plank","TRX povlačenje kolena (knee tuck)","TRX pike","TRX bočni plank"],"core|tegovi":["Plank sa tegom na leđima","Hod sa tegom iznad glave","Rotacija sa tegom stojeći"],"stomak|bez":["Krančevi","Obrnuti krančevi","Bicikl krančevi","Kosi krančevi","Trbušnjaci (sit up)","Podizanje nogu ležeći","Makaze (flutter kicks)","Ruski twist","V sklapanje (V up)","Mountain climbers","Dodir peta (heel touch)","Toe touch krančevi","Podizanje nogu u visu","Podizanje kolena u visu","Brisači (windshield wipers)","Kosi plank krančevi (plank do lakta)","Krančevi sa nogama u vazduhu","Dodir prstiju u ležanju","Sklapanje u sedu (seated tuck)","Podizanje kukova ležeći (hip raise)","Bočni pregib ležeći (heel tap)"],"stomak|bucice":["Ruski twist sa bučicom","Krančevi sa bučicom","Bočni pregib sa bučicom","V up sa bučicom","Dead bug sa bučicom iznad glave"],"stomak|tegovi":["Ruski twist sa tegom","Krančevi sa tegom","Sit up sa tegom iznad glave"],"stomak|kettlebell":["Ruski twist sa kettlebellom","Sit up sa kettlebellom"],"stomak|wallball":["Sit up sa wall ball loptom","Ruski twist sa wall ball loptom","V up sa wall ball loptom"],"stomak|slamball":["Sit up sa bacanjem slam balla","Ruski twist sa slam ballom"],"stomak|sajla":["Krančevi na sajli klečeći"],"stomak|masina":["Krančevi na mašini","Podizanje nogu na razboju"],"stomak|trx":["TRX mountain climbers","TRX povlačenje kolena bočno"],"stomak|trake":["Krančevi sa trakom","Obrnuti krančevi sa trakom"],"ruke|bucice":["Biceps pregib sa bučicama","Hammer pregib sa bučicama","Koncentrisani pregib","Biceps pregib na kosoj klupi","Zottman pregib","Francuski potisak sa bučicom","Triceps ekstenzija iznad glave sa bučicom","Triceps zabacivanje u pretklonu (kickback)","Uski potisak sa bučicama","Pregib na Scott klupi sa bučicom","Biceps pregib u čučnju (spider curl)","Unakrsni hammer pregib","Triceps ekstenzija ležeći sa bučicama","Tate potisak"],"ruke|sipka":["Biceps pregib sa šipkom","Biceps pregib obrnutim hvatom","Biceps pregib sa EZ šipkom","Francuski potisak sa EZ šipkom (skull crusher)","Potisak uskim hvatom sa šipkom","Pregib šake sa šipkom","Spider pregib sa EZ šipkom","Ekstenzija iznad glave sa EZ šipkom"],"ruke|kettlebell":["Biceps pregib sa kettlebellom","Triceps ekstenzija iznad glave sa kettlebellom","Hammer pregib sa kettlebellom"],"ruke|trake":["Biceps pregib sa trakom","Triceps potisak nadole sa trakom","Triceps ekstenzija iznad glave sa trakom","Hammer pregib sa trakom","Triceps zabacivanje sa trakom"],"ruke|sajla":["Triceps potisak na sajli (konopac)","Triceps potisak na sajli (šipka)","Triceps ekstenzija iznad glave na sajli","Biceps pregib na sajli","Hammer pregib na sajli (konopac)","Triceps zabacivanje na sajli"],"ruke|masina":["Biceps pregib na mašini (Scott)","Triceps na mašini"],"ruke|bez":["Propadanja na klupi (triceps dips)","Uski sklekovi (dijamant)","Sklekovi na kolenima uskim hvatom","Plank do skleka (up down)"],"ruke|tegovi":["Pregib sa tegom (plate curl)","Triceps ekstenzija sa tegom iznad glave","Stiskanje tega prstima (plate pinch)","Hammer pregib sa tegom"],"ruke|trx":["TRX biceps pregib","TRX triceps ekstenzija"],"grudi|sipka":["Potisak sa šipkom na ravnoj klupi","Potisak sa šipkom na kosoj klupi","Potisak sa šipkom sa poda (floor press)","Landmine potisak za grudi"],"grudi|bucice":["Potisak sa bučicama na ravnoj klupi","Potisak sa bučicama na kosoj klupi","Razvlačenje sa bučicama (fly)","Razvlačenje na kosoj klupi","Pullover sa bučicom","Potisak sa bučicama sa poda","Potisak sa spojenim bučicama (squeeze press)","Razvlačenje sa bučicama na podu","Potisak sa bučicama obrnutim hvatom","Potisak sa bučicom jednom rukom"],"grudi|kettlebell":["Potisak sa kettlebellom sa poda","Sklekovi na kettlebellovima"],"grudi|bez":["Sklekovi","Sklekovi na kolenima","Sklekovi na klupi (lakši)","Sklekovi sa nogama na klupi","Široki sklekovi","Sklekovi sa pljeskom","Sklekovi sa rotacijom (T sklek)","Spori sklekovi (negativni)"],"grudi|trake":["Potisak sa trakom stojeći","Razvlačenje sa trakom","Sklekovi sa trakom","Ukrštanje sa trakom"],"grudi|sajla":["Ukrštanje na sajli (crossover)","Ukrštanje na sajli odozdo","Potisak na sajli stojeći"],"grudi|masina":["Potisak na mašini za grudi","Pec deck (butterfly)","Propadanja na razboju uz pomoć"],"grudi|tegovi":["Potisak tega ispred grudi (svend press)"],"grudi|wallball":["Dodavanje wall ball lopte u zid sa grudi"],"grudi|slamball":["Sklekovi sa rukom na slam ballu"],"grudi|trx":["TRX sklekovi","TRX razvlačenje"],"ledja|sipka":["Mrtvo dizanje","Veslanje sa šipkom u pretklonu","Veslanje sa šipkom obrnutim hvatom","Pendlay veslanje","T veslanje","Sklekovi u visu ispod šipke (inverted row)","Landmine veslanje","Rack pull"],"ledja|bucice":["Veslanje sa bučicom jednom rukom","Veslanje sa bučicama u pretklonu","Veslanje na kosoj klupi sa bučicama","Odručenje u pretklonu sa bučicama","Slegivanje ramenima sa bučicama (trapez)","Pullover sa bučicom za leđa","Veslanje sa bučicama naslonjeno na klupu (chest supported)","Kroc veslanje"],"ledja|kettlebell":["Veslanje sa kettlebellom","Mrtvo dizanje sa kettlebellom","Gorilla veslanje sa kettlebellovima","Kettlebell swing za leđa i zadnju ložu"],"ledja|trake":["Razvlačenje trake ispred grudi (pull apart)","Veslanje sa trakom sedeći","Povlačenje trake nadole (lat pulldown)","Zgibovi uz pomoć trake","Face pull sa trakom","Veslanje sa trakom jednom rukom","Povlačenje trake opruženim rukama"],"ledja|sajla":["Lat povlačenje širokim hvatom","Lat povlačenje uskim hvatom","Veslanje na sajli sedeći","Povlačenje opruženim rukama na sajli (straight arm pulldown)","Veslanje jednom rukom na sajli","Face pull na sajli za leđa"],"ledja|masina":["Veslanje na mašini","Zgibovi uz pomoć mašine","Hiperekstenzija na klupi"],"ledja|bez":["Zgibovi","Negativni zgibovi","Superman sa povlačenjem laktova","Hiperekstenzija na podu","Plivanje ležeći na stomaku","Y T W na podu"],"ledja|tegovi":["Hiperekstenzija sa tegom","Veslanje sa tegom","Slegivanje ramenima sa tegovima"],"ledja|trx":["TRX veslanje","TRX veslanje jednom rukom","TRX Y podizanje","TRX T razvlačenje"],"ramena|bucice":["Potisak sa bučicama iznad glave sedeći","Potisak sa bučicama iznad glave stojeći","Arnold potisak","Odručenje sa bučicama (lateral raise)","Prednje podizanje sa bučicama","Zadnje rame u pretklonu sa bučicama","Veslanje do brade sa bučicama","Y T W podizanja na kosoj klupi","Odručenje sedeći","Odručenje sa naslonom na kosu klupu","Potisak iznad glave jednom rukom","Rotacija ramena sa bučicom ležeći","Z potisak sedeći na podu"],"ramena|sipka":["Potisak sa šipkom iznad glave (military press)","Push press sa šipkom","Veslanje do brade sa šipkom","Landmine potisak","Potisak iza vrata uskim hvatom"],"ramena|kettlebell":["Potisak sa kettlebellom iznad glave","Push press sa kettlebellom","Bottoms up potisak sa kettlebellom","Kettlebell halo za ramena","Odručenje sa kettlebellom"],"ramena|tegovi":["Prednje podizanje sa tegom","Tegom oko glave (halo)","Potisak tega iznad glave","Kruženje tega (steering wheel)"],"ramena|trake":["Potisak sa trakom iznad glave","Odručenje sa trakom","Spoljna rotacija sa trakom","Face pull sa trakom","Unutrašnja rotacija sa trakom","Prednje podizanje sa trakom","Razvlačenje trake iznad glave"],"ramena|sajla":["Odručenje na sajli","Face pull na sajli","Zadnje rame na sajli","Prednje podizanje na sajli"],"ramena|masina":["Potisak na mašini za ramena","Zadnje rame na pec deck mašini"],"ramena|bez":["Pike sklekovi","Plank do sklopa (plank to pike)","Krugovi rukama","Plank sa dodirom ramena","Hod na rukama u planku"],"ramena|wallball":["Wall ball potisak iznad glave"],"ramena|trx":["TRX Y podizanje za ramena","TRX face pull"],"celo|kettlebell":["Kettlebell swing","Kettlebell swing jednom rukom","Kettlebell clean","Kettlebell clean and press","Kettlebell snatch","Kettlebell thruster","Kettlebell sumo visoko povlačenje","Kettlebell turski ustanak (Turkish get up)","Kettlebell iskorak i potisak","Kettlebell swing i čučanj"],"celo|wallball":["Wall ball (čučanj i bacanje u metu)","Wall ball thruster","Wall ball čučanj sa izbačajem iznad glave","Wall ball burpee","Wall ball iskorak sa rotacijom"],"celo|slamball":["Slam ball udarac o pod","Slam ball udarac sa čučnjem","Slam ball bacanje preko ramena","Slam ball burpee","Slam ball čučanj i podizanje na rame","Slam ball bacanje u stranu i čučanj"],"celo|sipka":["Thruster sa šipkom","Power clean","Clean and press sa šipkom","Hang clean","Mrtvo dizanje i veslanje","Clean and jerk"],"celo|bucice":["Thruster sa bučicama","Man maker sa bučicama","Čučanj i potisak sa bučicama","Clean sa bučicama","Snatch sa bučicom jednom rukom","Devil press","Iskorak sa rotacijom i bučicom","Renegade veslanje i sklek","Bučice clean, čučanj i potisak"],"celo|tegovi":["Guranje tega po podu (plate push)","Čučanj sa potiskom tega","Tegom oko glave i čučanj"],"celo|bez":["Burpee","Burpee sa skokom","Inchworm","Sklek i čučanj (squat thrust)","Medved hod i sklek","Sprawl (burpee bez skleka)"],"celo|trake":["Čučanj i potisak sa trakom"],"celo|trx":["TRX čučanj sa veslanjem","TRX burpee"],"hiit|bez":["Burpees","Jumping jacks","High knees (visoko podizanje kolena)","Zabacivanje peta (butt kicks)","Mountain climbers brzo","Čučanj sa skokom","Iskorak sa skokom","Skater skokovi","Plank jacks","Seal jacks","Sprint u mestu","Senka boks (shadow boxing)","Sklek i skok (burpee bez skoka)","Bočni burpee preko linije","Tuck jump intervali","Sklekovi i mountain climbers","Brzi koraci (fast feet)","Skokovi zvezda","Plank do čučnja (plank jump in)"],"hiit|kettlebell":["Kettlebell swing intervali","Kettlebell snatch intervali"],"hiit|wallball":["Wall ball intervali"],"hiit|slamball":["Slam ball intervali"],"hiit|bucice":["Thruster sa bučicama intervali","Renegade veslanje intervali","Devil press intervali","Snatch sa bučicom intervali"],"hiit|trx":["TRX čučanj sa skokom","TRX sprinter start"],"hiit|vijaca":["Preskakanje vijače brzo","Dupli preskoci vijače"],"skokovi|kutija":["Skok na kutiju (box jump)","Bočni skok na kutiju","Skok sa kutije i odraz (depth jump)","Naizmenični skokovi na klupu (step jump)","Skok preko kutije","Skok na kutiju iz sedećeg položaja","Jednonožni skok na kutiju"],"skokovi|bez":["Skok u dalj iz mesta","Tuck jump (kolena do grudi)","Čučanj sa skokom","Iskorak sa promenom noge u skoku (split jump)","Bočni skokovi","Bočni odskok (lateral bound)","Žabji skokovi","Skok zvezda (star jump)","Jednonožni skokovi u mestu","Jednonožni skokovi napred","Skokovi preko prepreka","Skokovi preko čunjeva","Brzi poskoci u mestu (pogo)","Skater skokovi","Sklekovi sa odrazom (plyo push up)","Vertikalni skok iz mesta","Skok u dalj, tri skoka zaredom","Skokovi napred nazad preko linije","Skokovi levo desno preko linije","Skok iz čučnja sa okretom 180","Jednonožni bočni skokovi","Skip A","Skip B","Skip sa visokim kolenima"],"skokovi|bucice":["Čučanj sa skokom sa bučicama","Iskorak sa skokom sa bučicama"],"skokovi|kettlebell":["Čučanj sa skokom sa kettlebellom"],"skokovi|tegovi":["Čučanj sa skokom sa tegom"],"skokovi|wallball":["Bacanje wall ball lopte uvis","Dodavanje wall ball lopte sa grudi u zid","Skok sa wall ball loptom uvis"],"skokovi|slamball":["Bacanje slam balla unazad preko glave","Slam ball bacanje napred iz čučnja","Slam ball udarac i skok"],"skokovi|trake":["Skokovi sa trakom oko kolena"],"skokovi|vijaca":["Preskakanje vijače","Preskakanje vijače jednom nogom"],"kardio|masina":["Traka (hodanje na nagibu)","Traka (trčanje)","Sobni bicikl","Air bike","Veslački ergometar","Eliptični trenažer","Stepper (penjanje stepenicama)","Ski ergometar","Traka, intervali hod i trčanje","Sobni bicikl, intervali","Veslački ergometar, ravnomerno"],"kardio|bez":["Trčanje u mestu","Shadow boxing","Jumping jacks lagano","Marširanje sa podizanjem kolena","Step touch","Dizanje kolena sa pljeskom","Grapevine korak"],"kardio|vijaca":["Preskakanje vijače lagano","Preskakanje vijače, naizmenično noge"],"kardio|kutija":["Penjanje na step platformu","Step aerobik osnovni korak"],"kardio|tegovi":["Guranje tega po podu"],"kardio|bucice":["Farmerski hod"],"trx|trx":["TRX veslanje","TRX veslanje jednom rukom","TRX sklekovi","TRX razvlačenje (chest fly)","TRX čučanj","TRX čučanj sa skokom","TRX iskorak unazad","TRX pistol čučanj","TRX bugarski čučanj","TRX hip thrust","TRX fleksija nogu","TRX biceps pregib","TRX triceps ekstenzija","TRX Y podizanje","TRX T razvlačenje","TRX face pull","TRX plank","TRX povlačenje kolena","TRX pike","TRX mountain climbers","TRX bočni plank","TRX atomic sklek","TRX rotacija (power pull)","TRX sprinter start","TRX iskorak sa nogom u petlji","TRX sklek sa nogama u petljama","TRX plank sa dodirom ramena","TRX veslanje širokim hvatom","TRX čučanj sa veslanjem","TRX glute bridge","TRX bočni iskorak","TRX ekstenzija ramena"],"merdevine|merdevine":["Jedna noga u svako polje","Dve noge u svako polje","Bočno kretanje (dve noge u polje)","Icky shuffle","In in out out","Skokovi sunožno kroz polja","Jednonožni skokovi kroz polja","Skokovi otvoreno zatvoreno","Ukršteni korak (carioca)","Bočni skokovi kroz polja","Hop scotch","Brzi koraci unazad","Skijaški skokovi (slalom)","Merdevine i sprint","Merdevine i sklek na kraju","Bočni korak unutra van","Jedna noga, bočno","Skokovi napred nazad","Iskorak kroz polja","Čučanj u svakom drugom polju","Medved hod kroz merdevine","Plank hod rukama kroz polja"],"noge|lopta":["Fleksija nogu na pilates lopti","Zidni čučanj sa pilates loptom"],"noge|bosu":["Čučanj na bosu lopti","Iskorak na bosu loptu"],"noge|slamball":["Čučanj sa slam ballom ispred grudi"],"gluteus|lopta":["Glute bridge sa nogama na pilates lopti","Hip thrust sa leđima na pilates lopti"],"core|lopta":["Plank na pilates lopti","Kružni pokreti u planku na lopti (stir the pot)","Povlačenje kolena na pilates lopti","Pike na pilates lopti"],"core|bosu":["Plank na bosu lopti","Mountain climbers na bosu lopti"],"stomak|lopta":["Krančevi na pilates lopti","Dodavanje lopte iz ruku u noge (V pass)"],"grudi|lopta":["Potisak sa bučicama na pilates lopti","Sklekovi sa nogama na pilates lopti"],"grudi|bosu":["Sklekovi na bosu lopti"],"ledja|lopta":["Hiperekstenzija na pilates lopti"],"hiit|kutija":["Box jump intervali","Brzi koraci na kutiju"],"hiit|trake":["Skokovi sa trakom oko kolena"],"hiit|masina":["Air bike sprint","Veslački ergometar sprint"],"skokovi|merdevine":["Skokovi kroz merdevine sunožno"],"mobilnost|bez":["Mačka krava","Dečiji položaj","Pas sa glavom nadole","Kobra","Iskorak sa istezanjem kuka (hip flexor)","Najveće istezanje na svetu (world's greatest stretch)","Golub (pigeon)","Istezanje zadnje lože sedeći","Istezanje kvadricepsa stojeći","Leptir istezanje","90 90 rotacija kukova","Rotacija grudnog dela kičme na boku (open book)","Istezanje ramena preko grudi","Istezanje tricepsa iznad glave","Istezanje listova uz zid","Kruženje kukovima","Kruženje ramenima","Duboki čučanj zadržavanje"],"mobilnost|trake":["Istezanje zadnje lože sa trakom","Provlačenje trake preko glave (shoulder dislocates)"],"mobilnost|lopta":["Istezanje leđa preko pilates lopte"],"mobilnost|valjak":["Valjak za kvadriceps","Valjak za zadnju ložu","Valjak za listove","Valjak za leđa","Valjak za bočni deo butine","Valjak za gluteus"]};
+const EX_LIB_N=Object.values(EX_LIB).reduce((a,x)=>a+x.length,0);
+async function seedExercises(){
+  const have=new Map((S.exercises||[]).map(x=>[(x.cat+'|'+x.name).toLowerCase(), x]));
+  const add=[], fix=[];
+  Object.entries(EX_LIB).forEach(([k,ns])=>{ const [c,e]=k.split('|'); ns.forEach(n=>{ const h=have.get((c+'|'+n).toLowerCase()); if(!h) add.push({id:uid(), name:n, cat:c, eq:e}); else if(!h.eq) fix.push({...h, eq:e}); }); });
+  if(!add.length && !fix.length){ toast('Sve vežbe iz biblioteke su već tu.'); return; }
+  fix.forEach(f=>{ const i=S.exercises.findIndex(x=>x.id===f.id); if(i>=0) S.exercises[i]=f; });
+  S.exercises=[...(S.exercises||[]), ...add]; saveLocal(); render(); toast('Dodato vežbi: '+add.length);
+}
+function vTreninzi(){
+  const tab=S.woTab||'treninzi', c=S.woCat||'', q=S.woEq||'';
+  const ws=(S.workouts||[]).filter(w=>!c || (w.cats||[]).includes(c)).sort((a,b)=>(b.updatedAt||'').localeCompare(a.updatedAt||'') || a.name.localeCompare(b.name,'sr'));
+  const exs=(S.exercises||[]).filter(x=>(!c || x.cat===c) && (!q || x.eq===q)).sort((a,b)=>a.name.localeCompare(b.name,'sr'));
+  const cnt = k => tab==='treninzi' ? (S.workouts||[]).filter(w=>!k||(w.cats||[]).includes(k)).length : (S.exercises||[]).filter(x=>(!k||x.cat===k) && (!q||x.eq===q)).length;
+  const t=todayISO(); const used = id => S.sessions.filter(s=>s.workoutId===id && s.date>=t).length;
+  let body;
+  if(tab==='treninzi'){
+    body = ws.length ? \`<div class="card list">\${ws.map(w=>\`<button class="item" data-act="open-wo" data-w="\${w.id}"><div class="main"><div class="nm">\${esc(w.name)}</div><div class="sub" style="display:flex;gap:4px;flex-wrap:wrap;margin-top:3px">\${(w.cats||[]).map(catPill).join('')}<span class="note">\${(w.items||[]).length} vežbi\${used(w.id)?' · u '+used(w.id)+' termina':''}</span></div></div></button>\`).join('')}</div>\`
+      : \`<div class="card emptybox"><p>\${c?'Nema treninga za '+esc(catName(c))+'.':'Još nema treninga.'} Napravi prvi i složi ga od vežbi iz baze.</p><button class="btn pri" data-act="new-wo">+ Nov trening</button></div>\`;
+  } else {
+    const byCat=WCATS.filter(([k])=>!c||k===c).map(([k,l])=>[k,l,exs.filter(x=>x.cat===k)]).filter(x=>x[2].length);
+    body = byCat.length ? byCat.map(([k,l,list])=>\`<div class="sec-h"><h2 style="font-size:17px">\${catPill(k)} <span class="note num">(\${list.length})</span></h2></div><div class="card list">\${list.map(x=>\`<button class="item" data-act="open-ex" data-x="\${x.id}"><div class="main"><div class="nm">\${esc(x.name)}</div><div class="sub">\${x.eq?esc(eqName(x.eq)):''}\${x.note?(x.eq?' · ':'')+esc(x.note):''}</div></div>\${x.video?'<span class="pill mut">video</span>':''}</button>\`).join('')}</div>\`).join('')
+      : \`<div class="card emptybox"><p>\${c||q?'Nema vežbi za ovaj izbor.':'Baza vežbi je prazna. Ubaci gotovu biblioteku od '+EX_LIB_N+' vežbi za sve delove tela, pa je dopunjuj svojim.'}</p><div class="row-btns" style="justify-content:center"><button class="btn pri" data-act="new-ex">+ Nova vežba</button>\${(S.exercises||[]).length?'':\`<button class="btn" data-act="seed-ex">Ubaci biblioteku (\${EX_LIB_N} vežbi)</button>\`}</div></div>\`;
+  }
+  return \`<section class="view">
+    <div class="seg big" role="tablist"><button role="tab" data-act="wo-tab" data-t="treninzi" class="\${tab==='treninzi'?'on':''}">Treninzi <span class="num">(\${(S.workouts||[]).length})</span></button><button role="tab" data-act="wo-tab" data-t="vezbe" class="\${tab==='vezbe'?'on':''}">Vežbe <span class="num">(\${(S.exercises||[]).length})</span></button></div>
+    <div class="sec-h"><h2>\${tab==='treninzi'?'Treninzi':'Baza vežbi'}</h2><button class="btn pri" data-act="\${tab==='treninzi'?'new-wo':'new-ex'}">\${tab==='treninzi'?'+ Nov trening':'+ Nova vežba'}</button></div>
+    <div class="filters wrap"><button class="\${!c?'on':''}" data-act="wo-cat" data-c="">Sve <b class="num fc">\${cnt('')}</b></button>\${WCATS.map(([k,l])=>\`<button class="\${c===k?'on':''}" data-act="wo-cat" data-c="\${k}">\${esc(l)} <b class="num fc">\${cnt(k)}</b></button>\`).join('')}</div>
+    \${tab==='vezbe'?\`<div class="filters wrap"><span class="note" style="flex:none;align-self:center">Oprema:</span><button class="\${!q?'on':''}" data-act="wo-eq" data-e="">Sva</button>\${WEQ.map(([k,l])=>\`<button class="\${q===k?'on':''}" data-act="wo-eq" data-e="\${k}">\${esc(l)}</button>\`).join('')}</div>\`:''}
+    \${body}
+    \${tab==='vezbe' && (S.exercises||[]).length?\`<button class="btn ghost" data-act="seed-ex" style="align-self:flex-start">Dopuni iz biblioteke (\${EX_LIB_N} vežbi)</button>\`:''}
+  </section>\`;
+}
+function exerciseSheet(id, preset, onDone){
+  const x = id ? {...exById(id)} : {id:uid(), name:(preset&&preset.name)||'', cat:(preset&&preset.cat)||S.woCat||'noge', eq:S.woEq||'', note:'', video:''};
+  const isNew=!id;
+  openSheet(\`\${sheetHead(isNew?'Nova vežba':x.name)}
+    <div class="field"><label for="ex-n">Naziv vežbe</label><input id="ex-n" value="\${esc(x.name)}" autocomplete="off"></div>
+    <div class="field"><label for="ex-c">Kategorija</label><select id="ex-c">\${WCATS.map(([k,l])=>\`<option value="\${k}" \${x.cat===k?'selected':''}>\${esc(l)}</option>\`).join('')}</select></div>
+    <div class="field"><label for="ex-eq">Oprema</label><select id="ex-eq"><option value="">Nije navedeno</option>\${WEQ.map(([k,l])=>\`<option value="\${k}" \${x.eq===k?'selected':''}>\${esc(l)}</option>\`).join('')}</select></div>
+    <div class="field"><label for="ex-no">Kako se radi (napomena)</label><input id="ex-no" value="\${esc(x.note||'')}" autocomplete="off"></div>
+    <div class="field"><label for="ex-v">Link do videa (nije obavezno)</label><input id="ex-v" inputmode="url" value="\${esc(x.video||'')}" autocomplete="off"></div>
+    <div class="confirm-slot"></div>
+    <div class="row-btns" style="justify-content:space-between">\${isNew?'<span></span>':'<button class="btn danger" id="ex-del">Obriši</button>'}<button class="btn pri" id="ex-save">Sačuvaj</button></div>\`, root=>{
+    wireClose(root);
+    root.querySelector('#ex-save').onclick=async()=>{ const name=root.querySelector('#ex-n').value.trim(); if(!name){ toast('Upiši naziv.'); return; }
+      const v=root.querySelector('#ex-v').value.trim(); if(v && !/^https?:\\/\\//i.test(v)){ toast('Link mora da počinje sa https://'); return; }
+      const o={...x, name, cat:root.querySelector('#ex-c').value, eq:root.querySelector('#ex-eq').value, note:root.querySelector('#ex-no').value.trim(), video:v};
+      closeSheet(); await put('exercises',o); toast(isNew?'Vežba dodata':'Sačuvano'); if(onDone) onDone(o); };
+    const d=root.querySelector('#ex-del'); if(d) d.onclick=()=>{ const n=(S.workouts||[]).filter(w=>(w.items||[]).some(it=>it.exId===x.id)).length;
+      confirmBox(root,'Obrisati vežbu '+x.name+'?'+(n?' Ostaje u '+n+' treninga pod istim imenom.':''),async()=>{ closeSheet(); await del('exercises',x.id); toast('Vežba obrisana'); }); };
+  });
+}
+function workoutSheet(id, copyFrom){
+  const src = id ? woById(id) : (copyFrom ? woById(copyFrom) : null);
+  const w = id ? clone(src) : {id:uid(), name: src ? src.name+' (kopija)' : '', cats: src ? [...(src.cats||[])] : (S.woCat?[S.woCat]:[]), items: src ? clone(src.items||[]).map(it=>({...it, id:uid()})) : [], note: src ? src.note||'' : ''};
+  const isNew=!id;
+  let items=w.items||[], cats=new Set(w.cats||[]);
+  const t=todayISO();
+  const upcoming=S.sessions.filter(s=>s.date>=t && s.date<=addDays(t,14)).sort((a,b)=>(a.date+(a.time||'')).localeCompare(b.date+(b.time||'')));
+  openSheet(\`\${sheetHead(isNew?(src?'Kopija treninga':'Nov trening'):'Uredi trening')}
+    <div class="wo-step"><span class="wo-num">1</span><div><b>Naziv i kategorije</b></div></div>
+    <div class="field"><label for="wo-n">Naziv treninga</label><input id="wo-n" value="\${esc(w.name)}" placeholder="npr. Donji deo tela, utorak" autocomplete="off"></div>
+    <div class="field"><span class="fl">Kategorije <span class="note">(klikni da izabereš, može više)</span></span><div class="chips" id="wo-cats"></div></div>
+    <div class="wo-step"><span class="wo-num">2</span><div><b>Vežbe</b> <span class="pill mut num" id="wo-cnt">0</span></div></div>
+    <div id="wo-items" style="display:flex;flex-direction:column;gap:10px"></div>
+    <button type="button" class="wo-addbtn" id="wo-add"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span>Dodaj vežbe iz baze</span></button>
+    <div class="wo-step"><span class="wo-num">3</span><div><b>Napomena i termin</b> <span class="note">(nije obavezno)</span></div></div>
+    <div class="field"><label for="wo-no">Napomena za ceo trening</label><input id="wo-no" value="\${esc(w.note||'')}" placeholder="npr. zagrevanje 10 min, kružno 3 kruga" autocomplete="off"></div>
+    \${!isNew && upcoming.length?\`<div class="field"><label for="wo-ses">Stavi u termin</label><div style="display:flex;gap:8px"><select id="wo-ses" style="flex:1;min-width:0;border:1px solid var(--line);border-radius:10px;padding:11px 9px;background:var(--surface);color:inherit"><option value="">Izaberi termin</option>\${upcoming.map(s=>\`<option value="\${s.id}">\${esc(DANI_K[parse(s.date).getDay()])} \${fmtShort(s.date)} \${esc(s.time||'')} · \${esc(s.title||'')}\${s.workoutId&&s.workoutId!==w.id?' (ima trening)':s.workoutId===w.id?' ✓':''}</option>\`).join('')}</select><button type="button" class="btn" id="wo-ses-add">Stavi</button></div></div>\`:''}
+    <div class="confirm-slot"></div>
+    <div class="wo-foot">\${isNew?'':'<button class="btn danger sm" id="wo-del">Obriši</button><button class="btn sm" id="wo-copy">Kopiraj</button>'}<span style="flex:1"></span><button class="btn pri" id="wo-save">Sačuvaj trening</button></div>\`, root=>{
+    wireClose(root);
+    const drawCats=()=>{ root.querySelector('#wo-cats').innerHTML=WCATS.map(([k,l])=>\`<button type="button" class="chip \${cats.has(k)?'on':''}" data-c="\${k}" aria-pressed="\${cats.has(k)}">\${esc(l)}</button>\`).join(''); };
+    root.querySelector('#wo-cats').onclick=e=>{ const b=e.target.closest('[data-c]'); if(!b) return; cats.has(b.dataset.c)?cats.delete(b.dataset.c):cats.add(b.dataset.c); drawCats(); };
+    const readItems=()=>{ root.querySelectorAll('[data-it]').forEach(row=>{ const it=items.find(x=>x.id===row.dataset.it); if(!it) return; row.querySelectorAll('[data-f]').forEach(inp=>{ it[inp.dataset.f]=inp.value.trim(); }); }); };
+    const drawItems=(flashIds)=>{
+      root.querySelector('#wo-cnt').textContent=items.length;
+      root.querySelector('#wo-items').innerHTML = items.length ? items.map((it,i)=>{ const x=exById(it.exId)||{}; return \`<div class="wo-item \${flashIds&&flashIds.has(it.id)?'flash':''}" data-it="\${it.id}"><div class="h"><span class="wo-badge num">\${i+1}</span><div class="n"><div>\${esc(itemName(it))}</div><div class="note" style="font-weight:400">\${esc([catName(x.cat||''), eqName(x.eq||'')].filter(Boolean).join(' · '))}</div></div><button type="button" class="iconbtn" data-mv="-1" aria-label="Pomeri gore" \${i===0?'disabled':''}><svg viewBox="0 0 24 24"><path d="M6 15l6-6 6 6"/></svg></button><button type="button" class="iconbtn" data-mv="1" aria-label="Pomeri dole" \${i===items.length-1?'disabled':''}><svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button><button type="button" class="iconbtn" data-rm aria-label="Ukloni \${esc(itemName(it))}" style="color:var(--bad)"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+        <div class="wo-f"><label>Serije<input data-f="sets" inputmode="numeric" value="\${esc(it.sets||'')}"></label><label>Ponav./vreme<input data-f="reps" value="\${esc(it.reps||'')}"></label><label>Kg<input data-f="kg" inputmode="decimal" value="\${esc(it.kg||'')}"></label><label>Odmor<input data-f="rest" value="\${esc(it.rest||'')}"></label></div>
+        <input class="nt" data-f="note" value="\${esc(it.note||'')}" placeholder="Napomena za ovu vežbu (nije obavezno)" aria-label="Napomena za \${esc(itemName(it))}"></div>\`; }).join('')
+        : '<div class="wo-empty"><b>Još nema vežbi</b><span>Klikni dugme ispod i izaberi vežbe iz baze. Možeš više odjednom.</span></div>';
+    };
+    root.querySelector('#wo-items').onclick=e=>{ const row=e.target.closest('[data-it]'); if(!row) return; readItems(); const i=items.findIndex(x=>x.id===row.dataset.it);
+      const mv=e.target.closest('[data-mv]'); if(mv){ const j=i+(+mv.dataset.mv); if(j<0||j>=items.length) return; [items[i],items[j]]=[items[j],items[i]]; drawItems(new Set([items[j].id])); return; }
+      if(e.target.closest('[data-rm]')){ const nm=itemName(items[i]); items.splice(i,1); drawItems(); toast(nm+' uklonjena'); } };
+    root.querySelector('#wo-add').onclick=()=>{ readItems(); exercisePicker(items.map(it=>it.exId).filter(Boolean), [...cats], (selIds)=>{
+      const keep=items.filter(it=>!it.exId || selIds.includes(it.exId));
+      const have=new Set(keep.map(it=>it.exId));
+      const added=selIds.filter(xid=>!have.has(xid)).map(xid=>{ const x=exById(xid)||{}; if(x.cat) cats.add(x.cat); return {id:uid(), exId:xid, name:x.name||'', sets:'', reps:'', kg:'', rest:'', note:''}; });
+      const removed=items.length-keep.length; items=[...keep, ...added];
+      drawCats(); drawItems(new Set(added.map(a=>a.id)));
+      const msg=[added.length?'Dodato: '+added.length:'', removed?'Uklonjeno: '+removed:''].filter(Boolean).join(', ');
+      if(msg) toast(msg);
+      if(added.length){ const el=root.querySelector('[data-it="'+added[0].id+'"]'); if(el) el.scrollIntoView({block:'center',behavior:'smooth'}); }
+    }); };
+    drawCats(); drawItems();
+    const collect=()=>{ readItems(); const name=root.querySelector('#wo-n').value.trim(); if(!name){ const n=root.querySelector('#wo-n'); n.focus(); n.scrollIntoView({block:'center'}); toast('Upiši naziv treninga.'); return null; }
+      return {...w, name, cats:WCATS.map(c=>c[0]).filter(k=>cats.has(k)), items:items.map(it=>({...it, name:itemName(it)})), note:root.querySelector('#wo-no').value.trim(), updatedAt:new Date().toISOString()}; };
+    root.querySelector('#wo-save').onclick=async()=>{ const o=collect(); if(!o) return; closeSheet(); await put('workouts',o); toast((isNew?'Trening napravljen':'Trening sačuvan')+' ('+o.items.length+' '+vezbiW(o.items.length)+')'); };
+    const cp=root.querySelector('#wo-copy'); if(cp) cp.onclick=async()=>{ const o=collect(); if(!o) return; await put('workouts',o); workoutSheet(null, o.id); };
+    const sa=root.querySelector('#wo-ses-add'); if(sa) sa.onclick=async()=>{ const sid=root.querySelector('#wo-ses').value; if(!sid){ toast('Izaberi termin.'); return; } const o=collect(); if(!o) return; await put('workouts',o); const ss=S.sessions.find(x=>x.id===sid); if(ss){ await put('sessions',{...ss, workoutId:o.id}); toast('Trening stavljen u termin '+fmtShort(ss.date)+' '+(ss.time||'')); } };
+    const dl=root.querySelector('#wo-del'); if(dl) dl.onclick=()=>confirmBox(root,'Obrisati trening '+w.name+'? Termini ostaju, samo bez treninga.',async()=>{ closeSheet(); await del('workouts',w.id); for(const ss of S.sessions.filter(x=>x.workoutId===w.id && x.date>=todayISO())) await put('sessions',{...ss, workoutId:''}); toast('Trening obrisan'); });
+  });
+}
+/* biranje vežbi: ceo ekran, više odjednom, jasno se vidi šta je izabrano */
+const vezbiW = n => { const d=n%10, h=n%100; return d===1&&h!==11?'vežba':(d>=2&&d<=4&&(h<12||h>14)?'vežbe':'vežbi'); };
+function exercisePicker(initialIds, preferCats, onDone){
+  const start=new Set(initialIds||[]); const sel=new Set(initialIds||[]);
+  let cat = (preferCats||[]).length===1 ? preferCats[0] : '', eq='', q='', onlySel=false;
+  document.getElementById('pk') && document.getElementById('pk').remove();
+  const pk=document.createElement('div'); pk.className='pk'; pk.id='pk'; pk.setAttribute('role','dialog'); pk.setAttribute('aria-modal','true'); pk.setAttribute('aria-labelledby','pk-t');
+  pk.innerHTML=\`<div class="pk-h"><button type="button" class="iconbtn" data-pk="cancel" aria-label="Nazad bez promena"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button><div style="flex:1;min-width:0"><div id="pk-t" class="pk-t">Izaberi vežbe</div><div class="note" id="pk-sub" aria-live="polite"></div></div></div>
+    <div class="pk-tools"><input class="search" id="pk-q" placeholder="Traži vežbu" autocomplete="off" aria-label="Traži vežbu">
+      <div class="pk-sel"><label>Kategorija<select id="pk-cat"><option value="">Sve kategorije</option>\${WCATS.map(([k,l])=>\`<option value="\${k}">\${esc(l)}</option>\`).join('')}</select></label><label>Oprema<select id="pk-eq"><option value="">Sva oprema</option>\${WEQ.map(([k,l])=>\`<option value="\${k}">\${esc(l)}</option>\`).join('')}</select></label></div>
+      <button type="button" class="chip" id="pk-only" aria-pressed="false">Prikaži samo izabrane</button></div>
+    <div class="pk-list" id="pk-list"></div>
+    <div class="pk-foot"><button type="button" class="btn pri" data-pk="done" id="pk-done" style="width:100%">Gotovo</button></div>\`;
+  document.body.appendChild(pk); document.body.style.overflow='hidden';
+  pk.querySelector('#pk-cat').value=cat;
+  const close=()=>{ pk.remove(); if(!document.getElementById('scrim')) document.body.style.overflow=''; };
+  const draw=()=>{
+    const ql=q.trim().toLowerCase();
+    let list=(S.exercises||[]).filter(x=>(!cat||x.cat===cat) && (!eq||x.eq===eq) && (!ql||x.name.toLowerCase().includes(ql)) && (!onlySel||sel.has(x.id)));
+    list.sort((a,b)=>(sel.has(b.id)-sel.has(a.id)) || a.name.localeCompare(b.name,'sr'));
+    const shown=list.slice(0,150);
+    const exact=(S.exercises||[]).some(x=>x.name.toLowerCase()===ql);
+    pk.querySelector('#pk-list').innerHTML =
+      (ql && !exact ? \`<button type="button" class="pk-row pk-new" data-new="1"><span class="pk-ck plus" aria-hidden="true"></span><span class="pk-tx"><b>Napravi novu vežbu: „\${esc(q.trim())}“</b><span class="note">\${esc(catName(cat||(preferCats||[])[0]||'noge'))}\${eq?' · '+esc(eqName(eq)):''}</span></span></button>\`:'')
+      + (shown.length ? shown.map(x=>\`<button type="button" class="pk-row \${sel.has(x.id)?'on':''}" data-x="\${x.id}" aria-pressed="\${sel.has(x.id)}"><span class="pk-ck" aria-hidden="true"></span><span class="pk-tx"><b>\${esc(x.name)}</b><span class="note">\${esc(catName(x.cat))}\${x.eq?' · '+esc(eqName(x.eq)):''}</span></span>\${sel.has(x.id)?'<span class="pk-tag">Izabrano</span>':''}</button>\`).join('')
+        : \`<div class="wo-empty" style="margin:16px"><b>\${onlySel?'Još ništa nije izabrano':'Nema vežbi za ovaj izbor'}</b><span>\${onlySel?'Isključi „Prikaži samo izabrane“ i klikni na vežbe.':'Promeni kategoriju ili opremu, ili upiši naziv gore da napraviš novu.'}</span></div>\`)
+      + (list.length>shown.length?\`<div class="note" style="padding:12px 16px">Prikazano \${shown.length} od \${list.length}. Suzi pretragu da vidiš ostale.</div>\`:'');
+    const plus=[...sel].filter(x=>!start.has(x)).length, minus=[...start].filter(x=>!sel.has(x)).length;
+    pk.querySelector('#pk-sub').textContent = 'Izabrano: '+sel.size+(plus||minus?' ('+[plus?'+'+plus+' novih':'', minus?minus+' uklonjeno':''].filter(Boolean).join(', ')+')':'');
+    const only=pk.querySelector('#pk-only'); only.classList.toggle('on',onlySel); only.setAttribute('aria-pressed',onlySel); only.textContent='Prikaži samo izabrane ('+sel.size+')';
+    pk.querySelector('#pk-done').textContent = plus||minus ? (plus?'Dodaj u trening ('+plus+')':'Sačuvaj izbor') : 'Gotovo';
+  };
+  pk.querySelector('#pk-q').oninput=e=>{ q=e.target.value; draw(); };
+  pk.querySelector('#pk-cat').onchange=e=>{ cat=e.target.value; draw(); };
+  pk.querySelector('#pk-eq').onchange=e=>{ eq=e.target.value; draw(); };
+  pk.querySelector('#pk-only').onclick=()=>{ onlySel=!onlySel; draw(); };
+  pk.querySelector('#pk-list').onclick=async e=>{
+    const r=e.target.closest('[data-x]'); if(r){ const xid=r.dataset.x; sel.has(xid)?sel.delete(xid):sel.add(xid);
+      const on=sel.has(xid); r.classList.toggle('on',on); r.setAttribute('aria-pressed',on); const tag=r.querySelector('.pk-tag'); if(on && !tag) r.insertAdjacentHTML('beforeend','<span class="pk-tag">Izabrano</span>'); if(!on && tag) tag.remove();
+      if(navigator.vibrate) try{ navigator.vibrate(8); }catch(_){}
+      const plus=[...sel].filter(x=>!start.has(x)).length, minus=[...start].filter(x=>!sel.has(x)).length;
+      pk.querySelector('#pk-sub').textContent='Izabrano: '+sel.size+(plus||minus?' ('+[plus?'+'+plus+' novih':'', minus?minus+' uklonjeno':''].filter(Boolean).join(', ')+')':'');
+      pk.querySelector('#pk-only').textContent='Prikaži samo izabrane ('+sel.size+')';
+      pk.querySelector('#pk-done').textContent = plus||minus ? (plus?'Dodaj u trening ('+plus+')':'Sačuvaj izbor') : 'Gotovo';
+      return; }
+    if(e.target.closest('[data-new]')){ const x={id:uid(), name:q.trim(), cat:cat||(preferCats||[])[0]||'noge', eq}; await put('exercises',x); sel.add(x.id); q=''; pk.querySelector('#pk-q').value=''; draw(); toast('Nova vežba napravljena i izabrana'); }
+  };
+  pk.onclick=e=>{ const b=e.target.closest('[data-pk]'); if(!b) return; if(b.dataset.pk==='cancel'){ close(); return; } if(b.dataset.pk==='done'){ close(); onDone([...sel]); } };
+  pk.addEventListener('keydown',e=>{ if(e.key==='Escape'){ e.stopPropagation(); close(); } });
+  draw(); setTimeout(()=>pk.querySelector('#pk-q').focus({preventScroll:true}),50);
+}
+function viewWorkoutSheet(id, sid){
+  const w=woById(id); if(!w){ toast('Trening nije pronađen.'); return; }
+  const ss=sid ? S.sessions.find(x=>x.id===sid) : null;
+  openSheet(\`\${sheetHead(w.name)}
+    \${ss?\`<div class="note">\${fmtDay(ss.date)} u \${esc(ss.time||'')} · \${esc(ss.title||'')}</div>\`:''}
+    \${(w.cats||[]).length?\`<div style="display:flex;gap:4px;flex-wrap:wrap">\${w.cats.map(catPill).join('')}</div>\`:''}
+    \${w.note?\`<div class="banner" style="background:var(--surface);color:inherit;border:1px solid var(--line)">\${esc(w.note)}</div>\`:''}
+    <div class="card wo-view" style="padding:4px 14px"><ol>\${(w.items||[]).map((it,i)=>{ const x=exById(it.exId)||{}; return \`<li><div><b class="num">\${i+1}.</b> \${esc(itemName(it))}\${x.eq?\` <span class="note">(\${esc(eqName(x.eq))})</span>\`:''}\${x.video?\` <a href="\${esc(x.video)}" target="_blank" rel="noopener" style="font-size:13px">video</a>\`:''}</div>\${itemDet(it)?\`<div class="wo-det num">\${esc(itemDet(it))}</div>\`:''}\${it.note?\`<div class="wo-det">\${esc(it.note)}</div>\`:''}\${x.note?\`<div class="wo-det">\${esc(x.note)}</div>\`:''}</li>\`; }).join('') || '<li class="note">Nema vežbi.</li>'}</ol></div>
+    \${ME.role==='admin'?\`<div class="row-btns" style="justify-content:flex-end"><button class="btn" id="vw-edit">Uredi trening</button></div>\`:''}\`, root=>{
+    wireClose(root);
+    const e=root.querySelector('#vw-edit'); if(e) e.onclick=()=>workoutSheet(w.id);
+  });
+}
 function bannerLocal(){ if(S.conflict) return '<div class="banner" style="background:var(--bad-bg);color:var(--bad)">Podaci su u međuvremenu promenjeni na drugom uređaju, pa ova izmena nije sačuvana. <button class="btn sm" onclick="location.reload()">Učitaj najnovije</button></div>'; if(IS_WEB && S.oldServer) return '<div class="banner">Baza još nije povezana: podaci se za sad čuvaju samo u ovom pregledaču, na ovom uređaju.</div>'; return S.oldServer ? '<div class="banner">Podaci su sačuvani samo u pregledaču. Da bi se čuvali i u fajl: zatvori prozor „Vanja Studio server“ na traci dole, pa ponovo pokreni „Pokreni Vanja Studio“.</div>' : ''; }
 
 const PARTS={jutro:{label:'Jutarnji termini'}, vece:{label:'Večernji termini'}};
@@ -1112,6 +1351,8 @@ function openSheet(html, onMount){
 }
 function closeSheet(){ const s=$('#scrim'); if(s){ s.remove(); document.body.style.overflow=''; } }
 document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeSheet(); });
+// točkić miša pomera redove sa filterima levo desno (na računaru)
+document.addEventListener('wheel',e=>{ const f=e.target.closest && e.target.closest('.filters:not(.wrap)'); if(!f || f.scrollWidth<=f.clientWidth || Math.abs(e.deltaX)>Math.abs(e.deltaY)) return; f.scrollLeft+=e.deltaY; e.preventDefault(); },{passive:false});
 const sheetHead = t => \`<div class="sheet-h"><h3>\${esc(t)}</h3><button class="iconbtn" data-close aria-label="Zatvori"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>\`;
 function wireClose(root){ root.querySelectorAll('[data-close]').forEach(b=>b.onclick=closeSheet); }
 function confirmBox(root, text, onYes){
@@ -1287,6 +1528,7 @@ function sessionSheet(id, date, time){
     <div class="grid2"><div class="field"><label for="s-date">Datum</label><input id="s-date" type="date" value="\${s.date}"></div><div class="field"><label for="s-time">Vreme</label><input id="s-time" type="time" value="\${esc(s.time)}"></div></div>
     \${trainerSelect('s-trainer', s.trainerId || (isNew ? (groups().find(g=>g.id===s.groupId)||{}).trainerId : ''))}
     <div class="field"><label for="s-title">Naziv</label><input id="s-title" value="\${esc(s.title)}" placeholder="npr. Personalni sa Anom"></div>
+    <div class="field"><label for="s-wo">Trening</label><select id="s-wo"><option value="">Bez treninga</option>\${[...(S.workouts||[])].sort((a,b)=>a.name.localeCompare(b.name,'sr')).map(w=>\`<option value="\${w.id}" \${s.workoutId===w.id?'selected':''}>\${esc(w.name)}\${(w.cats||[]).length?' ('+w.cats.map(catName).join(', ')+')':''}</option>\`).join('')}</select></div>
     \${!isNew?\`<div class="field"><span class="fl">Ko je došao <span class="note" id="s-attn"></span></span><div class="chips" id="s-att"></div><div class="note">Klikni na ime. Čuva se odmah, i za prošle termine.</div></div>\`:''}
     <div class="field"><span class="fl" id="s-cnt"></span><input class="search" id="s-q" placeholder="Traži članicu" autocomplete="off"><div class="pick" id="s-pick"></div></div>
     \${isNew?\`<div class="field"><label for="s-rep">Ponovi</label><select id="s-rep"><option value="1">Samo ovaj put</option><option value="4">Svake nedelje, 4 nedelje</option><option value="8">Svake nedelje, 8 nedelja</option><option value="12">Svake nedelje, 12 nedelja</option></select></div>\`:''}
@@ -1330,7 +1572,7 @@ function sessionSheet(id, date, time){
       const k=seg.querySelector('.on').dataset.k;
       if(k==='grupa' && !gsel.value && groups().length){ toast('Izaberi grupu.'); return; }
       const trSel=root.querySelector('#s-trainer');
-      const base={...s, trainerId: trSel ? trSel.value : (s.trainerId||''), date:root.querySelector('#s-date').value||s.date, time:root.querySelector('#s-time').value, kind:k==='personalni'?'personalni':'grupa', groupId:k==='grupa'?gsel.value:'', memberIds:[...sel], attended:[...att].filter(a=>sel.has(a))};
+      const base={...s, workoutId: root.querySelector('#s-wo').value, trainerId: trSel ? trSel.value : (s.trainerId||''), date:root.querySelector('#s-date').value||s.date, time:root.querySelector('#s-time').value, kind:k==='personalni'?'personalni':'grupa', groupId:k==='grupa'?gsel.value:'', memberIds:[...sel], attended:[...att].filter(a=>sel.has(a))};
       let title=root.querySelector('#s-title').value.trim();
       if(base.kind==='personalni' && (title==='Personalni'||!title) && sel.size===1) title='Personalni · '+memberById([...sel][0]).name.split(' ')[0];
       base.title=title||(base.kind==='personalni'?'Personalni':'Trening');
@@ -1344,7 +1586,8 @@ function sessionSheet(id, date, time){
 }
 function attendanceSheet(id){
   const s=S.sessions.find(x=>x.id===id); if(!s) return;
-  openSheet(\`\${sheetHead(s.title)}<div class="note">\${fmtDay(s.date)} u \${esc(s.time||'')}</div><div id="att-box"></div>\`, root=>{
+  openSheet(\`\${sheetHead(s.title)}<div class="note">\${fmtDay(s.date)} u \${esc(s.time||'')}</div>\${s.workoutId&&woById(s.workoutId)?\`<button class="chip wo-chip" id="att-wo" style="align-self:flex-start">Trening: \${esc(woById(s.workoutId).name)}</button>\`:''}<div id="att-box"></div>\`, root=>{
+    const aw=root.querySelector('#att-wo'); if(aw) aw.onclick=()=>viewWorkoutSheet(s.workoutId, s.id);
     wireClose(root);
     const draw=()=>{ const cur=S.sessions.find(x=>x.id===id)||s; const att=cur.attended||[]; const ms=(cur.memberIds||[]).map(memberById).filter(Boolean).sort((a,b)=>a.name.localeCompare(b.name,'sr'));
       root.querySelector('#att-box').innerHTML=\`<div class="chips">\${ms.map(m=>\`<button class="chip \${att.includes(m.id)?'on':''}" data-m="\${m.id}">\${esc(m.name)}</button>\`).join('')}</div><div class="note" style="margin-top:10px">Došlo \${att.filter(x=>(cur.memberIds||[]).includes(x)).length} od \${(cur.memberIds||[]).length}.</div>\`; };
@@ -1657,6 +1900,15 @@ document.addEventListener('click', async e=>{
   if(a==='day'){ S.dayView=addDays(S.dayView||todayISO(), +b.dataset.n); if(S.dayView===todayISO()) S.dayView=null; render(); return; }
   if(a==='day0'){ S.dayView=null; render(); return; }
   if(a==='reviews') return reviewsSheet();
+  if(a==='wo-tab'){ S.woTab=b.dataset.t; render(); return; }
+  if(a==='wo-cat'){ S.woCat=b.dataset.c; render(); return; }
+  if(a==='wo-eq'){ S.woEq=b.dataset.e; render(); return; }
+  if(a==='new-wo') return workoutSheet(null);
+  if(a==='open-wo') return workoutSheet(b.dataset.w);
+  if(a==='new-ex') return exerciseSheet(null);
+  if(a==='open-ex') return exerciseSheet(b.dataset.x);
+  if(a==='seed-ex') return seedExercises();
+  if(a==='view-wo') return viewWorkoutSheet(b.dataset.w, b.dataset.s);
   if(a==='trf'){ S.trf = b.dataset.t==='*' ? null : b.dataset.t; if(S.filter.startsWith('g:') && !grpMatch(groups().find(g=>g.id===S.filter.slice(2)))) S.filter='sve'; render(); return; }
   if(a==='flt'){ S.filter=b.dataset.f; S._focusQ=false; render(); return; }
   if(a==='fill-week') return fillGroups(S.week,7);
@@ -1671,7 +1923,7 @@ document.addEventListener('click', async e=>{
   }
   if(a==='restore'){
     const inp=document.createElement('input'); inp.type='file'; inp.accept='.json,application/json';
-    inp.onchange=async()=>{ try{ const d=JSON.parse(await inp.files[0].text()); if(!Array.isArray(d.members)) throw 0; S.members=d.members; S.sessions=d.sessions||[]; S.payments=d.payments||[]; S.expenses=d.expenses||[]; S.settings=d.settings||null; saveLocal(); render(); toast('Kopija učitana'); }catch(err){ toast('Ovo nije ispravna kopija.'); } };
+    inp.onchange=async()=>{ try{ const d=JSON.parse(await inp.files[0].text()); if(!Array.isArray(d.members)) throw 0; S.members=d.members; S.sessions=d.sessions||[]; S.payments=d.payments||[]; S.expenses=d.expenses||[]; S.exercises=d.exercises||[]; S.workouts=d.workouts||[]; S.settings=d.settings||null; saveLocal(); render(); toast('Kopija učitana'); }catch(err){ toast('Ovo nije ispravna kopija.'); } };
     inp.click(); return;
   }
   if(a==='remind'){

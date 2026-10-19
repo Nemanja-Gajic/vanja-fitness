@@ -8,8 +8,10 @@ const BACKUP_DAYS = 60;
 const MAX_BYTES = 4_000_000;
 const noStore = { "Cache-Control": "no-store" };
 
-type Sess = { id: string; trainerId?: string; memberIds?: string[]; attended?: string[]; date?: string; time?: string; title?: string; groupId?: string; kind?: string };
-type Data = { members?: { id: string; name: string }[]; sessions?: Sess[]; settings?: { groups?: unknown[]; slots?: unknown }; savedAt?: number };
+type Sess = { id: string; workoutId?: string; trainerId?: string; memberIds?: string[]; attended?: string[]; date?: string; time?: string; title?: string; groupId?: string; kind?: string };
+type Item = { exId?: string; [k: string]: unknown };
+type Workout = { id: string; items?: Item[]; [k: string]: unknown };
+type Data = { members?: { id: string; name: string }[]; sessions?: Sess[]; workouts?: Workout[]; exercises?: { id: string; [k: string]: unknown }[]; settings?: { groups?: unknown[]; slots?: unknown }; savedAt?: number };
 
 // Trener vidi samo svoje termine i imena članica iz njih. Bez uplata, troškova i beleški.
 function forTrainer(d: Data, uid: string) {
@@ -17,7 +19,12 @@ function forTrainer(d: Data, uid: string) {
   const ids = new Set(sessions.flatMap((s) => s.memberIds || []));
   const members = (d.members || []).filter((m) => ids.has(m.id)).map((m) => ({ id: m.id, name: m.name, status: "aktivna" }));
   const settings = { groups: d.settings?.groups || [], slots: d.settings?.slots };
-  return { members, sessions, payments: [], expenses: [], settings, savedAt: d.savedAt || 0 };
+  // treninzi samo za njegove termine, i vežbe iz njih
+  const wIds = new Set(sessions.map((s) => s.workoutId).filter(Boolean));
+  const workouts = (d.workouts || []).filter((w) => wIds.has(w.id));
+  const exIds = new Set(workouts.flatMap((w) => (w.items || []).map((it) => it.exId)).filter(Boolean));
+  const exercises = (d.exercises || []).filter((x) => exIds.has(x.id));
+  return { members, sessions, payments: [], expenses: [], workouts, exercises, settings, savedAt: d.savedAt || 0 };
 }
 
 // Članica vidi samo sebe: svoje termine (bez drugih imena), svoje merenja i grupe.
